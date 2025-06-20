@@ -82,8 +82,9 @@ class EmailCheckView(APIView):
         email = request.query_params.get('email')
         if User.objects.filter(email=email).exists():
             user = User.objects.get(email=email)
-            id = user.id
-            email = user.email
-            fullname = user.fullname
-            return Response({"id": id, "email": email, "fullname": fullname}, status=status.HTTP_200_OK)
+            return Response({
+                "id": user.id, 
+                "email": user.email, 
+                "fullname": f"{user.first_name} {user.last_name}"
+            }, status=status.HTTP_200_OK)
         return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)
