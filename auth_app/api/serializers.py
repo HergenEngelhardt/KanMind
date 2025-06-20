@@ -1,37 +1,35 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 
 class UserSerializer(serializers.ModelSerializer):
-    fullname = serializers.SerializerMethodField()
-
     class Meta:
         model = User
-        fields = ['id', 'email', 'fullname']
-    
-    def get_fullname(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
+        fields = ('id', 'username', 'email', 'first_name', 'last_name')
 
 class RegisterSerializer(serializers.ModelSerializer):
-    fullname = serializers.CharField(write_only=True)
-    
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'password', 'fullname')
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
-    
+        fields = ('username', 'password', 'email', 'first_name', 'last_name')
+
+    def validate(self, attrs):
+        # If username is not provided, use email as username
+        if not attrs.get('username'):
+            attrs['username'] = attrs.get('email')
+        return attrs
+
     def create(self, validated_data):
-        fullname = validated_data.pop('fullname')
-        names = fullname.split(' ', 1)
-        first_name = names[0]
-        last_name = names[1] if len(names) > 1 else ''
-        
-        user = User.objects.create_user(
-            username=validated_data['email'],  
+        user = User.objects.create(
+            username=validated_data['username'],
             email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=first_name,
-            last_name=last_name
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '')
         )
+        user.set_password(validated_data['password'])
+        user.save()
         return user
