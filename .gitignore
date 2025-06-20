@@ -1,4 +1,15 @@
+# Python virtual environments
 env/
+.venv/
+venv/
+
+# Database files
 db.sqlite3
-.venv
-.bat
+
+# Batch files
+*.bat
+
+# Compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class

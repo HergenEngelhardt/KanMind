@@ -16,17 +16,16 @@ class TaskListCreate(generics.ListCreateAPIView):
             return Task.objects.filter(column_id=column_id)
         return Task.objects.filter(column__board__owner=self.request.user)
 
-
-def perform_create(self, serializer):
-    column_id = self.request.data.get('column')
-    try:
-        column = Column.objects.get(id=column_id)
-        if column.board.owner != self.request.user:
-            raise PermissionDenied(
-                "You don't have permission to add tasks to this column")
-        serializer.save(column=column)
-    except Column.DoesNotExist:
-        raise PermissionDenied("Column does not exist")
+    def perform_create(self, serializer):
+        column_id = self.request.data.get('column')
+        try:
+            column = Column.objects.get(id=column_id)
+            if column.board.owner != self.request.user:
+                raise PermissionDenied(
+                    "You don't have permission to add tasks to this column")
+            serializer.save(column=column)
+        except Column.DoesNotExist:
+            raise PermissionDenied("Column does not exist")
 
 class TaskRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer

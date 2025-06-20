@@ -1,8 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from kanban_app.models import Board
-from kanban_app.api.serializers import BoardListSerializer, BoardDetailSerializer, UserSerializer
+from rest_framework import status, viewsets, generics, permissions
+from rest_framework.exceptions import PermissionDenied, NotFound
+from kanban_app.models import Board, Column
+from tasks_app.models import Task
+from kanban_app.api.serializers import BoardListSerializer, BoardDetailSerializer, UserSerializer, ColumnSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -43,36 +45,35 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Board.objects.all()
 
-    def partial_update(self, request, *args, **kwargs):
-        allowed_fields = {'title', 'members'}
+    def partial_update(self, request, *args, **kwargs):  
+        allowed_fields = {'name', 'members'}  
 
         if not all(field in allowed_fields for field in request.data.keys()):
             return Response(
-                {"error": "Only the fields 'title' and 'members' can be edited."},
+                {"error": "Only the fields 'name' and 'members' can be edited."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
+        
         response = super().partial_update(request, *args, **kwargs)
-
+        
         if response.status_code == status.HTTP_200_OK:
             if 'owner_id' in response.data:
                 del response.data['owner_id']
-                del response.data['tasks']
+            
             response.data['owner_data'] = UserSerializer(
-                self.get_object().owner_id).data
-
+                self.get_object().owner).data  
+                
             if 'members' in response.data:
                 response.data['members_data'] = response.data.pop('members')
-
+                
         return response
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):  
         super().delete(request, *args, **kwargs)
         return Response(
             {"message": f"board successfully deleted."},
             status=status.HTTP_204_NO_CONTENT
         )
-
 
 class EmailCheckView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -88,3 +89,84 @@ class EmailCheckView(APIView):
                 "fullname": f"{user.first_name} {user.last_name}"
             }, status=status.HTTP_200_OK)
         return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)
+    
+class ColumnListCreateView(generics.ListCreateAPIView):
+    serializer_class = ColumnSerializer  
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsOwnerOrMember]
+    
+    def get_queryset(self):
+        board_id = self.kwargs.get('board_id')
+        return Column.objects.filter(board_id=board_id)
+        
+    def perform_create(self, serializer):
+        board_id = self.kwargs.get('board_id')
+        try:
+            board = Board.objects.get(pk=board_id)
+            if not IsOwnerOrMember().has_object_permission(self.request, self, board):
+                raise PermissionDenied("You don't have permission to add columns to this board")
+            serializer.save(board=board)
+        except Board.DoesNotExist:
+            raise NotFound("Board not found")
+
+class ColumnDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ColumnSerializer 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsOwnerOrMember]
+    
+    def get_queryset(self):
+        return Column.objects.all()
+    
+class TaskReorderView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        task_id = request.data.get('task_id')
+        column_id = request.data.get('column_id')
+        position = request.data.get('position')
+        
+        try:
+            task = Task.objects.get(id=task_id)
+            column = Column.objects.get(id=column_id)
+            
+            if not (task.column.board.owner == request.user or 
+                    request.user in task.column.board.members.all()):
+                raise PermissionDenied("You don't have permission to modify this task")
+            
+            old_column = task.column
+            old_position = task.position
+            
+            task.column = column
+            task.position = position
+            task.save()
+            
+            if old_column == column:
+                if old_position < position:
+                    Task.objects.filter(
+                        column=column,
+                        position__gt=old_position,
+                        position__lte=position
+                    ).exclude(id=task_id).update(position=models.F('position') - 1)
+                elif old_position > position:
+                    Task.objects.filter(
+                        column=column,
+                        position__gte=position,
+                        position__lt=old_position
+                    ).exclude(id=task_id).update(position=models.F('position') + 1)
+            else:
+                Task.objects.filter(
+                    column=old_column,
+                    position__gt=old_position
+                ).update(position=models.F('position') - 1)
+                
+                Task.objects.filter(
+                    column=column,
+                    position__gte=position
+                ).exclude(id=task_id).update(position=models.F('position') + 1)
+                
+            return Response({"success": True}, status=status.HTTP_200_OK)
+        except (Task.DoesNotExist, Column.DoesNotExist):
+            return Response(
+                {"error": "Task or column not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
