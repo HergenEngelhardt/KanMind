@@ -7,7 +7,7 @@ from .views import (
 urlpatterns = [
     path('boards/', BoardListCreateView.as_view(), name='board-list-create'),
     path('boards/<int:pk>/', BoardDetailView.as_view(), name='board-detail'),
-    path('check-email/', EmailCheckView.as_view(), name='check-email'),
+    path('email-check/', EmailCheckView.as_view(), name='email-check'),  # Changed from check-email
     path('boards/<int:board_id>/columns/', ColumnListCreateView.as_view(), name='column-list-create'),
     path('columns/<int:pk>/', ColumnDetailView.as_view(), name='column-detail'),
 ]

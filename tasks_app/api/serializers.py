@@ -1,22 +1,25 @@
 from rest_framework import serializers
+from tasks_app.models import Task, Comment
 from django.contrib.auth.models import User
-from tasks_app.models import Task
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
     
     class Meta:
-        model = Task
-        fields = ['id', 'title', 'description', 'column', 'position', 
-                  'created_by', 'assigned_to', 'created_at', 'updated_at']
+        model = Comment
+        fields = ['id', 'author', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['author', 'created_at', 'updated_at']
 
 class TaskSerializer(serializers.ModelSerializer):
-    created_by = UserSerializer(read_only=True)
-    assigned_to = UserSerializer(read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    assignee = UserSerializer(read_only=True)
+    reviewers = UserSerializer(many=True, read_only=True)
     
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'column', 'position', 
-                  'created_by', 'assigned_to', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'column', 'position', 'assignee', 'reviewers', 'comments', 'created_at', 'updated_at']
