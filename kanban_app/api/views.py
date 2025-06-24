@@ -34,7 +34,7 @@ class BoardListCreateView(ListCreateAPIView):
         return [IsOwnerOrMember()]
 
     def perform_create(self, serializer):
-        board = serializer.save(owner_id=self.request.user)
+        board = serializer.save(owner=self.request.user)
         if not board.members.filter(id=self.request.user.id).exists():
             board.members.add(self.request.user)
 
@@ -51,27 +51,37 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Board.objects.all()
 
+
     def partial_update(self, request, *args, **kwargs):
-        allowed_fields = {"name", "members"}
+        allowed_fields = {"name", "description"}  
 
         if not all(field in allowed_fields for field in request.data.keys()):
             return Response(
-                {"error": "Only the fields 'name' and 'members' can be edited."},
+                {"error": "Only the fields 'name' and 'description' can be edited."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        response = super().partial_update(request, *args, **kwargs)
+        try:
+            response = super().partial_update(request, *args, **kwargs)
 
-        if response.status_code == status.HTTP_200_OK:
-            if "owner_id" in response.data:
-                del response.data["owner_id"]
+            if response.status_code == status.HTTP_200_OK:
+                response_data = response.data.copy()
 
-            response.data["owner_data"] = UserSerializer(self.get_object().owner).data
+                if "owner_id" in response_data:
+                    del response_data["owner_id"]
 
-            if "members" in response.data:
-                response.data["members_data"] = response.data.pop("members")
+                response_data["owner_data"] = UserSerializer(
+                    self.get_object().owner).data
 
-        return response
+                response.data = response_data
+
+            return response
+        except Exception as e:
+            print(f"Error updating board: {str(e)}")
+            return Response(
+                {"error": "Ein Serverfehler ist aufgetreten."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
@@ -147,7 +157,8 @@ class TaskReorderView(APIView):
                 task.column.board.owner == request.user
                 or request.user in task.column.board.members.all()
             ):
-                raise PermissionDenied("You don't have permission to modify this task")
+                raise PermissionDenied(
+                    "You don't have permission to modify this task")
 
             old_column = task.column
             old_position = task.position

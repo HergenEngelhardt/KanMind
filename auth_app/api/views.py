@@ -36,7 +36,6 @@ class CustomAuthTokenSerializer(serializers.Serializer):
             attrs["user"] = guest_user
             return attrs
 
-        # Normal validation process
         if (not username and not email) or not password:
             msg = "Entweder E-Mail oder Benutzername sowie Passwort müssen angegeben werden."
             raise serializers.ValidationError(msg, code="authorization")

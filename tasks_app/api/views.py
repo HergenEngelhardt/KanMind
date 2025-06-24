@@ -1,5 +1,6 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 from django.db import models
 from django.shortcuts import get_object_or_404
 from tasks_app.models import Task, Comment
@@ -39,6 +40,21 @@ class TaskRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             models.Q(column__board__owner=self.request.user)
             | models.Q(column__board__members=self.request.user)
         ).distinct()
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+        
+    def partial_update(self, request, *args, **kwargs):
+        try:
+            return super().partial_update(request, *args, **kwargs)
+        except Exception as e:
+            print(f"Error updating task: {str(e)}")
+            return Response(
+                {"error": "Ein Fehler ist beim Aktualisieren der Aufgabe aufgetreten."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class TasksAssignedToMeView(generics.ListAPIView):
