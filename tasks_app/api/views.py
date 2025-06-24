@@ -3,6 +3,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.db import models
 from django.shortcuts import get_object_or_404
 from tasks_app.models import Task, Comment
+from kanban_app.models import Column
 from .serializers import TaskSerializer, CommentSerializer
 
 class TaskListCreate(generics.ListCreateAPIView):
