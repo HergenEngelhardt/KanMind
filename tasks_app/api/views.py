@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from tasks_app.models import Task, Comment
 from kanban_app.models import Column
 from .serializers import TaskSerializer, CommentSerializer
-
+from .permissions import IsTaskBoardMember, IsTaskAssigneeOrBoardOwner, IsCommentAuthorOrBoardOwner
 
 class TaskListCreate(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
@@ -33,7 +33,12 @@ class TaskListCreate(generics.ListCreateAPIView):
 
 class TaskRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsTaskBoardMember]
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return [permissions.IsAuthenticated(), IsTaskAssigneeOrBoardOwner()]
+        return [permissions.IsAuthenticated(), IsTaskBoardMember()]
 
     def get_queryset(self):
         return Task.objects.filter(
