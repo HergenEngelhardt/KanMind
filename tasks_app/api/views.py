@@ -1,11 +1,13 @@
 import logging
 from rest_framework import generics, permissions, status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from django.db import models
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from tasks_app.models import Task, Comment
-from kanban_app.models import Column
+from kanban_app.models import Column, Board
 from .serializers import TaskSerializer, CommentSerializer
 from .permissions import (
     IsTaskBoardMember, 
@@ -23,23 +25,35 @@ class TaskListCreate(generics.ListCreateAPIView):
     GET: Returns tasks filtered by column or user's boards
     POST: Creates a new task in specified column with permission check
     """
-    
     serializer_class = TaskSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Return tasks filtered by column or user's boards."""
         column_id = self.request.query_params.get("column")
         if column_id:
+            if not column_id.isdigit():
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError("Invalid column ID")
             return Task.objects.filter(column_id=column_id)
         return self._get_user_board_tasks()
 
+    def _get_user_board_tasks(self):
+        """Get tasks from boards where user is owner or member."""
+        user_boards = Board.objects.filter(
+            Q(owner=self.request.user) | Q(members=self.request.user)
+        ).distinct()
+        return Task.objects.filter(column__board__in=user_boards)
+
     def perform_create(self, serializer):
-        """Create task with column permission validation."""
-        column_id = self.request.data.get("column")
-        column = self._get_column_or_raise(column_id)
-        self._validate_column_permissions(column)
-        serializer.save(column=column)
+        """Ensure the user has permission to create tasks in the specified column."""
+        column = serializer.validated_data['column']
+        board = column.board
+        
+        if not (board.owner == self.request.user or self.request.user in board.members.all()):
+            raise PermissionDenied("You don't have permission to create tasks in this board.")
+        
+        serializer.save()
 
     def _get_user_board_tasks(self):
         """Get all tasks from user's owned boards."""

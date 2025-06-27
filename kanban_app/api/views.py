@@ -20,7 +20,6 @@ from kanban_app.api.permissions import IsOwnerOrMember, IsOwner
 
 logger = logging.getLogger(__name__)
 
-
 class BoardListCreateView(ListCreateAPIView):
     """
     List user's boards or create a new board.
@@ -28,7 +27,6 @@ class BoardListCreateView(ListCreateAPIView):
     GET: Returns boards where user is owner or member
     POST: Creates new board with authenticated user as owner
     """
-    
     serializer_class = BoardListSerializer
     authentication_classes = [TokenAuthentication]
 
@@ -64,7 +62,6 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
     PATCH: Update board name or description
     DELETE: Delete board (owner only)
     """
-    
     serializer_class = BoardDetailSerializer
     authentication_classes = [TokenAuthentication]
 
@@ -130,7 +127,6 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
 class EmailCheckView(APIView):
     """
     Check if user exists by email address.
@@ -176,7 +172,7 @@ class EmailCheckView(APIView):
                 "id": user.id,
                 "email": user.email,
                 "fullname": f"{user.first_name} {user.last_name}".strip() or user.email,
-                "exists": True  # Hinzugefügt für Konsistenz
+                "exists": True 
             },
             status=status.HTTP_200_OK,
         )
@@ -185,9 +181,8 @@ class EmailCheckView(APIView):
         """Return user not found response."""
         return Response(
             {"exists": False}, 
-            status=status.HTTP_200_OK  # Geändert von 404 zu 200 für bessere API-Konsistenz
+            status=status.HTTP_200_OK 
         )
-
 
 class ColumnListCreateView(generics.ListCreateAPIView):
     """
@@ -227,7 +222,6 @@ class ColumnListCreateView(generics.ListCreateAPIView):
                 "You don't have permission to add columns to this board"
             )
 
-
 class ColumnDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or delete a specific column.
@@ -237,7 +231,7 @@ class ColumnDetailView(generics.RetrieveUpdateDestroyAPIView):
     
     serializer_class = ColumnSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]  # Vereinfacht für bessere Kompatibilität
+    permission_classes = [IsAuthenticated] 
 
     def get_queryset(self):
         """Return all columns for permission checking."""
@@ -256,7 +250,6 @@ class ColumnDetailView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied(
                 "You don't have permission to access this column"
             )
-
 
 class TaskReorderView(APIView):
     """
@@ -362,8 +355,6 @@ class TaskReorderView(APIView):
             status=status.HTTP_404_NOT_FOUND
         )
 
-
-# Zusätzliche View für ViewSet-Kompatibilität (falls benötigt)
 from rest_framework import viewsets
 from rest_framework.decorators import action
 

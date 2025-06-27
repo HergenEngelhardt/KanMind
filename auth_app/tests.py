@@ -1,11 +1,8 @@
-# Standard library imports
 from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-
-# Local imports
 from auth_app.api.serializers import RegisterSerializer, CustomAuthTokenSerializer
 
 
@@ -189,7 +186,6 @@ class CustomAuthTokenSerializerTest(TestCase):
     
     def test_guest_user_creation(self):
         """Test guest user is created when doesn't exist."""
-        # Ensure no guest user exists
         User.objects.filter(username='guest@example.com').delete()
         
         data = {
@@ -427,7 +423,6 @@ class AuthAPIEndpointsTest(APITestCase):
         # Test guest login response format
         guest_response = self.client.post(self.guest_login_url)
         
-        # All should have same response structure
         for response in [reg_response, login_response, guest_response]:
             self.assertIn('token', response.data)
             self.assertIn('user_id', response.data)

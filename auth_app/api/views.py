@@ -132,7 +132,7 @@ class RegisterView(APIView):
     Creates new user account and returns authentication token.
     Accessible without authentication.
     """
-    
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -189,7 +189,7 @@ class LoginView(ObtainAuthToken):
     Authenticates user and returns authentication token.
     Supports both email and username authentication.
     """
-    
+    authentication_classes = []
     permission_classes = [AllowAny]
     serializer_class = CustomAuthTokenSerializer
 
@@ -241,7 +241,7 @@ class GuestLoginView(APIView):
     Creates or authenticates guest user for demo purposes.
     Accessible without authentication.
     """
-    
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
