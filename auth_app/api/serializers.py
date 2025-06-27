@@ -4,14 +4,33 @@ from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model representation.
+    
+    Used for displaying user information in API responses.
+    Includes basic user fields without sensitive data.
+    """
+    
     class Meta:
         model = User
         fields = ("id", "username", "email", "first_name", "last_name")
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+    
+    Handles user creation with email as primary identifier.
+    Supports both separate first_name/last_name fields and combined full_name.
+    Automatically sets username to email if not provided.
+    """
+    
     email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(
+        write_only=True, 
+        required=True, 
+        validators=[validate_password]
+    )
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
     full_name = serializers.CharField(required=False, write_only=True)
@@ -24,6 +43,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
     
     def validate(self, attrs):
+        """
+        Validate and process registration data.
+        
+        Sets username to email if not provided.
+        Splits full_name into first_name and last_name if provided.
+        
+        Args:
+            attrs (dict): Serializer attributes
+            
+        Returns:
+            dict: Validated and processed attributes
+        """
         if not attrs.get("username"):
             attrs["username"] = attrs.get("email")
             
@@ -36,6 +67,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
     
     def create(self, validated_data):
+        """
+        Create a new user with validated data.
+        
+        Args:
+            validated_data (dict): Validated registration data
+            
+        Returns:
+            User: Created user instance
+        """
         user = User.objects.create(
             username=validated_data['username'],
             email=validated_data['email'],

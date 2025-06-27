@@ -5,7 +5,16 @@ from kanban_app.models import Board, BoardMembership
 
 
 def create_board_permissions():
-    """Create custom permissions for boards"""
+    """
+    Create custom permissions for board management.
+    
+    Creates the following permissions:
+    - view_all_boards: Can view all boards in the system
+    - create_board: Can create new boards  
+    - manage_board_members: Can add/remove board members
+    
+    This function is idempotent - it won't create duplicate permissions.
+    """
     board_content_type = ContentType.objects.get_for_model(Board)
 
     permissions = [

@@ -1,3 +1,4 @@
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, serializers
@@ -7,125 +8,292 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, UserSerializer
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class CustomAuthTokenSerializer(serializers.Serializer):
+    """
+    Custom authentication token serializer.
+    
+    Supports authentication with either email or username.
+    Includes special handling for guest login credentials.
+    """
+    
     email = serializers.EmailField(required=False)
     username = serializers.CharField(required=False)
     password = serializers.CharField(style={"input_type": "password"})
 
     def validate(self, attrs):
-        username = attrs.get("username")
-        email = attrs.get("email")
-        password = attrs.get("password")
-
-        if email == "kevin@kovacsi.de" and password == "asdasdasd":
-            try:
-                guest_user = User.objects.get(username="guest@example.com")
-            except User.DoesNotExist:
-                guest_user = User.objects.create_user(
-                    username="guest@example.com",
-                    email="guest@example.com",
-                    password="guest1234",
-                    first_name="Guest",
-                    last_name="User",
-                )
-            attrs["user"] = guest_user
-            return attrs
-
-        if (not username and not email) or not password:
-            msg = "Entweder E-Mail oder Benutzername sowie Passwort müssen angegeben werden."
-            raise serializers.ValidationError(msg, code="authorization")
-
-        if email and not username:
-            try:
-                user = User.objects.get(email=email)
-                username = user.username
-            except User.DoesNotExist:
-                msg = "Benutzer mit dieser E-Mail-Adresse existiert nicht."
-                raise serializers.ValidationError(msg, code="authorization")
-
-        user = authenticate(username=username, password=password)
-        if not user:
-            msg = "Anmeldung mit den angegebenen Anmeldedaten nicht möglich."
-            raise serializers.ValidationError(msg, code="authorization")
-
+        """
+        Validate authentication credentials.
+        
+        Args:
+            attrs (dict): Authentication attributes
+            
+        Returns:
+            dict: Validated attributes with user instance
+        """
+        if self._is_guest_login(attrs):
+            return self._handle_guest_login(attrs)
+        
+        self._validate_required_fields(attrs)
+        username = self._get_username(attrs)
+        user = self._authenticate_user(username, attrs.get("password"))
+        
         attrs["user"] = user
         return attrs
 
+    def _is_guest_login(self, attrs):
+        """Check if this is a guest login attempt."""
+        return (attrs.get("email") == "kevin@kovacsi.de" and 
+                attrs.get("password") == "asdasdasd")
+
+    def _handle_guest_login(self, attrs):
+        """Handle guest login authentication."""
+        guest_user = self._get_or_create_guest_user()
+        attrs["user"] = guest_user
+        return attrs
+
+    def _validate_required_fields(self, attrs):
+        """Validate required authentication fields."""
+        username = attrs.get("username")
+        email = attrs.get("email")
+        password = attrs.get("password")
+        
+        if (not username and not email) or not password:
+            msg = "Either email or username and password must be provided."
+            raise serializers.ValidationError(msg, code="authorization")
+
+    def _get_username(self, attrs):
+        """Get username from attrs, converting email if needed."""
+        username = attrs.get("username")
+        email = attrs.get("email")
+        
+        if email and not username:
+            return self._get_username_from_email(email)
+        return username
+
+    def _authenticate_user(self, username, password):
+        """Authenticate user with username and password."""
+        user = authenticate(username=username, password=password)
+        if not user:
+            msg = "Unable to authenticate with provided credentials."
+            raise serializers.ValidationError(msg, code="authorization")
+        return user
+
+    def _get_or_create_guest_user(self):
+        """
+        Get or create guest user for demo purposes.
+        
+        Returns:
+            User: Guest user instance
+        """
+        try:
+            return User.objects.get(username="guest@example.com")
+        except User.DoesNotExist:
+            return self._create_guest_user()
+
+    def _create_guest_user(self):
+        """Create new guest user."""
+        return User.objects.create_user(
+            username="guest@example.com",
+            email="guest@example.com",
+            password="guest1234",
+            first_name="Guest",
+            last_name="User",
+        )
+
+    def _get_username_from_email(self, email):
+        """
+        Get username from email address.
+        
+        Args:
+            email (str): Email address
+            
+        Returns:
+            str: Username corresponding to email
+            
+        Raises:
+            ValidationError: If user with email doesn't exist
+        """
+        try:
+            user = User.objects.get(email=email)
+            return user.username
+        except User.DoesNotExist:
+            msg = "User with this email address does not exist."
+            raise serializers.ValidationError(msg, code="authorization")
+
 
 class RegisterView(APIView):
+    """
+    User registration endpoint.
+    
+    Creates new user account and returns authentication token.
+    Accessible without authentication.
+    """
+    
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Register new user.
+        
+        Args:
+            request: HTTP request with registration data
+            
+        Returns:
+            Response: User data with authentication token or validation errors
+        """
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
-            return Response(
-                {
-                    "token": token.key,
-                    "user_id": user.pk,
-                    "email": user.email,
-                    "fullname": f"{user.first_name} {user.last_name}",
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return self._create_user_response(serializer)
+        return self._validation_error_response(serializer)
+
+    def _create_user_response(self, serializer):
+        """Create user and return success response."""
+        user = serializer.save()
+        token = self._get_or_create_token(user)
+        
+        return Response(
+            self._build_user_data(user, token),
+            status=status.HTTP_201_CREATED,
+        )
+
+    def _validation_error_response(self, serializer):
+        """Return validation error response."""
+        return Response(
+            serializer.errors, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def _get_or_create_token(self, user):
+        """Get or create authentication token for user."""
+        token, created = Token.objects.get_or_create(user=user)
+        return token
+
+    def _build_user_data(self, user, token):
+        """Build user data response."""
+        return {
+            "token": token.key,
+            "user_id": user.pk,
+            "email": user.email,
+            "fullname": f"{user.first_name} {user.last_name}".strip(),
+        }
 
 
 class LoginView(ObtainAuthToken):
+    """
+    User login endpoint.
+    
+    Authenticates user and returns authentication token.
+    Supports both email and username authentication.
+    """
+    
     permission_classes = [AllowAny]
     serializer_class = CustomAuthTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        print("Received login data:", request.data)
+        """
+        Authenticate user and return token.
+        
+        Args:
+            request: HTTP request with login credentials
+            
+        Returns:
+            Response: User data with authentication token
+        """
+        logger.debug("Processing login request")
+        
+        serializer = self._get_validated_serializer(request)
+        user = serializer.validated_data["user"]
+        token = self._get_or_create_token(user)
+        
+        return Response(self._build_user_data(user, token))
 
+    def _get_validated_serializer(self, request):
+        """Get and validate serializer."""
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
+        return serializer
+
+    def _get_or_create_token(self, user):
+        """Get or create authentication token for user."""
         token, created = Token.objects.get_or_create(user=user)
-        return Response(
-            {
-                "token": token.key,
-                "user_id": user.pk,
-                "email": user.email,
-                "fullname": f"{user.first_name} {user.last_name}",
-            }
-        )
+        return token
+
+    def _build_user_data(self, user, token):
+        """Build user data response."""
+        return {
+            "token": token.key,
+            "user_id": user.pk,
+            "email": user.email,
+            "fullname": f"{user.first_name} {user.last_name}".strip(),
+        }
 
 
 class GuestLoginView(APIView):
+    """
+    Guest login endpoint.
+    
+    Creates or authenticates guest user for demo purposes.
+    Accessible without authentication.
+    """
+    
     permission_classes = [AllowAny]
 
     def post(self, request):
-        logger.debug("Guest login requested")
+        """
+        Create or authenticate guest user.
+        
+        Args:
+            request: HTTP request (no data required)
+            
+        Returns:
+            Response: Guest user data with authentication token
+        """
+        guest_user = self._get_or_create_guest_user()
+        token = self._get_or_create_token(guest_user)
+        
+        return Response(
+            self._build_user_data(guest_user, token),
+            status=status.HTTP_200_OK,
+        )
+
+    def _get_or_create_guest_user(self):
+        """
+        Get or create guest user for demo purposes.
+        
+        Returns:
+            User: Guest user instance
+        """
         try:
-            guest_user = User.objects.get(username="guest@example.com")
-            logger.debug("Found existing guest user")
+            return User.objects.get(username="guest@example.com")
         except User.DoesNotExist:
-            logger.debug("Creating new guest user")
-            guest_user = User.objects.create_user(
-                username="guest@example.com",
-                email="guest@example.com",
-                password="guest1234",
-                first_name="Guest",
-                last_name="User",
-            )
+            return self._create_guest_user()
 
-        token, created = Token.objects.get_or_create(user=guest_user)
-        logger.debug(f"Generated token: {token.key}")
+    def _create_guest_user(self):
+        """Create new guest user."""
+        return User.objects.create_user(
+            username="guest@example.com",
+            email="guest@example.com",
+            password="guest1234",
+            first_name="Guest",
+            last_name="User",
+        )
 
-        response_data = {
+    def _get_or_create_token(self, user):
+        """Get or create authentication token for user."""
+        token, created = Token.objects.get_or_create(user=user)
+        return token
+
+    def _build_user_data(self, user, token):
+        """Build user data response."""
+        return {
             "token": token.key,
-            "user_id": guest_user.pk,
-            "email": guest_user.email,
-            "fullname": f"{guest_user.first_name} {guest_user.last_name}",
+            "user_id": user.pk,
+            "email": user.email,
+            "fullname": f"{user.first_name} {user.last_name}".strip(),
         }
-
-        return Response(response_data)
