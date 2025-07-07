@@ -11,9 +11,6 @@ from django.contrib.auth import authenticate
 from django.conf import settings
 from .serializers import RegisterSerializer, UserSerializer
 
-logger = logging.getLogger(__name__)
-
-
 class CustomAuthTokenSerializer(serializers.Serializer):
     """
     Custom authentication token serializer.
@@ -216,23 +213,18 @@ class LoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         """Authenticate user and return token with improved error handling."""
         try:
-            logger.debug("Processing login request")
-            
             serializer = self._get_validated_serializer(request)
             user = serializer.validated_data["user"]
             token = self._get_or_create_token(user)
             
-            logger.info(f"Successful login for user: {user.email}")
             return Response(self._build_user_data(user, token))
             
         except ValidationError as e:
-            logger.warning(f"Login validation failed: {e}")
             return Response(
                 {"error": "Invalid credentials provided"},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            logger.error(f"Unexpected login error: {str(e)}")
             return Response(
                 {"error": "Login failed due to server error"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

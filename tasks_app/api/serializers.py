@@ -64,7 +64,7 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'column', 'position',
             'assignee', 'assignee_id', 'reviewers', 'reviewer_ids',
-            'comments', 'created_at', 'updated_at'
+            'comments', 'created_at', 'updated_at', 'status'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

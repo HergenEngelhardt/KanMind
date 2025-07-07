@@ -30,6 +30,12 @@ class Task(models.Model):
         related_name="reviewing_tasks", 
         blank=True
     )
+    STATUS_CHOICES = [
+        ('TODO', 'To Do'),
+        ('IN_PROGRESS', 'In Progress'), 
+        ('DONE', 'Done'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TODO')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

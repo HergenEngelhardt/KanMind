@@ -10,3 +10,976 @@ INFO 2025-07-07 12:03:14,526 views 19788 18740 Added guest@example.com as ADMIN 
 INFO 2025-07-07 12:03:14,527 views 19788 18740 Board created successfully
 INFO 2025-07-07 12:05:02,141 views 19788 20960 Successful login for user: test@mail.com
 INFO 2025-07-07 12:18:09,268 views 16708 15732 Successful login for user: test@mail.com
+INFO 2025-07-07 12:19:02,745 views 16708 15732 Successful login for user: test@mail.com
+INFO 2025-07-07 12:19:16,343 views 16708 15732 Board creation request from user: test@mail.com
+INFO 2025-07-07 12:19:16,343 views 16708 15732 Request data: {'title': 'Test Board', 'members': [19, 1]}
+INFO 2025-07-07 12:19:16,344 views 16708 15732 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 12:19:16,367 views 16708 15732 Added test@mail.com as ADMIN member to board Test Board
+INFO 2025-07-07 12:19:16,370 views 16708 15732 Board created successfully
+INFO 2025-07-07 12:20:52,295 views 16708 8152 Successful login for user: engel@mail.com
+INFO 2025-07-07 12:47:00,686 views 4172 3548 Board creation request from user: engel
+INFO 2025-07-07 12:47:00,687 views 4172 3548 Request data: {'title': 'Test Board', 'members': [19, 1]}
+INFO 2025-07-07 12:47:00,687 views 4172 3548 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 12:47:00,721 views 4172 3548 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 12:47:00,724 views 4172 3548 Board created successfully
+INFO 2025-07-07 12:47:41,210 views 4172 19300 Board creation request from user: engel
+INFO 2025-07-07 12:47:41,210 views 4172 19300 Request data: {'title': 'Test Board', 'members': [1, 19]}
+INFO 2025-07-07 12:47:41,210 views 4172 19300 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 12:47:41,232 views 4172 19300 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 12:47:41,236 views 4172 19300 Board created successfully
+INFO 2025-07-07 14:05:29,879 views 1352 3144 Board creation request from user: engel
+INFO 2025-07-07 14:05:29,880 views 1352 3144 Request data: {'title': 'Test Board', 'members': [1]}
+INFO 2025-07-07 14:05:29,880 views 1352 3144 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 14:05:29,899 views 1352 3144 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 14:05:29,902 views 1352 3144 Board created successfully
+INFO 2025-07-07 14:13:24,641 views 5968 17600 Board creation request from user: engel
+INFO 2025-07-07 14:13:24,642 views 5968 17600 Request data: {'title': 'Test Board', 'members': [1]}
+INFO 2025-07-07 14:13:24,642 views 5968 17600 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 14:13:24,667 views 5968 17600 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 14:13:24,674 views 5968 17600 Board created successfully
+INFO 2025-07-07 14:13:24,677 views 5968 17600 Board response data: {'id': 22, 'name': 'Test Board', 'description': '', 'owner': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'fullname': 'Vorname Nachname'}, 'members': [{'id': 20, 'user': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'fullname': 'Vorname Nachname', 'username': ''}, 'role': 'ADMIN'}], 'columns': [], 'created_at': '2025-07-07T12:13:24.643564Z', 'updated_at': '2025-07-07T12:13:24.643593Z'}
+INFO 2025-07-07 14:16:50,540 views 14876 1676 Board creation request from user: engel
+INFO 2025-07-07 14:16:50,540 views 14876 1676 Request data: {'title': 'Test Board', 'members': [1]}
+INFO 2025-07-07 14:16:50,541 views 14876 1676 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 14:16:50,561 views 14876 1676 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 14:16:50,568 views 14876 1676 Board created successfully
+INFO 2025-07-07 14:16:50,571 views 14876 1676 Board response data: {'id': 23, 'name': 'Test Board', 'description': '', 'owner': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'fullname': 'Vorname Nachname'}, 'members': [{'id': 21, 'user': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'fullname': 'Vorname Nachname', 'username': ''}, 'role': 'ADMIN'}], 'columns': [], 'created_at': '2025-07-07T12:16:50.542102Z', 'updated_at': '2025-07-07T12:16:50.542128Z'}
+INFO 2025-07-07 14:45:27,057 views 23248 10528 Board creation request from user: engel
+INFO 2025-07-07 14:45:27,058 views 23248 10528 Request data: {'title': 'Test Board', 'members': [19, 1]}
+INFO 2025-07-07 14:45:27,058 views 23248 10528 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 14:45:27,079 views 23248 10528 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 14:45:27,085 views 23248 10528 Board created successfully
+INFO 2025-07-07 14:45:27,089 views 23248 10528 Board response data: {'id': 24, 'name': 'Test Board', 'description': '', 'owner': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'fullname': 'Vorname Nachname'}, 'members': [{'id': 22, 'user': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'fullname': 'Vorname Nachname', 'username': ''}, 'role': 'ADMIN'}], 'columns': [], 'created_at': '2025-07-07T12:45:27.059658Z', 'updated_at': '2025-07-07T12:45:27.059679Z'}
+ERROR 2025-07-07 14:54:48,911 views 24140 14596 Board retrieval error: No Board matches the given query.
+ERROR 2025-07-07 14:54:48,911 views 24140 14596 Error type: Http404
+ERROR 2025-07-07 14:54:48,936 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 633, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+kanban_app.models.Board.DoesNotExist: Board matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 100, in get_object
+    obj = get_object_or_404(queryset, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 19, in get_object_or_404
+    return _get_object_or_404(queryset, *filter_args, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 92, in get_object_or_404
+    raise Http404(
+        "No %s matches the given query." % queryset.model._meta.object_name
+    )
+django.http.response.Http404: No Board matches the given query.
+
+ERROR 2025-07-07 14:55:05,823 views 24140 14596 Board retrieval error: Authentication credentials were not provided.
+ERROR 2025-07-07 14:55:05,823 views 24140 14596 Error type: NotAuthenticated
+ERROR 2025-07-07 14:55:05,826 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 103, in get_object
+    self.check_object_permissions(self.request, obj)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\views.py", line 352, in check_object_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\views.py", line 180, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: Authentication credentials were not provided.
+
+ERROR 2025-07-07 14:55:09,689 views 24140 14596 Board retrieval error: No Board matches the given query.
+ERROR 2025-07-07 14:55:09,689 views 24140 14596 Error type: Http404
+ERROR 2025-07-07 14:55:09,691 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 633, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+kanban_app.models.Board.DoesNotExist: Board matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 100, in get_object
+    obj = get_object_or_404(queryset, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 19, in get_object_or_404
+    return _get_object_or_404(queryset, *filter_args, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 92, in get_object_or_404
+    raise Http404(
+        "No %s matches the given query." % queryset.model._meta.object_name
+    )
+django.http.response.Http404: No Board matches the given query.
+
+ERROR 2025-07-07 14:55:14,319 views 24140 14596 Board retrieval error: No Board matches the given query.
+ERROR 2025-07-07 14:55:14,319 views 24140 14596 Error type: Http404
+ERROR 2025-07-07 14:55:14,320 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 633, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+kanban_app.models.Board.DoesNotExist: Board matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 100, in get_object
+    obj = get_object_or_404(queryset, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 19, in get_object_or_404
+    return _get_object_or_404(queryset, *filter_args, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 92, in get_object_or_404
+    raise Http404(
+        "No %s matches the given query." % queryset.model._meta.object_name
+    )
+django.http.response.Http404: No Board matches the given query.
+
+ERROR 2025-07-07 14:55:18,763 views 24140 14596 Board retrieval error: No Board matches the given query.
+ERROR 2025-07-07 14:55:18,763 views 24140 14596 Error type: Http404
+ERROR 2025-07-07 14:55:18,765 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 633, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+kanban_app.models.Board.DoesNotExist: Board matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 100, in get_object
+    obj = get_object_or_404(queryset, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 19, in get_object_or_404
+    return _get_object_or_404(queryset, *filter_args, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 92, in get_object_or_404
+    raise Http404(
+        "No %s matches the given query." % queryset.model._meta.object_name
+    )
+django.http.response.Http404: No Board matches the given query.
+
+ERROR 2025-07-07 14:55:22,563 views 24140 14596 Board retrieval error: No Board matches the given query.
+ERROR 2025-07-07 14:55:22,563 views 24140 14596 Error type: Http404
+ERROR 2025-07-07 14:55:22,565 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 633, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+kanban_app.models.Board.DoesNotExist: Board matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 100, in get_object
+    obj = get_object_or_404(queryset, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 19, in get_object_or_404
+    return _get_object_or_404(queryset, *filter_args, **filter_kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\shortcuts.py", line 92, in get_object_or_404
+    raise Http404(
+        "No %s matches the given query." % queryset.model._meta.object_name
+    )
+django.http.response.Http404: No Board matches the given query.
+
+INFO 2025-07-07 14:55:25,590 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:25,590 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:25,590 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:25,590 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:25,590 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:25,591 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:25,591 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:25,591 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:25,591 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:28,786 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:28,787 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:28,787 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:28,787 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:28,787 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:28,788 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:28,788 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:28,788 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:28,788 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:29,145 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:29,145 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:29,145 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:29,145 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:29,146 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:29,146 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:29,146 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:29,146 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:29,146 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:29,525 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:29,526 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:29,526 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:29,526 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:29,526 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:29,527 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:29,527 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:29,527 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:29,527 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:29,874 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:29,874 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:29,875 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:29,875 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:29,875 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:29,875 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:29,875 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:29,875 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:29,876 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:30,271 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:30,271 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:30,272 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:30,272 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:30,272 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:30,272 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:30,272 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:30,273 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:30,273 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:30,664 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:30,664 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:30,664 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:30,664 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:30,665 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:30,665 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:30,665 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:30,665 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:30,665 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:31,157 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:31,157 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:31,157 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:31,158 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:31,158 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:31,158 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:31,158 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:31,158 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:31,159 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:31,657 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:31,657 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:31,657 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:31,657 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:31,657 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:31,658 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:31,658 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:31,658 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:31,658 views 24140 10332 === END DEBUG ===
+ERROR 2025-07-07 14:55:32,004 views 24140 14596 Board retrieval error: Authentication credentials were not provided.
+ERROR 2025-07-07 14:55:32,004 views 24140 14596 Error type: NotAuthenticated
+ERROR 2025-07-07 14:55:32,006 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 103, in get_object
+    self.check_object_permissions(self.request, obj)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\views.py", line 352, in check_object_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\views.py", line 180, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: Authentication credentials were not provided.
+
+INFO 2025-07-07 14:55:32,448 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:32,448 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:32,448 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:32,449 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:32,449 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:32,449 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:32,449 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:32,449 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:32,450 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:32,832 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:32,832 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:32,833 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:32,833 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:32,833 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:32,833 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:32,833 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:32,834 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:32,834 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:33,249 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:33,249 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:33,249 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:33,249 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:33,249 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:33,250 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:33,250 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:33,250 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:33,250 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:33,661 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:33,662 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:33,662 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:33,662 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:33,662 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:33,662 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:33,663 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:33,663 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:33,663 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:34,070 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:34,070 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:34,070 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:34,070 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:34,071 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:34,071 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:34,071 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:34,071 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:34,071 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:34,554 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:34,555 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:34,555 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:34,555 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:34,555 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:34,555 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:34,556 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:34,556 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:34,556 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:35,150 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:35,151 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:35,151 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:35,151 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:35,151 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:35,152 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:35,152 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:35,152 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:35,152 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:55:35,576 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:35,577 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:35,578 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:35,578 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:35,578 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:35,578 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:35,579 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:35,579 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:35,579 views 24140 10332 === END DEBUG ===
+ERROR 2025-07-07 14:55:35,789 views 24140 14596 Board retrieval error: Authentication credentials were not provided.
+ERROR 2025-07-07 14:55:35,790 views 24140 14596 Error type: NotAuthenticated
+ERROR 2025-07-07 14:55:35,791 views 24140 14596 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views.py", line 172, in retrieve
+    instance = self.get_object()
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\generics.py", line 103, in get_object
+    self.check_object_permissions(self.request, obj)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\views.py", line 352, in check_object_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\views.py", line 180, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: Authentication credentials were not provided.
+
+INFO 2025-07-07 14:55:59,902 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:55:59,902 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:55:59,903 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:55:59,903 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:55:59,903 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:55:59,903 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:55:59,903 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:55:59,904 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:55:59,904 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:00,871 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:00,871 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:00,871 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:00,872 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:00,872 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:00,872 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:00,872 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:00,872 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:00,872 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:07,545 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:07,545 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:07,545 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:07,545 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:07,546 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:07,546 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:07,546 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:07,547 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:07,547 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:08,119 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:08,139 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:08,185 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:08,185 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:08,185 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:08,185 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:08,185 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:08,186 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:08,186 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:08,689 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:08,690 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:08,690 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:08,690 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:08,690 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:08,691 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:08,691 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:08,691 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:08,691 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:09,229 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:09,229 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:09,230 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:09,230 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:09,230 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:09,230 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:09,230 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:09,231 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:09,231 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:09,799 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:09,799 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:09,800 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:09,800 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:09,800 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:09,800 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:09,800 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:09,800 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:09,801 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:10,237 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:10,237 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:10,238 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:10,238 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:10,238 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:10,238 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:10,238 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:10,238 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:10,239 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:10,630 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:10,631 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:10,631 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:10,632 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:10,632 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:10,632 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:10,632 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:10,632 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:10,633 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:11,066 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:11,066 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:11,066 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:11,066 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:11,066 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:11,067 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:11,067 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:11,067 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:11,067 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:11,642 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:11,642 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:11,642 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:11,642 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:11,643 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:11,643 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:11,643 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:11,643 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:11,643 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:14,870 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:14,870 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:14,871 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:14,871 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:14,871 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:14,871 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:14,871 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:14,871 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:14,872 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:47,802 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:47,802 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:47,803 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:47,803 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:47,803 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:47,803 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:47,804 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:47,804 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:47,804 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:48,885 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:48,886 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:48,886 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:48,886 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:48,886 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:48,886 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:48,887 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:48,887 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:48,887 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:56:49,320 views 24140 10332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:56:49,321 views 24140 10332 Board ID: 24
+INFO 2025-07-07 14:56:49,321 views 24140 10332 Board Name: Test Board
+INFO 2025-07-07 14:56:49,321 views 24140 10332 Board Description: 
+INFO 2025-07-07 14:56:49,321 views 24140 10332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:56:49,322 views 24140 10332 Members count: 1
+INFO 2025-07-07 14:56:49,322 views 24140 10332 Columns count: 0
+INFO 2025-07-07 14:56:49,322 views 24140 10332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:56:49,322 views 24140 10332 === END DEBUG ===
+INFO 2025-07-07 14:57:54,207 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:54,220 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:54,221 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:54,221 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:54,222 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:54,222 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:54,223 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:54,223 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:54,223 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:55,831 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:55,831 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:55,832 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:55,832 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:55,833 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:55,833 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:55,833 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:55,834 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:55,834 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:56,407 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:56,407 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:56,408 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:56,408 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:56,409 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:56,409 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:56,409 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:56,410 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:56,410 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:56,958 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:56,959 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:56,959 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:56,960 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:56,960 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:56,960 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:56,961 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:56,961 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:56,961 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:57,435 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:57,436 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:57,436 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:57,437 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:57,437 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:57,438 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:57,438 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:57,438 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:57,439 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:57,948 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:57,948 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:57,948 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:57,948 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:57,948 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:57,949 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:57,949 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:57,949 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:57,949 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:58,547 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:58,548 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:58,548 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:58,548 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:58,548 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:58,549 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:58,549 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:58,549 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:58,550 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:57:59,816 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:57:59,816 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:57:59,816 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:57:59,816 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:57:59,816 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:57:59,817 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:57:59,817 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:57:59,817 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:57:59,817 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:05,323 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:05,323 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:05,324 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:05,324 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:05,324 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:05,324 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:05,325 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:05,325 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:05,325 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:06,337 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:06,338 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:06,338 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:06,338 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:06,338 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:06,339 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:06,339 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:06,339 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:06,339 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:10,532 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:10,533 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:10,533 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:10,533 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:10,533 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:10,534 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:10,534 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:10,534 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:10,534 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:11,506 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:11,507 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:11,507 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:11,507 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:11,507 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:11,508 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:11,508 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:11,508 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:11,509 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:15,705 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:15,705 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:15,706 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:15,706 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:15,706 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:15,706 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:15,706 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:15,707 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:15,707 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:16,673 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:16,673 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:16,673 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:16,673 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:16,674 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:16,674 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:16,674 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:16,674 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:16,674 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:18,681 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:18,682 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:18,682 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:18,682 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:18,682 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:18,683 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:18,683 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:18,683 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:18,683 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:19,665 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:19,666 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:19,666 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:19,666 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:19,666 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:19,666 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:19,667 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:19,667 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:19,667 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:20,843 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:20,844 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:20,844 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:20,844 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:20,844 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:20,844 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:20,845 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:20,845 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:20,845 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:26,121 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:26,121 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:26,121 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:26,121 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:26,122 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:26,122 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:26,122 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:26,122 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:26,122 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:27,008 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:27,008 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:27,008 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:27,009 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:27,009 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:27,009 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:27,009 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:27,009 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:27,009 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:27,504 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:27,504 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:27,504 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:27,504 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:27,505 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:27,505 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:27,505 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:27,505 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:27,505 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:31,139 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:31,139 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:31,139 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:31,140 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:31,140 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:31,140 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:31,140 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:31,140 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:31,140 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:32,158 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:32,159 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:32,159 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:32,159 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:32,160 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:32,160 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:32,160 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:32,160 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:32,160 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:33,212 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:33,213 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:33,213 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:33,213 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:33,213 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:33,213 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:33,214 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:33,214 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:33,214 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:33,805 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:33,806 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:33,806 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:33,806 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:33,806 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:33,807 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:33,807 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:33,807 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:33,807 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:34,386 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:34,387 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:34,387 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:34,387 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:34,387 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:34,388 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:34,388 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:34,388 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:34,388 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:34,917 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:34,917 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:34,918 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:34,918 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:34,918 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:34,918 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:34,918 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:34,918 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:34,919 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:35,510 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:35,511 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:35,511 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:35,511 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:35,511 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:35,512 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:35,512 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:35,512 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:35,512 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:36,096 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:36,097 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:36,097 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:36,097 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:36,098 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:36,098 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:36,098 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:36,098 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:36,098 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:36,755 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:36,755 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:36,756 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:36,756 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:36,757 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:36,757 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:36,757 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:36,757 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:36,757 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:41,632 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:41,633 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:41,633 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:41,633 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:41,633 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:41,633 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:41,634 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:41,634 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:41,634 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:42,198 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:42,199 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:42,199 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:42,199 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:42,199 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:42,199 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:42,200 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:42,200 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:42,200 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:42,744 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:42,745 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:42,746 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:43,414 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:43,415 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:43,415 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:43,415 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:43,415 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:43,415 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:43,416 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:43,416 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:43,416 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:44,126 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:44,127 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:44,127 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:44,127 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:44,127 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:44,127 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:44,128 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:44,128 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:44,128 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:44,734 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:44,735 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:44,735 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:44,735 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:44,735 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:44,735 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:44,735 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:44,736 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:44,736 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:45,267 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:45,268 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:45,268 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:45,268 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:45,268 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:45,268 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:45,268 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:45,269 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:45,269 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:45,876 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:45,876 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:45,877 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:45,877 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:45,877 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:45,877 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:45,877 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:45,878 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:45,878 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:46,405 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:46,405 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:46,405 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:46,406 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:46,406 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:46,406 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:46,406 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:46,406 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:46,406 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:47,070 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:47,070 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:47,070 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:47,070 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:47,071 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:47,071 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:47,071 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:47,071 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:47,072 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:48,035 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:48,036 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:48,036 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:48,036 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:48,036 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:48,036 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:48,037 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:48,037 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:48,037 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:50,066 views 23248 14736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:50,066 views 23248 14736 Board ID: 24
+INFO 2025-07-07 14:58:50,067 views 23248 14736 Board Name: Test Board
+INFO 2025-07-07 14:58:50,067 views 23248 14736 Board Description: 
+INFO 2025-07-07 14:58:50,067 views 23248 14736 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:50,067 views 23248 14736 Members count: 1
+INFO 2025-07-07 14:58:50,067 views 23248 14736 Columns count: 0
+INFO 2025-07-07 14:58:50,067 views 23248 14736 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:50,068 views 23248 14736 === END DEBUG ===
+INFO 2025-07-07 14:58:51,870 views 7036 12332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:51,870 views 7036 12332 Board ID: 24
+INFO 2025-07-07 14:58:51,870 views 7036 12332 Board Name: Test Board
+INFO 2025-07-07 14:58:51,870 views 7036 12332 Board Description: 
+INFO 2025-07-07 14:58:51,871 views 7036 12332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:51,871 views 7036 12332 Members count: 1
+INFO 2025-07-07 14:58:51,871 views 7036 12332 Columns count: 0
+INFO 2025-07-07 14:58:51,871 views 7036 12332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:51,871 views 7036 12332 === END DEBUG ===
+INFO 2025-07-07 14:58:54,706 views 7036 12332 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:54,706 views 7036 12332 Board ID: 24
+INFO 2025-07-07 14:58:54,706 views 7036 12332 Board Name: Test Board
+INFO 2025-07-07 14:58:54,707 views 7036 12332 Board Description: 
+INFO 2025-07-07 14:58:54,707 views 7036 12332 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:54,707 views 7036 12332 Members count: 1
+INFO 2025-07-07 14:58:54,707 views 7036 12332 Columns count: 0
+INFO 2025-07-07 14:58:54,707 views 7036 12332 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:54,708 views 7036 12332 === END DEBUG ===
+INFO 2025-07-07 14:58:56,548 views 7572 1704 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:56,549 views 7572 1704 Board ID: 24
+INFO 2025-07-07 14:58:56,549 views 7572 1704 Board Name: Test Board
+INFO 2025-07-07 14:58:56,549 views 7572 1704 Board Description: 
+INFO 2025-07-07 14:58:56,549 views 7572 1704 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:56,549 views 7572 1704 Members count: 1
+INFO 2025-07-07 14:58:56,550 views 7572 1704 Columns count: 0
+INFO 2025-07-07 14:58:56,550 views 7572 1704 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:56,550 views 7572 1704 === END DEBUG ===
+INFO 2025-07-07 14:58:59,421 views 24468 6632 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:58:59,421 views 24468 6632 Board ID: 24
+INFO 2025-07-07 14:58:59,421 views 24468 6632 Board Name: Test Board
+INFO 2025-07-07 14:58:59,421 views 24468 6632 Board Description: 
+INFO 2025-07-07 14:58:59,421 views 24468 6632 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:58:59,422 views 24468 6632 Members count: 1
+INFO 2025-07-07 14:58:59,422 views 24468 6632 Columns count: 0
+INFO 2025-07-07 14:58:59,422 views 24468 6632 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:58:59,423 views 24468 6632 === END DEBUG ===
+INFO 2025-07-07 14:59:04,355 views 6460 19964 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:59:04,355 views 6460 19964 Board ID: 24
+INFO 2025-07-07 14:59:04,355 views 6460 19964 Board Name: Test Board
+INFO 2025-07-07 14:59:04,356 views 6460 19964 Board Description: 
+INFO 2025-07-07 14:59:04,356 views 6460 19964 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:59:04,356 views 6460 19964 Members count: 1
+INFO 2025-07-07 14:59:04,356 views 6460 19964 Columns count: 0
+INFO 2025-07-07 14:59:04,357 views 6460 19964 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:59:04,357 views 6460 19964 === END DEBUG ===
+INFO 2025-07-07 14:59:07,388 views 19868 6296 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:59:07,389 views 19868 6296 Board ID: 24
+INFO 2025-07-07 14:59:07,389 views 19868 6296 Board Name: Test Board
+INFO 2025-07-07 14:59:07,389 views 19868 6296 Board Description: 
+INFO 2025-07-07 14:59:07,389 views 19868 6296 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:59:07,389 views 19868 6296 Members count: 1
+INFO 2025-07-07 14:59:07,390 views 19868 6296 Columns count: 0
+INFO 2025-07-07 14:59:07,390 views 19868 6296 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:59:07,390 views 19868 6296 === END DEBUG ===
+INFO 2025-07-07 14:59:08,184 views 19868 6296 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:59:08,185 views 19868 6296 Board ID: 24
+INFO 2025-07-07 14:59:08,185 views 19868 6296 Board Name: Test Board
+INFO 2025-07-07 14:59:08,185 views 19868 6296 Board Description: 
+INFO 2025-07-07 14:59:08,186 views 19868 6296 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:59:08,186 views 19868 6296 Members count: 1
+INFO 2025-07-07 14:59:08,186 views 19868 6296 Columns count: 0
+INFO 2025-07-07 14:59:08,187 views 19868 6296 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:59:08,187 views 19868 6296 === END DEBUG ===
+INFO 2025-07-07 14:59:09,255 views 19868 6296 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 14:59:09,256 views 19868 6296 Board ID: 24
+INFO 2025-07-07 14:59:09,256 views 19868 6296 Board Name: Test Board
+INFO 2025-07-07 14:59:09,256 views 19868 6296 Board Description: 
+INFO 2025-07-07 14:59:09,256 views 19868 6296 Owner: {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}
+INFO 2025-07-07 14:59:09,256 views 19868 6296 Members count: 1
+INFO 2025-07-07 14:59:09,256 views 19868 6296 Columns count: 0
+INFO 2025-07-07 14:59:09,257 views 19868 6296 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-07 14:59:09,257 views 19868 6296 === END DEBUG ===

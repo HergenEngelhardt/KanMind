@@ -13,6 +13,7 @@ Provides endpoints for:
 urlpatterns = [
     path("", views.BoardListCreateView.as_view(), name="board-list-create"),
     path("<int:pk>/", views.BoardDetailView.as_view(), name="board-detail"),
+    path("<int:pk>/members/", views.BoardMembersView.as_view(), name="board-members"),
     path("email-check/", views.EmailCheckView.as_view(), name="email-check"),
     path("<int:board_id>/columns/", views.ColumnListCreateView.as_view(), name="column-list-create"),
     path("columns/<int:pk>/", views.ColumnDetailView.as_view(), name="column-detail"),
