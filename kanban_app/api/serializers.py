@@ -157,157 +157,130 @@ class BoardDetailSerializer(serializers.ModelSerializer):
     columns = ColumnSerializer(many=True, read_only=True)
     title = serializers.CharField(write_only=True, required=False, help_text="Alternative field name for 'name'")
 
-    class Meta:
-        model = Board
-        fields = [
-            "id",
-            "name",
-            "title",
-            "description",
-            "owner",
-            "members",
-            "columns",
-            "created_at",
-            "updated_at",
+class Meta:
+    model = Board
+    fields = [
+        "id",
+        "name",
+        "title",
+        "description",
+        "owner",
+        "members",
+        "columns",
+        "created_at",
+        "updated_at",
+    ]
+    read_only_fields = ['id', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+
+def _serialize_user(self, user):
+    """Helper method to serialize user data."""
+    if not user:
+        return {
+            'id': None,
+            'email': '',
+            'first_name': '',
+            'last_name': '',
+            'username': '',
+            'fullname': ''
+        }
+    
+    return {
+        'id': user.id,
+        'email': user.email or '',
+        'first_name': user.first_name or '',
+        'last_name': user.last_name or '',
+        'username': user.username or '',
+        'fullname': f"{user.first_name or ''} {user.last_name or ''}".strip() or user.email or ''
+    }
+
+def _serialize_members(self, instance):
+    """Helper method to serialize board members."""
+    members = []
+    if hasattr(instance, 'boardmembership_set'):
+        for membership in instance.boardmembership_set.all():
+            if membership.user:
+                member_data = {
+                    'id': membership.id,
+                    'role': membership.role or 'VIEWER',
+                    'user': self._serialize_user(membership.user)
+                }
+                members.append(member_data)
+    return members
+
+def _serialize_task(self, task):
+    """Helper method to serialize task data."""
+    task_data = {
+        'id': task.id,
+        'title': task.title or '',
+        'description': task.description or '',
+        'position': task.position or 0,
+        'status': getattr(task, 'status', 'TODO'),
+        'created_at': task.created_at.isoformat() if task.created_at else None,
+        'updated_at': task.updated_at.isoformat() if task.updated_at else None,
+        'assignee': self._serialize_user(getattr(task, 'assignee', None)),
+        'reviewers': []
+    }
+    
+    if hasattr(task, 'reviewers'):
+        task_data['reviewers'] = [
+            self._serialize_user(reviewer) 
+            for reviewer in task.reviewers.all()
         ]
-        read_only_fields = ['id', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+    
+    return task_data
 
-    def to_representation(self, instance):
-        """Ensure all data fields are properly formatted for frontend."""
-        try:
-            data = super().to_representation(instance)
-            
-            data['id'] = instance.id
-            data['name'] = instance.name or ''
-            data['description'] = instance.description or ''
-            data['created_at'] = instance.created_at.isoformat() if instance.created_at else None
-            data['updated_at'] = instance.updated_at.isoformat() if instance.updated_at else None
-            
-            if instance.owner:
-                data['owner'] = {
-                    'id': instance.owner.id,
-                    'email': instance.owner.email or '',
-                    'first_name': instance.owner.first_name or '',
-                    'last_name': instance.owner.last_name or '',
-                    'username': instance.owner.username or '',
-                    'fullname': f"{instance.owner.first_name or ''} {instance.owner.last_name or ''}".strip() or instance.owner.email or ''
-                }
-            else:
-                data['owner'] = {
-                    'id': None,
-                    'email': '',
-                    'first_name': '',
-                    'last_name': '',
-                    'username': '',
-                    'fullname': ''
-                }
-            
-            data['members'] = []
-            if hasattr(instance, 'boardmembership_set'):
-                for membership in instance.boardmembership_set.all():
-                    if membership.user:
-                        member_data = {
-                            'id': membership.id,
-                            'role': membership.role or 'VIEWER',
-                            'user': {
-                                'id': membership.user.id,
-                                'email': membership.user.email or '',
-                                'first_name': membership.user.first_name or '',
-                                'last_name': membership.user.last_name or '',
-                                'username': membership.user.username or '',
-                                'fullname': f"{membership.user.first_name or ''} {membership.user.last_name or ''}".strip() or membership.user.email or ''
-                            }
-                        }
-                        data['members'].append(member_data)
-            
-            data['columns'] = []
-            if hasattr(instance, 'columns'):
-                for column in instance.columns.all().order_by('position'):
-                    column_data = {
-                        'id': column.id,
-                        'name': column.name or '',
-                        'position': column.position or 0,
-                        'board': column.board_id,
-                        'tasks': []
-                    }
-                    
-                    if hasattr(column, 'tasks'):
-                        for task in column.tasks.all().order_by('position'):
-                            task_data = {
-                                'id': task.id,
-                                'title': task.title or '',
-                                'description': task.description or '',
-                                'position': task.position or 0,
-                                'status': getattr(task, 'status', 'TODO'),
-                                'created_at': task.created_at.isoformat() if task.created_at else None,
-                                'updated_at': task.updated_at.isoformat() if task.updated_at else None,
-                                'assignee': None,
-                                'reviewers': []
-                            }
-                            
-                            if hasattr(task, 'assignee') and task.assignee:
-                                task_data['assignee'] = {
-                                    'id': task.assignee.id,
-                                    'email': task.assignee.email or '',
-                                    'first_name': task.assignee.first_name or '',
-                                    'last_name': task.assignee.last_name or '',
-                                    'username': task.assignee.username or '',
-                                    'fullname': f"{task.assignee.first_name or ''} {task.assignee.last_name or ''}".strip() or task.assignee.email or ''
-                                }
-                            
-                            # Reviewers hinzufügen
-                            if hasattr(task, 'reviewers'):
-                                for reviewer in task.reviewers.all():
-                                    reviewer_data = {
-                                        'id': reviewer.id,
-                                        'email': reviewer.email or '',
-                                        'first_name': reviewer.first_name or '',
-                                        'last_name': reviewer.last_name or '',
-                                        'username': reviewer.username or '',
-                                        'fullname': f"{reviewer.first_name or ''} {reviewer.last_name or ''}".strip() or reviewer.email or ''
-                                    }
-                                    task_data['reviewers'].append(reviewer_data)
-                            
-                            column_data['tasks'].append(task_data)
-                    
-                    data['columns'].append(column_data)
-            
-            return data
-            
-        except Exception as e:
-            return {
-                'id': getattr(instance, 'id', None),
-                'name': getattr(instance, 'name', ''),
-                'description': getattr(instance, 'description', ''),
-                'owner': None,
-                'members': [],
-                'columns': [],
-                'created_at': None,
-                'updated_at': None
+def _serialize_columns(self, instance):
+    """Helper method to serialize board columns."""
+    columns = []
+    if hasattr(instance, 'columns'):
+        for column in instance.columns.all().order_by('position'):
+            column_data = {
+                'id': column.id,
+                'name': column.name or '',
+                'position': column.position or 0,
+                'board': column.board_id,
+                'tasks': []
             }
-    def validate(self, data):
-        """Handle title to name conversion."""
-        if 'title' in data and 'name' not in data:
-            data['name'] = data['title']
-        if 'title' in data:
-            del data['title']
-        return data
+            
+            if hasattr(column, 'tasks'):
+                column_data['tasks'] = [
+                    self._serialize_task(task) 
+                    for task in column.tasks.all().order_by('position')
+                ]
+            
+            columns.append(column_data)
+    return columns
 
-    def validate_name(self, value):
-        """
-        Validate board name is not empty.
+def to_representation(self, instance):
+    """Ensure all data fields are properly formatted for frontend."""
+    try:
+        data = super().to_representation(instance)
         
-        Args:
-            value (str): Board name
-            
-        Returns:
-            str: Validated name
-            
-        Raises:
-            ValidationError: If name is empty or whitespace only
-        """
-        if not value or not value.strip():
-            raise serializers.ValidationError(
-                "Board name cannot be empty."
-            )
-        return value.strip()
+        data.update({
+            'id': instance.id,
+            'name': instance.name or '',
+            'description': instance.description or '',
+            'created_at': instance.created_at.isoformat() if instance.created_at else None,
+            'updated_at': instance.updated_at.isoformat() if instance.updated_at else None,
+            'owner': self._serialize_user(instance.owner),
+            'members': self._serialize_members(instance),
+            'columns': self._serialize_columns(instance)
+        })
+        
+        return data
+        
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Board serialization error: {str(e)}")
+        
+        return {
+            'id': getattr(instance, 'id', None),
+            'name': getattr(instance, 'name', ''),
+            'description': getattr(instance, 'description', ''),
+            'owner': None,
+            'members': [],
+            'columns': [],
+            'created_at': None,
+            'updated_at': None
+    }
