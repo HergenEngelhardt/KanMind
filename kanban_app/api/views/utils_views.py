@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from kanban_app.api.serializers import UserSerializer
+from kanban_app.api.serializers.user_serializers import UserSerializer
 
 
 class EmailCheckView(APIView):

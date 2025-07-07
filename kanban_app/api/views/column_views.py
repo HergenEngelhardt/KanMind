@@ -3,7 +3,7 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from kanban_app.models import Board, Column
-from kanban_app.api.serializers import ColumnSerializer
+from kanban_app.api.serializers.column_serializers import ColumnSerializer
 from kanban_app.api.permissions import IsOwnerOrMember
 
 

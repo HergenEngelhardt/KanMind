@@ -11,3 +11,13 @@ from .utils_views import (
     EmailCheckView,
     TaskReorderView
 )
+
+__all__ = [
+    'BoardListCreateView',
+    'BoardDetailView',
+    'BoardMembersView',
+    'ColumnListCreateView',
+    'ColumnDetailView',
+    'EmailCheckView',
+    'TaskReorderView'
+]

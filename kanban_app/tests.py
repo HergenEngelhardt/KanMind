@@ -8,7 +8,7 @@ from django.db import IntegrityError
 
 # Local imports
 from kanban_app.models import Board, Column, BoardMembership
-from kanban_app.api.serializers import (
+from kanban_app.api.serializers.serializers import (
     BoardListSerializer, 
     BoardDetailSerializer, 
     ColumnSerializer,

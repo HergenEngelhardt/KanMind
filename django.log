@@ -983,3 +983,9 @@ INFO 2025-07-07 14:59:09,256 views 19868 6296 Members count: 1
 INFO 2025-07-07 14:59:09,256 views 19868 6296 Columns count: 0
 INFO 2025-07-07 14:59:09,257 views 19868 6296 Full response keys: ['id', 'name', 'description', 'owner', 'members', 'columns', 'created_at', 'updated_at']
 INFO 2025-07-07 14:59:09,257 views 19868 6296 === END DEBUG ===
+INFO 2025-07-07 16:13:56,968 board_views 22936 13736 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 16:13:56,968 board_views 22936 13736 Board ID: 24
+INFO 2025-07-07 16:13:56,969 board_views 22936 13736 Board Name: Test Board
+INFO 2025-07-07 16:13:56,969 board_views 22936 13736 Request User: engel
+INFO 2025-07-07 16:13:56,969 board_views 22936 13736 Board Owner: engel
+INFO 2025-07-07 16:13:56,970 board_views 22936 13736 === END DEBUG ===

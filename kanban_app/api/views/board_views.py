@@ -1,3 +1,5 @@
+import logging
+import traceback
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -8,12 +10,14 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import models
 from django.contrib.auth.models import User
 from kanban_app.models import Board
-from kanban_app.api.serializers import (
+from kanban_app.api.serializers.board_serializers import (
     BoardListSerializer,
     BoardDetailSerializer,
-    UserSerializer,
 )
+from kanban_app.api.serializers.user_serializers import UserSerializer
 from kanban_app.api.permissions import IsOwnerOrMember, IsOwner
+
+logger = logging.getLogger(__name__)
 
 
 class BoardListCreateView(ListCreateAPIView):
@@ -66,11 +70,56 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
         return [IsOwnerOrMember()]
 
     def get_queryset(self): 
-        return Board.objects.select_related('owner').prefetch_related(
-            'boardmembership_set__user',
-            'columns__tasks__assignee',
-            'columns__tasks__reviewers'
-        ).all()
+        try:
+            return Board.objects.select_related('owner').prefetch_related(
+                'boardmembership_set__user',
+                'columns__tasks__assignee',
+                'columns__tasks__reviewers'
+            ).all()
+        except Exception as e:
+            logger.error(f"Error in get_queryset: {str(e)}")
+            return Board.objects.all()
+
+    def get_object(self):
+        try:
+            obj = super().get_object()
+            # Check permissions
+            self.check_object_permissions(self.request, obj)
+            return obj
+        except Exception as e:
+            logger.error(f"Error getting object: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
+
+    def get(self, request, *args, **kwargs):
+        try:
+            board = self.get_object()
+            serializer = self.get_serializer(board)
+            
+            # Debug logging
+            logger.info("=== BOARD RETRIEVAL DEBUG ===")
+            logger.info(f"Board ID: {board.id}")
+            logger.info(f"Board Name: {board.name}")
+            logger.info(f"Request User: {request.user}")
+            logger.info(f"Board Owner: {board.owner}")
+            logger.info("=== END DEBUG ===")
+            
+            return Response(serializer.data)
+            
+        except Exception as e:
+            logger.error(f"Board retrieval error: {str(e)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Request User: {request.user}")
+            logger.error(f"Is Authenticated: {request.user.is_authenticated}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            
+            if isinstance(e, (PermissionDenied, NotFound)):
+                raise
+            
+            return Response(
+                {"error": "Internal server error", "detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
