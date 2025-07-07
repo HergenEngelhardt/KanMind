@@ -28,6 +28,6 @@ urlpatterns = [
     path("<int:pk>/members/", BoardMembersView.as_view(), name="board-members"),
     path("<int:board_id>/columns/", ColumnListCreateView.as_view(), name="column-list-create"),
     path("<int:board_id>/columns/<int:pk>/", ColumnDetailView.as_view(), name="column-detail"),
-    path("check-email/", EmailCheckView.as_view(), name="check-email"),
+    path("email-check/", EmailCheckView.as_view(), name="email-check"),
     path("reorder-tasks/", TaskReorderView.as_view(), name="reorder-tasks"),
 ]

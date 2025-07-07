@@ -989,3 +989,27 @@ INFO 2025-07-07 16:13:56,969 board_views 22936 13736 Board Name: Test Board
 INFO 2025-07-07 16:13:56,969 board_views 22936 13736 Request User: engel
 INFO 2025-07-07 16:13:56,969 board_views 22936 13736 Board Owner: engel
 INFO 2025-07-07 16:13:56,970 board_views 22936 13736 === END DEBUG ===
+ERROR 2025-07-07 16:24:16,582 board_views 23312 9516 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:17,370 board_views 23312 9516 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:36,948 board_views 12996 17484 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:38,032 board_views 12996 17484 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:39,432 board_views 4820 23056 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:44,472 board_views 16120 4660 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:45,352 board_views 16120 4660 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:47,486 board_views 10208 17308 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:51,366 board_views 7212 5356 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:24:54,090 board_views 22700 21036 Error in get_queryset: name 'models' is not defined
+ERROR 2025-07-07 16:25:02,687 board_views 22700 21036 Error in get_queryset: name 'models' is not defined
+INFO 2025-07-07 16:25:32,306 board_views 5724 11228 Board creation request from user: engel
+INFO 2025-07-07 16:25:32,307 board_views 5724 11228 Request data: {'title': 'Test Board', 'members': [19]}
+INFO 2025-07-07 16:25:32,307 board_views 5724 11228 Converted 'title' to 'name': Test Board
+INFO 2025-07-07 16:25:32,311 board_views 5724 11228 Added engel as ADMIN member to board Test Board
+INFO 2025-07-07 16:25:32,313 board_views 5724 11228 Added test@mail.com as VIEWER member to board Test Board
+INFO 2025-07-07 16:25:32,314 board_views 5724 11228 Board created successfully
+INFO 2025-07-07 16:25:32,333 board_views 5724 11228 Board response data: {'id': 25, 'name': 'Test Board', 'description': '', 'owner': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}, 'members': [{'id': 23, 'role': 'ADMIN', 'user': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}}, {'id': 24, 'role': 'VIEWER', 'user': {'id': 19, 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'username': 'test@mail.com', 'fullname': 'Test Kontakt'}}], 'columns': [], 'created_at': '2025-07-07T14:25:32.308257+00:00', 'updated_at': '2025-07-07T14:25:32.308287+00:00'}
+INFO 2025-07-07 16:25:39,660 board_views 5724 4248 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-07 16:25:39,661 board_views 5724 4248 Board ID: 25
+INFO 2025-07-07 16:25:39,661 board_views 5724 4248 Board Name: Test Board
+INFO 2025-07-07 16:25:39,661 board_views 5724 4248 Request User: engel
+INFO 2025-07-07 16:25:39,661 board_views 5724 4248 Board Owner: engel
+INFO 2025-07-07 16:25:39,661 board_views 5724 4248 === END DEBUG ===

@@ -1,62 +1,143 @@
 import logging
 import traceback
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, generics
-from rest_framework.exceptions import PermissionDenied, NotFound
+from django.db import models, transaction
+from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from django.db import models
-from django.contrib.auth.models import User
-from kanban_app.models import Board
-from kanban_app.api.serializers.board_serializers import (
-    BoardListSerializer,
-    BoardDetailSerializer,
-)
-from kanban_app.api.serializers.user_serializers import UserSerializer
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
+from kanban_app.models import Board, BoardMembership
+from kanban_app.api.serializers.board_serializers import BoardListSerializer, BoardDetailSerializer
 from kanban_app.api.permissions import IsOwnerOrMember, IsOwner
 
 logger = logging.getLogger(__name__)
 
 
 class BoardListCreateView(ListCreateAPIView):
-    """List user's boards or create a new board."""
-    serializer_class = BoardListSerializer
+    """List boards or create a new board."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return BoardListSerializer
+        return BoardListSerializer
+
     def get_queryset(self):
-        user = self.request.user
-        if not user.is_authenticated:
+        try:
+            user = self.request.user
+            return Board.objects.filter(
+                models.Q(owner=user) | models.Q(members=user)
+            ).distinct().select_related('owner').prefetch_related(
+                'boardmembership_set__user'
+            ).order_by('-created_at')
+        except Exception as e:
+            logger.error(f"Error in get_queryset: {str(e)}")
             return Board.objects.none()
 
-        owned_boards = Board.objects.filter(owner=user)
-        for board in owned_boards:
-            if not board.members.filter(id=user.id).exists():
-                from kanban_app.models import BoardMembership
-                BoardMembership.objects.get_or_create(
-                    user=user,
-                    board=board,
-                    defaults={'role': 'ADMIN'}
+    def create(self, request, *args, **kwargs):
+        try:
+            logger.info(f"Board creation request from user: {request.user}")
+            logger.info(f"Request data: {request.data}")
+            
+            if not request.data:
+                return Response(
+                    {"error": "No data provided"}, 
+                    status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            title = request.data.get('title', '').strip()
+            name = request.data.get('name', '').strip()
+            
+            if not title and not name:
+                return Response(
+                    {"error": "Board name/title is required"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if title and not name:
+                request.data['name'] = title
+                logger.info(f"Converted 'title' to 'name': {title}")
+            
+            members = request.data.get('members', [])
+            if not isinstance(members, list):
+                return Response(
+                    {"error": "Members must be a list"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            serializer = self.get_serializer(data=request.data)
+            
+            if not serializer.is_valid():
+                logger.error(f"Serializer validation errors: {serializer.errors}")
+                return Response(
+                    {"error": "Validation failed", "details": serializer.errors}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            with transaction.atomic():
+                board = serializer.save(owner=request.user)
+                
+                BoardMembership.objects.create(
+                    user=request.user,
+                    board=board,
+                    role='ADMIN'
+                )
+                logger.info(f"Added {request.user} as ADMIN member to board {board.name}")
+                
+                for member_id in members:
+                    if member_id != request.user.id:
+                        try:
+                            from django.contrib.auth.models import User
+                            member_user = User.objects.get(id=member_id)
+                            BoardMembership.objects.get_or_create(
+                                user=member_user,
+                                board=board,
+                                defaults={'role': 'VIEWER'}
+                            )
+                            logger.info(f"Added {member_user} as VIEWER member to board {board.name}")
+                        except User.DoesNotExist:
+                            logger.warning(f"User with ID {member_id} not found")
+                
+                logger.info("Board created successfully")
+                
+                detail_serializer = BoardDetailSerializer(board)
+                response_data = detail_serializer.data
+                
+                logger.info(f"Board response data: {response_data}")
+                
+                return Response(
+                    response_data,
+                    status=status.HTTP_201_CREATED
+                )
+                
+        except ValidationError as e:
+            logger.error(f"Validation error in board creation: {str(e)}")
+            return Response(
+                {"error": "Validation error", "details": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in board creation: {str(e)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return Response(
+                {"error": "Internal server error", "details": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        return Board.objects.filter(
-            models.Q(owner=user) | models.Q(members=user)
-        ).distinct()
-
-    def perform_create(self, serializer):
-        board = serializer.save(owner=self.request.user)
-        self._add_owner_as_member(board)
-        board.refresh_from_db()
-
-    def _add_owner_as_member(self, board):
-        from kanban_app.models import BoardMembership
-        BoardMembership.objects.get_or_create(
-            user=self.request.user,
-            board=board,
-            defaults={'role': 'ADMIN'}
-        )
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error listing boards: {str(e)}")
+            return Response(
+                {"error": "Failed to retrieve boards"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class BoardDetailView(RetrieveUpdateDestroyAPIView):
@@ -83,7 +164,6 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
     def get_object(self):
         try:
             obj = super().get_object()
-            # Check permissions
             self.check_object_permissions(self.request, obj)
             return obj
         except Exception as e:
@@ -96,7 +176,6 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
             board = self.get_object()
             serializer = self.get_serializer(board)
             
-            # Debug logging
             logger.info("=== BOARD RETRIEVAL DEBUG ===")
             logger.info(f"Board ID: {board.id}")
             logger.info(f"Board Name: {board.name}")
@@ -129,36 +208,24 @@ class BoardDetailView(RetrieveUpdateDestroyAPIView):
         )
 
 
-class BoardMembersView(APIView):
-    """Get all members of a board for task assignment."""
+class BoardMembersView(ListCreateAPIView):
+    """Manage board members."""
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrMember]
 
-    def get(self, request, pk):
+    def get_queryset(self):
+        board_id = self.kwargs['pk']
+        return BoardMembership.objects.filter(board_id=board_id).select_related('user', 'board')
+
+    def get_serializer_class(self):
+        from kanban_app.api.serializers.board_serializers import BoardMembershipSerializer
+        return BoardMembershipSerializer
+
+    def perform_create(self, serializer):
+        board_id = self.kwargs['pk']
         try:
-            board = Board.objects.get(pk=pk)
-            
-            user_is_member = (
-                board.owner == request.user or 
-                board.boardmembership_set.filter(user=request.user).exists()
-            )
-            
-            if not user_is_member:
-                raise PermissionDenied("You don't have permission to view board members")
-            
-            members = []
-            
-            owner_data = UserSerializer(board.owner).data
-            owner_data['role'] = 'OWNER'
-            members.append(owner_data)
-            
-            for membership in board.boardmembership_set.all():
-                if membership.user != board.owner:
-                    user_data = UserSerializer(membership.user).data
-                    user_data['role'] = membership.role
-                    members.append(user_data)
-            
-            return Response(members, status=status.HTTP_200_OK)
-            
+            board = Board.objects.get(id=board_id)
+            self.check_object_permissions(self.request, board)
+            serializer.save(board=board)
         except Board.DoesNotExist:
             raise NotFound("Board not found")
