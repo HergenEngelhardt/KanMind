@@ -9,3 +9,4 @@ INFO 2025-07-07 12:03:14,484 views 19788 18740 Converted 'title' to 'name': Test
 INFO 2025-07-07 12:03:14,526 views 19788 18740 Added guest@example.com as ADMIN member to board Test Board
 INFO 2025-07-07 12:03:14,527 views 19788 18740 Board created successfully
 INFO 2025-07-07 12:05:02,141 views 19788 20960 Successful login for user: test@mail.com
+INFO 2025-07-07 12:18:09,268 views 16708 15732 Successful login for user: test@mail.com

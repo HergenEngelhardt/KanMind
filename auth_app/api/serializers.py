@@ -34,10 +34,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
     full_name = serializers.CharField(required=False, write_only=True)
+    fullname = serializers.CharField(required=False, write_only=True)
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'first_name', 'last_name', 'full_name', 'username']
+        fields = ['email', 'password', 'first_name', 'last_name', 'full_name', 'fullname', 'username']
         extra_kwargs = {
             'username': {'required': False},
         }
@@ -57,13 +58,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         """
         if not attrs.get("username"):
             attrs["username"] = attrs.get("email")
-            
-        if 'full_name' in attrs:
-            full_name = attrs.pop('full_name')
-            name_parts = full_name.split(' ', 1)
+        
+        # Check for both 'full_name' and 'fullname' to be flexible
+        full_name_value = attrs.pop('full_name', None) or attrs.pop('fullname', None)
+    
+        if full_name_value:
+            name_parts = full_name_value.split(' ', 1)
             attrs['first_name'] = name_parts[0]
             attrs['last_name'] = name_parts[1] if len(name_parts) > 1 else ''
-            
+        
         return attrs
     
     def create(self, validated_data):

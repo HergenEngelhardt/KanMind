@@ -63,6 +63,9 @@ class BoardListCreateView(ListCreateAPIView):
         """Create board and add owner as member."""
         board = serializer.save(owner=self.request.user)
         self._add_owner_as_member(board)
+        
+        # Ensure the board is properly saved after adding membership
+        board.refresh_from_db()
 
     def create(self, request, *args, **kwargs):
         """Override create to handle title->name conversion and add error handling."""
@@ -122,15 +125,16 @@ class BoardListCreateView(ListCreateAPIView):
 
     def _add_owner_as_member(self, board):
         """Add board owner as member if not already added."""
-        if not board.members.filter(id=self.request.user.id).exists():
-            from kanban_app.models import BoardMembership
-            BoardMembership.objects.get_or_create(
-                user=self.request.user,
-                board=board,
-                defaults={'role': 'ADMIN'}
-            )
-            logger.info(
-                f"Added {self.request.user} as ADMIN member to board {board.name}")
+        from kanban_app.models import BoardMembership
+        membership, created = BoardMembership.objects.get_or_create(
+            user=self.request.user,
+            board=board,
+            defaults={'role': 'ADMIN'}
+        )
+        if created:
+            logger.info(f"Added {self.request.user} as ADMIN member to board {board.name}")
+        else:
+            logger.info(f"User {self.request.user} already member of board {board.name}")
 
 
 class BoardDetailView(RetrieveUpdateDestroyAPIView):

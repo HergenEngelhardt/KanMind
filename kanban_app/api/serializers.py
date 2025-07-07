@@ -217,3 +217,21 @@ class BoardDetailSerializer(serializers.ModelSerializer):
                 "Board name cannot be empty."
             )
         return value.strip()
+    def to_representation(self, instance):
+        """Ensure members data is always properly formatted."""
+        data = super().to_representation(instance)
+        
+        if 'members' not in data or data['members'] is None:
+            data['members'] = []
+        
+        for member in data['members']:
+            if 'user' in member and member['user']:
+                user = member['user']
+                if 'first_name' not in user:
+                    user['first_name'] = ''
+                if 'last_name' not in user:
+                    user['last_name'] = ''
+                if 'email' not in user:
+                    user['email'] = ''
+        
+        return data
