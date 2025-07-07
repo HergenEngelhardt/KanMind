@@ -1,11 +1,5 @@
 from django.urls import path
-from .views import (
-    BoardListCreateView,
-    BoardDetailView,
-    EmailCheckView,
-    ColumnListCreateView,
-    ColumnDetailView,
-)
+from . import views
 
 """
 Kanban API URL patterns.
@@ -17,9 +11,10 @@ Provides endpoints for:
 """
 
 urlpatterns = [
-    path("boards/", BoardListCreateView.as_view(), name="board-list-create"),
-    path("boards/<int:pk>/", BoardDetailView.as_view(), name="board-detail"),
-    path("email-check/", EmailCheckView.as_view(), name="email-check"),
-    path("boards/<int:board_id>/columns/",ColumnListCreateView.as_view(),name="column-list-create",),
-    path("columns/<int:pk>/", ColumnDetailView.as_view(), name="column-detail"),
+    path("", views.BoardListCreateView.as_view(), name="board-list-create"),
+    path("<int:pk>/", views.BoardDetailView.as_view(), name="board-detail"),
+    path("email-check/", views.EmailCheckView.as_view(), name="email-check"),
+    path("<int:board_id>/columns/", views.ColumnListCreateView.as_view(), name="column-list-create"),
+    path("columns/<int:pk>/", views.ColumnDetailView.as_view(), name="column-detail"),
+    path("tasks/reorder/", views.TaskReorderView.as_view(), name="task-reorder"),
 ]

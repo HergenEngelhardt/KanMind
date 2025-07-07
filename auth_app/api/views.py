@@ -5,8 +5,10 @@ from rest_framework import status, serializers
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.conf import settings
 from .serializers import RegisterSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
@@ -45,9 +47,14 @@ class CustomAuthTokenSerializer(serializers.Serializer):
         return attrs
 
     def _is_guest_login(self, attrs):
-        """Check if this is a guest login attempt."""
-        return (attrs.get("email") == "kevin@kovacsi.de" and 
-                attrs.get("password") == "asdasdasd")
+        """Check if this is a guest login attempt with better security."""
+        email = attrs.get("email", "").lower().strip()
+        password = attrs.get("password", "")
+        
+        guest_email = getattr(settings, 'GUEST_EMAIL', 'kevin@kovacsi.de')
+        guest_password = getattr(settings, 'GUEST_PASSWORD', 'asdasdasd')
+        
+        return email == guest_email and password == guest_password
 
     def _handle_guest_login(self, attrs):
         """Handle guest login authentication."""
@@ -173,14 +180,27 @@ class RegisterView(APIView):
         return token
 
     def _build_user_data(self, user, token):
-        """Build user data response."""
+        """Build user data response with robust fullname handling."""
+        first_name = (user.first_name or "").strip()
+        last_name = (user.last_name or "").strip()
+        
+        if first_name and last_name:
+            fullname = f"{first_name} {last_name}"
+        elif first_name:
+            fullname = first_name
+        elif last_name:
+            fullname = last_name
+        else:
+            fullname = user.email.split('@')[0] if user.email else "User"
+        
         return {
             "token": token.key,
             "user_id": user.pk,
             "email": user.email,
-            "fullname": f"{user.first_name} {user.last_name}".strip(),
+            "fullname": fullname,
+            "first_name": first_name,
+            "last_name": last_name,
         }
-
 
 class LoginView(ObtainAuthToken):
     """
@@ -194,22 +214,29 @@ class LoginView(ObtainAuthToken):
     serializer_class = CustomAuthTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        """
-        Authenticate user and return token.
-        
-        Args:
-            request: HTTP request with login credentials
+        """Authenticate user and return token with improved error handling."""
+        try:
+            logger.debug("Processing login request")
             
-        Returns:
-            Response: User data with authentication token
-        """
-        logger.debug("Processing login request")
-        
-        serializer = self._get_validated_serializer(request)
-        user = serializer.validated_data["user"]
-        token = self._get_or_create_token(user)
-        
-        return Response(self._build_user_data(user, token))
+            serializer = self._get_validated_serializer(request)
+            user = serializer.validated_data["user"]
+            token = self._get_or_create_token(user)
+            
+            logger.info(f"Successful login for user: {user.email}")
+            return Response(self._build_user_data(user, token))
+            
+        except ValidationError as e:
+            logger.warning(f"Login validation failed: {e}")
+            return Response(
+                {"error": "Invalid credentials provided"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Unexpected login error: {str(e)}")
+            return Response(
+                {"error": "Login failed due to server error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def _get_validated_serializer(self, request):
         """Get and validate serializer."""
@@ -225,14 +252,27 @@ class LoginView(ObtainAuthToken):
         return token
 
     def _build_user_data(self, user, token):
-        """Build user data response."""
+        """Build user data response with robust fullname handling."""
+        first_name = (user.first_name or "").strip()
+        last_name = (user.last_name or "").strip()
+        
+        if first_name and last_name:
+            fullname = f"{first_name} {last_name}"
+        elif first_name:
+            fullname = first_name
+        elif last_name:
+            fullname = last_name
+        else:
+            fullname = user.email.split('@')[0] if user.email else "User"
+        
         return {
             "token": token.key,
             "user_id": user.pk,
             "email": user.email,
-            "fullname": f"{user.first_name} {user.last_name}".strip(),
+            "fullname": fullname,
+            "first_name": first_name,
+            "last_name": last_name,
         }
-
 
 class GuestLoginView(APIView):
     """
@@ -290,10 +330,24 @@ class GuestLoginView(APIView):
         return token
 
     def _build_user_data(self, user, token):
-        """Build user data response."""
+        """Build user data response with robust fullname handling."""
+        first_name = (user.first_name or "").strip()
+        last_name = (user.last_name or "").strip()
+        
+        if first_name and last_name:
+            fullname = f"{first_name} {last_name}"
+        elif first_name:
+            fullname = first_name
+        elif last_name:
+            fullname = last_name
+        else:
+            fullname = user.email.split('@')[0] if user.email else "User"
+        
         return {
             "token": token.key,
             "user_id": user.pk,
             "email": user.email,
-            "fullname": f"{user.first_name} {user.last_name}".strip(),
+            "fullname": fullname,
+            "first_name": first_name,
+            "last_name": last_name,
         }

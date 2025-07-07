@@ -106,7 +106,7 @@ Open `KanMind_Frontend/project.KanMind/index.html` in your web browser or use a 
 ## API Endpoints
 
 - Authentication: `/api/auth/`
-- Kanban boards and columns: `/api/kanban/`
+- Kanban boards and columns: `/api/boards/`
 - Tasks and comments: `/api/tasks/`
 
 ## API Documentation
