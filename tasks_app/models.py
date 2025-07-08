@@ -1,41 +1,61 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from kanban_app.models import Column
 
 class Task(models.Model):
-    """
-    Task model representing individual tasks within columns.
+    """Task model for Kanban board tasks."""
     
-    Tasks can be assigned to users and have reviewers.
-    They maintain position ordering within their column.
-    """
+    PRIORITY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('URGENT', 'Urgent'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('TODO', 'To Do'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('REVIEW', 'Review'),
+        ('DONE', 'Done'),
+    ]
     
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     column = models.ForeignKey(
-        "kanban_app.Column", 
+        Column, 
         on_delete=models.CASCADE, 
         related_name="tasks"
     )
     position = models.IntegerField()
+    
+    # User assignments
     assignee = models.ForeignKey(
         User,
+        blank=True,
+        null=True,
         on_delete=models.SET_NULL,
         related_name="assigned_tasks",
-        null=True,
-        blank=True,
     )
     reviewers = models.ManyToManyField(
         User, 
-        related_name="reviewing_tasks", 
-        blank=True
+        blank=True, 
+        related_name="reviewing_tasks"
     )
-    STATUS_CHOICES = [
-        ('TODO', 'To Do'),
-        ('IN_PROGRESS', 'In Progress'), 
-        ('DONE', 'Done'),
-    ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TODO')
+    
+    # Task properties
+    due_date = models.DateTimeField(null=True, blank=True)
+    priority = models.CharField(
+        max_length=10,
+        choices=PRIORITY_CHOICES,
+        default='MEDIUM'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='TODO'
+    )
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -49,16 +69,11 @@ class Task(models.Model):
 
 
 class Comment(models.Model):
-    """
-    Comment model for task discussions.
-    
-    Users can comment on tasks to provide updates or feedback.
-    Comments are ordered by creation time.
-    """
+    """Comment model for task comments."""
     
     task = models.ForeignKey(
-        Task, 
-        on_delete=models.CASCADE, 
+        Task,
+        on_delete=models.CASCADE,
         related_name="comments"
     )
     author = models.ForeignKey(User, on_delete=models.CASCADE)
