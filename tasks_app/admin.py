@@ -6,7 +6,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ['title', 'column', 'assignee', 'priority', 'status', 'due_date', 'created_at']
     list_filter = ['priority', 'status', 'created_at']
     search_fields = ['title', 'description']
-    ordering = ['position']
+    ordering = ['-created_at']
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):

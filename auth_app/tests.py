@@ -234,7 +234,6 @@ class AuthAPIEndpointsTest(APITestCase):
         self.assertEqual(response.data['email'], 'new@example.com')
         self.assertEqual(response.data['fullname'], 'New User')
         
-        # Verify user was created
         user = User.objects.get(email='new@example.com')
         self.assertEqual(user.username, 'new@example.com')
     
@@ -343,13 +342,11 @@ class AuthAPIEndpointsTest(APITestCase):
         self.assertEqual(response.data['email'], 'guest@example.com')
         self.assertEqual(response.data['fullname'], 'Guest User')
         
-        # Verify guest user was created
         guest_user = User.objects.get(username='guest@example.com')
         self.assertEqual(guest_user.email, 'guest@example.com')
     
     def test_guest_login_existing_user(self):
         """Test guest login when guest user already exists."""
-        # Create guest user first
         guest_user = User.objects.create_user(
             username='guest@example.com',
             email='guest@example.com',
@@ -404,7 +401,6 @@ class AuthAPIEndpointsTest(APITestCase):
     
     def test_response_format_consistency(self):
         """Test that all endpoints return consistent response format."""
-        # Test registration response format
         reg_data = {
             'email': 'format@example.com',
             'password': 'ValidPass123!',
@@ -413,14 +409,12 @@ class AuthAPIEndpointsTest(APITestCase):
         }
         reg_response = self.client.post(self.register_url, reg_data)
         
-        # Test login response format
         login_data = {
             'email': 'test@example.com',
             'password': 'testpass123'
         }
         login_response = self.client.post(self.login_url, login_data)
         
-        # Test guest login response format
         guest_response = self.client.post(self.guest_login_url)
         
         for response in [reg_response, login_response, guest_response]:

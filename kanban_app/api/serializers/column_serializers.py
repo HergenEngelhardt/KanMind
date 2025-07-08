@@ -9,7 +9,6 @@ class ColumnSerializer(serializers.ModelSerializer):
     Includes associated tasks for complete column representation.
     Board field is read-only to prevent unauthorized modifications.
     """
-    # Import task serializer dynamically to avoid circular imports
     def get_tasks_serializer(self):
         from tasks_app.api.serializers import TaskSerializer
         return TaskSerializer

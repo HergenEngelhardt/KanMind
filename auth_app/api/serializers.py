@@ -59,7 +59,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         if not attrs.get("username"):
             attrs["username"] = attrs.get("email")
         
-        # Check for both 'full_name' and 'fullname' to be flexible
         full_name_value = attrs.pop('full_name', None) or attrs.pop('fullname', None)
     
         if full_name_value:

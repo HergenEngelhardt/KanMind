@@ -10,7 +10,7 @@ class Board(models.Model):
     Each board has an owner and can have multiple members with different roles.
     """
     
-    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     owner = models.ForeignKey(
         User, 
@@ -22,7 +22,6 @@ class Board(models.Model):
         through="BoardMembership", 
         related_name="member_boards"
     )
-    # New fields
     deadline = models.DateTimeField(null=True, blank=True, help_text="Board deadline")
     status = models.CharField(
         max_length=20,
@@ -44,7 +43,7 @@ class Board(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class BoardMembership(models.Model):
@@ -73,7 +72,7 @@ class BoardMembership(models.Model):
         verbose_name_plural = "Board Memberships"
 
     def __str__(self):
-        return f"{self.user.username} - {self.board.name} ({self.role})"
+        return f"{self.user.username} - {self.board.title} ({self.role})"
 
 
 class Column(models.Model):
@@ -84,7 +83,7 @@ class Column(models.Model):
     Columns are ordered by position within each board.
     """
     
-    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
     board = models.ForeignKey(
         Board, 
         on_delete=models.CASCADE, 
@@ -98,4 +97,4 @@ class Column(models.Model):
         verbose_name_plural = "Columns"
 
     def __str__(self):
-        return f"{self.board.name} - {self.name}"
+        return f"{self.board.title} - {self.title}"

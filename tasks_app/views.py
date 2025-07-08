@@ -47,7 +47,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     @action(detail=False, methods=['get'])
-    def assigned_to_me(self, request):
+    def assignee_me(self, request):
         """Get tasks assigned to the current user."""
         tasks = self.get_queryset().filter(assignee=request.user)
         serializer = self.get_serializer(tasks, many=True)
@@ -77,8 +77,6 @@ class CommentListCreateView(generics.ListCreateAPIView):
         """Create comment for specific task."""
         task_id = self.kwargs['task_id']
         task = get_object_or_404(Task, id=task_id)
-        
-        # Check if user has permission to comment on this task
         if not (task.column.board.owner == self.request.user or 
                 self.request.user in task.column.board.members.all()):
             raise PermissionDenied('Permission denied')

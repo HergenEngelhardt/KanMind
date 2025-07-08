@@ -11262,3 +11262,498 @@ ERROR 2025-07-08 11:50:18,991 board_views 13948 20512 Default columns created
 INFO 2025-07-08 11:50:18,994 board_views 13948 20512 Added test@mail.com as VIEWER member to board Test Board
 ERROR 2025-07-08 11:50:19,009 board_views 13948 20512 Final response data: {'id': 27, 'name': 'Test Board', 'description': '', 'owner': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}, 'members': [{'id': 27, 'user': {'id': 1, 'email': 'engel@mail.com', 'first_name': 'Vorname', 'last_name': 'Nachname', 'username': 'engel', 'fullname': 'Vorname Nachname'}, 'role': 'ADMIN'}, {'id': 28, 'user': {'id': 19, 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'username': 'test@mail.com', 'fullname': 'Test Kontakt'}, 'role': 'VIEWER'}], 'status': 'PLANNING', 'deadline': None, 'columns': [{'id': 19, 'name': 'To Do', 'position': 1, 'tasks': []}, {'id': 20, 'name': 'In Progress', 'position': 2, 'tasks': []}, {'id': 21, 'name': 'Review', 'position': 3, 'tasks': []}, {'id': 22, 'name': 'Done', 'position': 4, 'tasks': []}], 'created_at': '2025-07-08T09:50:18.973954Z', 'updated_at': '2025-07-08T09:50:18.973986Z'}
 ERROR 2025-07-08 11:50:19,010 board_views 13948 20512 Final columns count: 4
+INFO 2025-07-08 14:48:00,588 board_views 8732 15796 === BOARD CREATION START ===
+INFO 2025-07-08 14:48:00,588 board_views 8732 15796 User: test@mail.com
+INFO 2025-07-08 14:48:00,589 board_views 8732 15796 Request data: {'title': 'Test Board', 'members': []}
+INFO 2025-07-08 14:48:00,589 board_views 8732 15796 Converted 'title' to 'name': Test Board
+ERROR 2025-07-08 14:48:00,595 board_views 8732 15796 Board creation error: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+ERROR 2025-07-08 14:48:00,598 board_views 8732 15796 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 68, in create
+    board = serializer.save(owner=request.user)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 1010, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+
+INFO 2025-07-08 14:53:24,275 board_views 15344 21316 === BOARD CREATION START ===
+INFO 2025-07-08 14:53:24,275 board_views 15344 21316 User: test@mail.com
+INFO 2025-07-08 14:53:24,276 board_views 15344 21316 Request data: {'title': 'Test Board', 'members': [1]}
+INFO 2025-07-08 14:53:24,276 board_views 15344 21316 Converted 'title' to 'name': Test Board
+ERROR 2025-07-08 14:53:24,280 board_views 15344 21316 Board creation error: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+ERROR 2025-07-08 14:53:24,283 board_views 15344 21316 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 68, in create
+    board = serializer.save(owner=request.user)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 1010, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+
+INFO 2025-07-08 14:58:23,935 board_views 14140 11448 === BOARD CREATION START ===
+INFO 2025-07-08 14:58:23,936 board_views 14140 11448 User: test@mail.com
+INFO 2025-07-08 14:58:23,936 board_views 14140 11448 Request data: {'title': 'Test Board', 'members': [1]}
+INFO 2025-07-08 14:58:23,936 board_views 14140 11448 Converted 'title' to 'name': Test Board
+ERROR 2025-07-08 14:58:23,941 board_views 14140 11448 Board creation error: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+ERROR 2025-07-08 14:58:23,944 board_views 14140 11448 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 68, in create
+    board = serializer.save(owner=request.user)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 1010, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+
+INFO 2025-07-08 15:01:45,925 board_views 21896 12324 === BOARD CREATION START ===
+INFO 2025-07-08 15:01:45,926 board_views 21896 12324 User: test@mail.com
+INFO 2025-07-08 15:01:45,926 board_views 21896 12324 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 15:01:45,927 board_views 21896 12324 Converted 'title' to 'name': Test Board
+ERROR 2025-07-08 15:01:45,931 board_views 21896 12324 Board creation error: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+ERROR 2025-07-08 15:01:45,934 board_views 21896 12324 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 68, in create
+    board = serializer.save(owner=request.user)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 210, in save
+    self.instance = self.create(validated_data)
+                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 1010, in create
+    raise TypeError(msg)
+TypeError: Got a `TypeError` when calling `Board.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `Board.objects.create()`. You may need to make the field read-only, or override the BoardDetailSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 991, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Board() got unexpected keyword arguments: 'title'
+
+
+INFO 2025-07-08 15:10:44,934 board_views 19960 10144 === BOARD CREATION START ===
+INFO 2025-07-08 15:10:44,935 board_views 19960 10144 User: test@mail.com
+INFO 2025-07-08 15:10:44,935 board_views 19960 10144 Request data: {'title': 'Test Board', 'members': [2, 1]}
+INFO 2025-07-08 15:10:44,936 board_views 19960 10144 Converted 'title' to 'name': Test Board
+INFO 2025-07-08 15:10:44,936 board_views 19960 10144 Removed 'title' field from data
+INFO 2025-07-08 15:10:44,940 board_views 19960 10144 Board 'Test Board' created with ID: 1
+INFO 2025-07-08 15:10:44,941 board_views 19960 10144 Added test@mail.com as ADMIN member
+INFO 2025-07-08 15:10:45,063 board_views 19960 10144 Added engel@mail.com as VIEWER member
+ERROR 2025-07-08 15:10:45,070 board_views 19960 10144 Board creation error: 'BoardDetailSerializer' object has no attribute 'get_columns'
+ERROR 2025-07-08 15:10:45,075 board_views 19960 10144 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 121, in create
+    response_data = detail_serializer.data
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 573, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\fields.py", line 1869, in to_representation
+    method = getattr(self.parent, self.method_name)
+AttributeError: 'BoardDetailSerializer' object has no attribute 'get_columns'
+
+INFO 2025-07-08 15:15:21,963 board_views 24912 13320 === BOARD CREATION START ===
+INFO 2025-07-08 15:15:21,963 board_views 24912 13320 User: test@mail.com
+INFO 2025-07-08 15:15:21,964 board_views 24912 13320 Request data: {'title': 'Test Board', 'members': [2, 1]}
+INFO 2025-07-08 15:15:21,964 board_views 24912 13320 Converted 'title' to 'name': Test Board
+INFO 2025-07-08 15:15:21,964 board_views 24912 13320 Removed 'title' field from data
+INFO 2025-07-08 15:15:21,967 board_views 24912 13320 Board 'Test Board' created with ID: 1
+INFO 2025-07-08 15:15:21,968 board_views 24912 13320 Added test@mail.com as ADMIN member
+INFO 2025-07-08 15:15:22,006 board_views 24912 13320 Added engel@mail.com as VIEWER member
+ERROR 2025-07-08 15:15:22,011 board_views 24912 13320 Board creation error: 'BoardDetailSerializer' object has no attribute 'get_columns'
+ERROR 2025-07-08 15:15:22,017 board_views 24912 13320 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 121, in create
+    response_data = detail_serializer.data
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 573, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 251, in data
+    self._data = self.to_representation(self.instance)
+                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\serializers.py", line 540, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\rest_framework\fields.py", line 1869, in to_representation
+    method = getattr(self.parent, self.method_name)
+AttributeError: 'BoardDetailSerializer' object has no attribute 'get_columns'
+
+INFO 2025-07-08 15:25:00,770 board_views 21268 1936 === BOARD CREATION START ===
+INFO 2025-07-08 15:25:00,771 board_views 21268 1936 User: test@mail.com
+INFO 2025-07-08 15:25:00,771 board_views 21268 1936 Request data: {'title': 'Test Board', 'members': [2, 1]}
+INFO 2025-07-08 15:25:00,771 board_views 21268 1936 Converted 'title' to 'name': Test Board
+INFO 2025-07-08 15:25:00,772 board_views 21268 1936 Removed 'title' field from data
+INFO 2025-07-08 15:25:00,776 board_views 21268 1936 Board 'Test Board' created with ID: 1
+INFO 2025-07-08 15:25:00,779 board_views 21268 1936 Added test@mail.com as ADMIN member
+INFO 2025-07-08 15:25:00,831 board_views 21268 1936 Added engel@mail.com as VIEWER member
+INFO 2025-07-08 15:25:00,867 board_views 21268 1936 Board creation SUCCESS! Columns count: 4
+INFO 2025-07-08 15:25:00,867 board_views 21268 1936 Created columns: ['To Do', 'In Progress', 'Review', 'Done']
+INFO 2025-07-08 15:25:12,341 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:28,017 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:30,996 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:41,313 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:41,953 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:43,137 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:43,666 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:45,165 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:45,659 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:46,996 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:25:47,536 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:00,017 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:12,024 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:16,358 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:23,856 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:24,399 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:27,833 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:30,039 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:27:36,219 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:01,618 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:03,142 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:04,751 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:06,731 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:16,618 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:17,193 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:17,705 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:18,304 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:18,866 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:21,068 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:21,591 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:23,107 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:28:23,769 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:29:00,152 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:29:40,336 board_views 21268 7820 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:29:41,983 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:29:46,970 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:29:58,866 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:23,803 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:24,649 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:25,258 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:25,810 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:26,350 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:28,305 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:28,893 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:31,302 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:32,027 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:30:47,840 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:00,155 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:24,618 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:32,675 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:34,723 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:37,823 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:38,289 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:38,879 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:39,478 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:40,025 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:40,628 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:41,194 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:41,719 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:42,254 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:42,780 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:43,388 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:43,952 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:44,523 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:45,027 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:45,653 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:46,155 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:46,795 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:47,326 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:47,885 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:48,411 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:49,030 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:49,589 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:50,153 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:50,748 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:51,259 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:51,850 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:52,394 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:53,011 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:31:53,603 board_views 3148 13872 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:35:08,405 board_views 11612 18688 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:35:14,006 board_views 11612 18688 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:41:16,004 board_views 4916 25580 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:41:33,407 board_views 4916 25580 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:03,667 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:04,158 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:04,789 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:05,268 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:06,752 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:07,303 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:08,458 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:09,049 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:42:12,526 board_views 4916 24912 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:44:51,461 board_views 22140 9020 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:45:02,804 board_views 22140 9020 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:45:09,889 board_views 22140 9020 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 15:45:14,204 board_views 22140 9020 Board 1 retrieved - Columns: 4
+INFO 2025-07-08 16:23:02,120 board_views 22856 21812 Board 1 retrieved - Columns: 0
+WARNING 2025-07-08 16:23:02,120 board_views 22856 21812 Board 1 has no columns!
+INFO 2025-07-08 16:23:03,238 board_views 22856 21812 Board 1 retrieved - Columns: 0
+WARNING 2025-07-08 16:23:03,238 board_views 22856 21812 Board 1 has no columns!
+INFO 2025-07-08 16:23:21,348 board_views 22856 21812 === BOARD CREATION START ===
+INFO 2025-07-08 16:23:21,349 board_views 22856 21812 User: test@mail.com
+INFO 2025-07-08 16:23:21,349 board_views 22856 21812 Request data: {'title': 'Test Board', 'members': [2, 1]}
+INFO 2025-07-08 16:23:37,659 board_views 22856 21812 === BOARD CREATION START ===
+INFO 2025-07-08 16:23:37,659 board_views 22856 21812 User: test@mail.com
+INFO 2025-07-08 16:23:37,660 board_views 22856 21812 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 16:55:58,310 board_views 11892 18656 === BOARD CREATION START ===
+INFO 2025-07-08 16:55:58,311 board_views 11892 18656 User: test@mail.com
+INFO 2025-07-08 16:55:58,312 board_views 11892 18656 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 16:56:02,604 board_views 11892 18656 === BOARD CREATION START ===
+INFO 2025-07-08 16:56:02,604 board_views 11892 18656 User: test@mail.com
+INFO 2025-07-08 16:56:02,605 board_views 11892 18656 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 16:58:14,834 board_views 3356 13584 === BOARD CREATION START ===
+INFO 2025-07-08 16:58:14,835 board_views 3356 13584 User: test@mail.com
+INFO 2025-07-08 16:58:14,835 board_views 3356 13584 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 16:58:14,839 board_views 3356 13584 Board 'Test Board' created with ID: 2
+INFO 2025-07-08 16:58:14,840 board_views 3356 13584 Added test@mail.com as ADMIN member
+ERROR 2025-07-08 16:58:14,842 board_views 3356 13584 Board creation error: Column() got unexpected keyword arguments: 'name'
+ERROR 2025-07-08 16:58:14,848 board_views 3356 13584 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 79, in create
+    column = Column.objects.create(
+        name=col_name,
+        board=board,
+        position=position
+    )
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\query.py", line 661, in create
+    obj = self.model(**kwargs)
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\.venv\Lib\site-packages\django\db\models\base.py", line 569, in __init__
+    raise TypeError(
+    ...<2 lines>...
+    )
+TypeError: Column() got unexpected keyword arguments: 'name'
+
+INFO 2025-07-08 17:00:02,628 board_views 17056 16772 === BOARD CREATION START ===
+INFO 2025-07-08 17:00:02,629 board_views 17056 16772 User: test@mail.com
+INFO 2025-07-08 17:00:02,629 board_views 17056 16772 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 17:00:02,632 board_views 17056 16772 Board 'Test Board' created with ID: 2
+INFO 2025-07-08 17:00:02,634 board_views 17056 16772 Added test@mail.com as ADMIN member
+INFO 2025-07-08 17:00:02,693 board_views 17056 16772 Board creation SUCCESS! Columns count: 4
+ERROR 2025-07-08 17:00:02,694 board_views 17056 16772 Board creation error: 'Column' object has no attribute 'name'
+ERROR 2025-07-08 17:00:02,697 board_views 17056 16772 Traceback: Traceback (most recent call last):
+  File "C:\Users\engel\OneDrive\Desktop\KanMind\kanban_app\api\views\board_views.py", line 110, in create
+    logger.info(f"Created columns: {[col.name for col in created_columns]}")
+                                     ^^^^^^^^
+AttributeError: 'Column' object has no attribute 'name'
+
+INFO 2025-07-08 17:37:54,211 board_views 20860 25244 === BOARD CREATION START ===
+INFO 2025-07-08 17:37:54,212 board_views 20860 25244 User: test@mail.com
+INFO 2025-07-08 17:37:54,212 board_views 20860 25244 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 17:37:54,215 board_views 20860 25244 Board 'Test Board' created with ID: 2
+INFO 2025-07-08 17:37:54,216 board_views 20860 25244 Added test@mail.com as ADMIN member
+INFO 2025-07-08 17:37:54,515 board_views 20860 25244 Board creation SUCCESS! Columns count: 4
+INFO 2025-07-08 17:37:54,516 board_views 20860 25244 Created columns: ['To Do', 'In Progress', 'Review', 'Done']
+INFO 2025-07-08 17:37:58,407 board_views 20860 24976 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:38:05,850 board_views 20860 24976 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:44:28,915 board_views 8660 20244 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:44:57,295 board_views 8660 20244 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:44:58,935 board_views 8660 20244 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:45:20,577 board_views 8660 20244 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:45:21,754 board_views 8660 20244 Board 2 retrieved - Columns: 4
+INFO 2025-07-08 17:45:32,817 board_views 8660 20244 === BOARD CREATION START ===
+INFO 2025-07-08 17:45:32,817 board_views 8660 20244 User: test@mail.com
+INFO 2025-07-08 17:45:32,818 board_views 8660 20244 Request data: {'title': 'Test Board', 'members': [2]}
+INFO 2025-07-08 17:45:32,822 board_views 8660 20244 Board 'Test Board' created with ID: 3
+INFO 2025-07-08 17:45:32,824 board_views 8660 20244 Added test@mail.com as ADMIN member
+INFO 2025-07-08 17:45:32,869 board_views 8660 20244 Board creation SUCCESS! Columns count: 4
+INFO 2025-07-08 17:45:32,869 board_views 8660 20244 Created columns: ['To Do', 'In Progress', 'Review', 'Done']
+INFO 2025-07-08 17:45:35,306 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:45:40,012 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:45:43,359 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:45:45,147 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:18,116 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:22,861 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:23,489 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:24,009 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:24,590 board_views 8660 12956 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:24,972 board_views 8660 2264 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:25,602 board_views 8660 2264 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:26,724 board_views 8660 2264 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:46:27,269 board_views 8660 2264 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:48:45,677 board_views 14164 1892 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:48:51,478 board_views 14164 1892 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:48:58,911 board_views 14164 1892 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:49:08,561 board_views 14164 1892 Board 3 retrieved - Columns: 4
+INFO 2025-07-08 17:50:01,624 board_views 14164 1892 Board 3 retrieved - Columns: 4

@@ -38,14 +38,13 @@ class BoardModelTest(TestCase):
     def test_board_creation(self):
         """Test board creation with valid data."""
         board = Board.objects.create(
-            name='Test Board',
+            title='Test Board',  
             description='Test Description',
             owner=self.user
         )
         self.assertEqual(str(board), 'Test Board')
         self.assertEqual(board.owner, self.user)
-        self.assertEqual(board.name, 'Test Board')
-        self.assertEqual(board.description, 'Test Description')
+        self.assertEqual(board.title, 'Test Board')
     
     def test_board_meta_options(self):
         """Test board meta options."""
@@ -53,7 +52,6 @@ class BoardModelTest(TestCase):
         board2 = Board.objects.create(name='Board 2', owner=self.user)
         
         boards = Board.objects.all()
-        # Should be ordered by -created_at (newest first)
         self.assertEqual(boards[0], board2)
         self.assertEqual(boards[1], board1)
     
@@ -61,7 +59,6 @@ class BoardModelTest(TestCase):
         """Test board members many-to-many relationship."""
         board = Board.objects.create(name='Test Board', owner=self.user)
         
-        # Add member through BoardMembership
         membership = BoardMembership.objects.create(
             user=self.other_user,
             board=board,
@@ -98,7 +95,7 @@ class BoardMembershipModelTest(TestCase):
         self.assertEqual(membership.user, self.user)
         self.assertEqual(membership.board, self.board)
         self.assertEqual(membership.role, 'ADMIN')
-        self.assertEqual(str(membership), f'{self.user.username} - {self.board.name} (ADMIN)')
+        self.assertEqual(str(membership), f'{self.user.username} - {self.board.title} (ADMIN)')
     
     def test_membership_default_role(self):
         """Test default role is VIEWER."""
@@ -394,7 +391,7 @@ class BoardAPITest(APITestCase):
         
         # Verify database update
         board.refresh_from_db()
-        self.assertEqual(board.name, 'Updated Name')
+        self.assertEqual(board.title, 'Updated Name')
     
     def test_update_board_restricted_fields(self):
         """Test updating board with restricted fields."""

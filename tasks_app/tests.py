@@ -647,7 +647,7 @@ class TaskAPITest(APITestCase):
             position=2
         )
         
-        response = self.client.get('/api/tasks/assigned-to-me/')
+        response = self.client.get('/api/tasks/assignee-me/')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
