@@ -6,10 +6,24 @@ from .models import Board, Column, BoardMembership
 class BoardAdmin(admin.ModelAdmin):
     """Admin interface for Board model."""
     
-    list_display = ('name', 'owner', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at')
-    search_fields = ('name', 'description', 'owner__username')
+    list_display = ('name', 'owner', 'status', 'deadline', 'created_at', 'updated_at')
+    list_filter = ('status', 'created_at', 'updated_at', 'deadline')
+    search_fields = ('name', 'description', 'owner__username', 'owner__email')
     readonly_fields = ('created_at', 'updated_at')
+    date_hierarchy = 'deadline'
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'owner')
+        }),
+        ('Project Management', {
+            'fields': ('status', 'deadline')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 @admin.register(Column)
@@ -17,7 +31,7 @@ class ColumnAdmin(admin.ModelAdmin):
     """Admin interface for Column model."""
     
     list_display = ('name', 'board', 'position')
-    list_filter = ('board',)
+    list_filter = ('board', 'board__status')
     search_fields = ('name', 'board__name')
     ordering = ('board', 'position')
 
@@ -26,6 +40,16 @@ class ColumnAdmin(admin.ModelAdmin):
 class BoardMembershipAdmin(admin.ModelAdmin):
     """Admin interface for BoardMembership model."""
     
-    list_display = ('user', 'board', 'role')
-    list_filter = ('role',)
-    search_fields = ('user__username', 'board__name')
+    list_display = ('user', 'board', 'role', 'board_status', 'board_deadline')
+    list_filter = ('role', 'board__status')
+    search_fields = ('user__username', 'user__email', 'board__name')
+    
+    def board_status(self, obj):
+        """Display board status in membership admin."""
+        return obj.board.status
+    board_status.short_description = 'Board Status'
+    
+    def board_deadline(self, obj):
+        """Display board deadline in membership admin."""
+        return obj.board.deadline
+    board_deadline.short_description = 'Board Deadline'

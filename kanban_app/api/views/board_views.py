@@ -1,15 +1,23 @@
-import logging
-import traceback
-from django.db import models, transaction
-from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from django.db import transaction, models
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+from django.utils.dateparse import parse_datetime
+import logging
+import traceback
+
 from kanban_app.models import Board, BoardMembership
-from kanban_app.api.serializers.board_serializers import BoardListSerializer, BoardDetailSerializer
-from kanban_app.api.permissions import IsOwnerOrMember, IsOwner
+from ..serializers.board_serializers import (
+    BoardListSerializer,
+    BoardDetailSerializer,
+    BoardMembershipSerializer
+)
+from ..permissions import IsOwnerOrMember
 
 logger = logging.getLogger(__name__)
 
@@ -20,21 +28,16 @@ class BoardListCreateView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.request.method == "POST":
-            return BoardListSerializer
+        if self.request.method == 'POST':
+            return BoardDetailSerializer
         return BoardListSerializer
 
     def get_queryset(self):
-        try:
-            user = self.request.user
-            return Board.objects.filter(
-                models.Q(owner=user) | models.Q(members=user)
-            ).distinct().select_related('owner').prefetch_related(
-                'boardmembership_set__user'
-            ).order_by('-created_at')
-        except Exception as e:
-            logger.error(f"Error in get_queryset: {str(e)}")
-            return Board.objects.none()
+        """Return boards where user is owner or member."""
+        user = self.request.user
+        return Board.objects.filter(
+            models.Q(owner=user) | models.Q(members=user)
+        ).distinct().order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
         try:
@@ -59,6 +62,30 @@ class BoardListCreateView(ListCreateAPIView):
             if title and not name:
                 request.data['name'] = title
                 logger.info(f"Converted 'title' to 'name': {title}")
+            
+            deadline_str = request.data.get('deadline')
+            if deadline_str:
+                try:
+                    deadline = parse_datetime(deadline_str)
+                    if not deadline:
+                        return Response(
+                            {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    request.data['deadline'] = deadline
+                except ValueError:
+                    return Response(
+                        {"error": "Invalid deadline format"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            valid_statuses = ['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED']
+            board_status = request.data.get('status', 'PLANNING')
+            if board_status not in valid_statuses:
+                return Response(
+                    {"error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
             members = request.data.get('members', [])
             if not isinstance(members, list):
@@ -127,105 +154,103 @@ class BoardListCreateView(ListCreateAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def list(self, request, *args, **kwargs):
-        try:
-            queryset = self.get_queryset()
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"Error listing boards: {str(e)}")
-            return Response(
-                {"error": "Failed to retrieve boards"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
 
 class BoardDetailView(RetrieveUpdateDestroyAPIView):
-    """Retrieve, update or delete a specific board."""
+    """Retrieve, update or delete a board."""
     serializer_class = BoardDetailSerializer
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsOwnerOrMember]
+    lookup_field = "pk"
 
-    def get_permissions(self):
-        if self.request.method == "DELETE":
-            return [IsOwner()]
-        return [IsOwnerOrMember()]
+    def get_queryset(self):
+        """Return boards where user is owner or member."""
+        user = self.request.user
+        return Board.objects.filter(
+            models.Q(owner=user) | models.Q(members=user)
+        ).distinct()
 
-    def get_queryset(self): 
+    def retrieve(self, request, *args, **kwargs):
         try:
-            return Board.objects.select_related('owner').prefetch_related(
-                'boardmembership_set__user',
-                'columns__tasks__assignee',
-                'columns__tasks__reviewers'
-            ).all()
-        except Exception as e:
-            logger.error(f"Error in get_queryset: {str(e)}")
-            return Board.objects.all()
-
-    def get_object(self):
-        try:
-            obj = super().get_object()
-            self.check_object_permissions(self.request, obj)
-            return obj
-        except Exception as e:
-            logger.error(f"Error getting object: {str(e)}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            raise
-
-    def get(self, request, *args, **kwargs):
-        try:
-            board = self.get_object()
-            serializer = self.get_serializer(board)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            response_data = serializer.data
             
             logger.info("=== BOARD RETRIEVAL DEBUG ===")
-            logger.info(f"Board ID: {board.id}")
-            logger.info(f"Board Name: {board.name}")
-            logger.info(f"Request User: {request.user}")
-            logger.info(f"Board Owner: {board.owner}")
+            logger.info(f"Board ID: {response_data.get('id')}")
+            logger.info(f"Board Name: {response_data.get('name')}")
+            logger.info(f"Board Description: {response_data.get('description')}")
+            logger.info(f"Board Status: {response_data.get('status')}")
+            logger.info(f"Board Deadline: {response_data.get('deadline')}")
+            logger.info(f"Owner: {response_data.get('owner')}")
+            logger.info(f"Members count: {len(response_data.get('members', []))}")
+            logger.info(f"Columns count: {len(response_data.get('columns', []))}")
+            logger.info(f"Full response keys: {list(response_data.keys())}")
             logger.info("=== END DEBUG ===")
             
-            return Response(serializer.data)
+            return Response(response_data)
             
         except Exception as e:
             logger.error(f"Board retrieval error: {str(e)}")
             logger.error(f"Error type: {type(e).__name__}")
-            logger.error(f"Request User: {request.user}")
-            logger.error(f"Is Authenticated: {request.user.is_authenticated}")
             logger.error(f"Traceback: {traceback.format_exc()}")
-            
-            if isinstance(e, (PermissionDenied, NotFound)):
-                raise
-            
             return Response(
-                {"error": "Internal server error", "detail": str(e)},
+                {"error": "Failed to retrieve board", "details": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
-        return Response(
-            {"message": "Board successfully deleted."},
-            status=status.HTTP_204_NO_CONTENT,
-        )
+    def update(self, request, *args, **kwargs):
+        try:
+            deadline_str = request.data.get('deadline')
+            if deadline_str:
+                try:
+                    deadline = parse_datetime(deadline_str)
+                    if not deadline:
+                        return Response(
+                            {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    request.data['deadline'] = deadline
+                except ValueError:
+                    return Response(
+                        {"error": "Invalid deadline format"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            board_status = request.data.get('status')
+            if board_status:
+                valid_statuses = ['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED']
+                if board_status not in valid_statuses:
+                    return Response(
+                        {"error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            return super().update(request, *args, **kwargs)
+            
+        except Exception as e:
+            logger.error(f"Board update error: {str(e)}")
+            return Response(
+                {"error": "Failed to update board", "details": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
-class BoardMembersView(ListCreateAPIView):
-    """Manage board members."""
+class BoardMembersView(ListAPIView):
+    """List members of a specific board."""
+    serializer_class = BoardMembershipSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsOwnerOrMember]
 
     def get_queryset(self):
-        board_id = self.kwargs['pk']
-        return BoardMembership.objects.filter(board_id=board_id).select_related('user', 'board')
-
-    def get_serializer_class(self):
-        from kanban_app.api.serializers.board_serializers import BoardMembershipSerializer
-        return BoardMembershipSerializer
-
-    def perform_create(self, serializer):
-        board_id = self.kwargs['pk']
-        try:
-            board = Board.objects.get(id=board_id)
-            self.check_object_permissions(self.request, board)
-            serializer.save(board=board)
-        except Board.DoesNotExist:
-            raise NotFound("Board not found")
+        board_id = self.kwargs.get("board_id")
+        board = get_object_or_404(Board, pk=board_id)
+        
+        user = self.request.user
+        if not Board.objects.filter(
+            models.Q(owner=user) | models.Q(members=user),
+            pk=board_id
+        ).exists():
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You don't have permission to view this board's members")
+        
+        return BoardMembership.objects.filter(board=board)

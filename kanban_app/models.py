@@ -22,6 +22,19 @@ class Board(models.Model):
         through="BoardMembership", 
         related_name="member_boards"
     )
+    # New fields
+    deadline = models.DateTimeField(null=True, blank=True, help_text="Board deadline")
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('PLANNING', 'Planning'),
+            ('ACTIVE', 'Active'),
+            ('ON_HOLD', 'On Hold'),
+            ('COMPLETED', 'Completed'),
+            ('CANCELLED', 'Cancelled'),
+        ],
+        default='PLANNING'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -36,24 +49,22 @@ class Board(models.Model):
 
 class BoardMembership(models.Model):
     """
-    Through model for Board-User relationship.
+    Represents the relationship between a user and a board.
     
     Defines user roles within a board (Admin, Editor, Viewer).
-    Ensures unique membership per user per board.
+    Each user can have only one role per board.
     """
     
-    ROLE_CHOICES = (
-        ("ADMIN", "Admin"),
-        ("EDITOR", "Editor"),
-        ("VIEWER", "Viewer"),
-    )
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     board = models.ForeignKey(Board, on_delete=models.CASCADE)
     role = models.CharField(
-        max_length=10, 
-        choices=ROLE_CHOICES, 
-        default="VIEWER"
+        max_length=10,
+        choices=[
+            ("ADMIN", "Admin"),
+            ("EDITOR", "Editor"),
+            ("VIEWER", "Viewer"),
+        ],
+        default="VIEWER",
     )
 
     class Meta:
@@ -67,10 +78,10 @@ class BoardMembership(models.Model):
 
 class Column(models.Model):
     """
-    Column model for Kanban boards.
+    Kanban column model.
     
-    Represents a workflow stage (e.g., To Do, In Progress, Done).
-    Columns are ordered by position within a board.
+    Represents a column within a board (e.g., To Do, In Progress, Done).
+    Columns are ordered by position within each board.
     """
     
     name = models.CharField(max_length=100)
@@ -87,4 +98,4 @@ class Column(models.Model):
         verbose_name_plural = "Columns"
 
     def __str__(self):
-        return f"{self.name} ({self.board.name})"
+        return f"{self.board.name} - {self.name}"

@@ -32,68 +32,32 @@ class BoardListSerializer(serializers.ModelSerializer):
     
     owner = UserSerializer(read_only=True)
     title = serializers.CharField(write_only=True, required=False, help_text="Alternative field name for 'name'")
+    deadline = serializers.DateTimeField(required=False, allow_null=True)
 
     class Meta:
         model = Board
-        fields = [
-            "id", 
-            "name", 
-            "title",
-            "description", 
-            "owner", 
-            "created_at", 
-            "updated_at"
-        ]
-        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
+        fields = ["id", "name", "title", "description", "owner", "status", "deadline", "created_at", "updated_at"]
+        read_only_fields = ["id", "owner", "created_at", "updated_at"]
 
     def validate(self, data):
-        """
-        Custom validation to handle title->name conversion and ensure name is provided.
-        
-        Args:
-            data (dict): Input data
-            
-        Returns:
-            dict: Validated data with name field
-            
-        Raises:
-            ValidationError: If neither name nor title is provided or both are empty
-        """
-        if 'title' in data and 'name' not in data:
-            data['name'] = data['title']
-        elif 'title' in data and 'name' in data:
-            pass
-        
-        if 'title' in data:
-            del data['title']
-        
-        if not data.get('name', '').strip():
-            raise serializers.ValidationError({
-                'name': 'Board name is required and cannot be empty.'
-            })
-        
-        data['name'] = data['name'].strip()
-        
+        """Handle both 'name' and 'title' fields."""
+        title = data.pop('title', None)
+        if title and not data.get('name'):
+            data['name'] = title
         return data
 
     def validate_name(self, value):
-        """
-        Validate board name is not empty.
-        
-        Args:
-            value (str): Board name
-            
-        Returns:
-            str: Validated name
-            
-        Raises:
-            ValidationError: If name is empty or whitespace only
-        """
+        """Validate board name is not empty."""
         if not value or not value.strip():
-            raise serializers.ValidationError(
-                "Board name cannot be empty."
-            )
+            raise serializers.ValidationError("Board name cannot be empty.")
         return value.strip()
+
+    def validate_status(self, value):
+        """Validate board status."""
+        valid_statuses = ['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED']
+        if value not in valid_statuses:
+            raise serializers.ValidationError(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+        return value
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
@@ -112,131 +76,105 @@ class BoardDetailSerializer(serializers.ModelSerializer):
         read_only=True
     )
     title = serializers.CharField(write_only=True, required=False, help_text="Alternative field name for 'name'")
+    deadline = serializers.DateTimeField(required=False, allow_null=True)
 
     class Meta:
         model = Board
-        fields = [
-            "id",
-            "name",
-            "title",
-            "description",
-            "owner",
-            "members",
-            "columns",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ['id', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+        fields = ["id", "name", "title", "description", "owner", "members", "status", "deadline", "columns", "created_at", "updated_at"]
+        read_only_fields = ["id", "owner", "created_at", "updated_at"]
 
     def validate(self, data):
         """Handle both 'name' and 'title' fields."""
-        if 'title' in data and 'name' not in data:
-            data['name'] = data.pop('title')
-        elif 'title' in data:
-            data.pop('title')
+        title = data.pop('title', None)
+        if title and not data.get('name'):
+            data['name'] = title
         return data
 
     def validate_name(self, value):
-        """
-        Validate board name is not empty.
-        
-        Args:
-            value (str): Board name
-            
-        Returns:
-            str: Validated name
-            
-        Raises:
-            ValidationError: If name is empty or whitespace only
-        """
+        """Validate board name is not empty."""
         if not value or not value.strip():
-            raise serializers.ValidationError(
-                "Board name cannot be empty."
-            )
+            raise serializers.ValidationError("Board name cannot be empty.")
         return value.strip()
 
+    def validate_status(self, value):
+        """Validate board status."""
+        valid_statuses = ['PLANNING', 'ACTIVE', 'ON_HOLD', 'COMPLETED', 'CANCELLED']
+        if value not in valid_statuses:
+            raise serializers.ValidationError(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+        return value
+
     def _serialize_user(self, user):
-        """Helper method to serialize user data."""
+        """Helper method to serialize user data safely."""
         if not user:
-            return {
-                'id': None,
-                'email': '',
-                'first_name': '',
-                'last_name': '',
-                'username': '',
-                'fullname': ''
-            }
+            return None
         
-        return {
-            'id': user.id,
-            'email': user.email or '',
-            'first_name': user.first_name or '',
-            'last_name': user.last_name or '',
-            'username': user.username or '',
-            'fullname': f"{user.first_name or ''} {user.last_name or ''}".strip() or user.email or ''
-        }
-
-    def _serialize_members(self, instance):
-        """Helper method to serialize board members."""
-        members = []
-        if hasattr(instance, 'boardmembership_set'):
-            for membership in instance.boardmembership_set.all():
-                if membership.user:
-                    member_data = {
-                        'id': membership.id,
-                        'role': membership.role or 'VIEWER',
-                        'user': self._serialize_user(membership.user)
-                    }
-                    members.append(member_data)
-        return members
-
-    def _serialize_task(self, task):
-        """Helper method to serialize task data."""
-        task_data = {
-            'id': task.id,
-            'title': task.title or '',
-            'description': task.description or '',
-            'position': task.position or 0,
-            'status': getattr(task, 'status', 'TODO'),
-            'created_at': task.created_at.isoformat() if task.created_at else None,
-            'updated_at': task.updated_at.isoformat() if task.updated_at else None,
-            'assignee': self._serialize_user(getattr(task, 'assignee', None)),
-            'reviewers': []
-        }
-        
-        if hasattr(task, 'reviewers'):
-            task_data['reviewers'] = [
-                self._serialize_user(reviewer) 
-                for reviewer in task.reviewers.all()
-            ]
-        
-        return task_data
-
-    def _serialize_columns(self, instance):
-        """Helper method to serialize board columns."""
-        columns = []
         try:
-            if hasattr(instance, 'columns'):
-                for column in instance.columns.all().order_by('position'):
-                    column_data = {
-                        'id': column.id,
-                        'name': column.name or '',
-                        'position': column.position or 0,
-                        'board': column.board_id,
-                        'tasks': []
-                    }
-                    
-                    if hasattr(column, 'tasks'):
-                        column_data['tasks'] = [
-                            self._serialize_task(task) 
-                            for task in column.tasks.all().order_by('position')
-                        ]
-                    
-                    columns.append(column_data)
+            return {
+                'id': user.id,
+                'email': getattr(user, 'email', ''),
+                'first_name': getattr(user, 'first_name', ''),
+                'last_name': getattr(user, 'last_name', ''),
+                'username': getattr(user, 'username', ''),
+                'fullname': f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip()
+            }
         except Exception as e:
-            logger.error(f"Error serializing columns: {str(e)}")
-        
-        return columns
+            logger.error(f"User serialization error: {str(e)}")
+            return None
+
+    def _serialize_members(self, board):
+        """Helper method to serialize board members safely."""
+        try:
+            memberships = board.boardmembership_set.all()
+            return [
+                {
+                    'id': membership.id,
+                    'user': self._serialize_user(membership.user),
+                    'role': membership.role
+                }
+                for membership in memberships
+            ]
+        except Exception as e:
+            logger.error(f"Members serialization error: {str(e)}")
+            return []
+
+    def _serialize_columns(self, board):
+        """Helper method to serialize board columns safely."""
+        try:
+            columns = board.columns.all().order_by('position')
+            return [
+                {
+                    'id': column.id,
+                    'name': column.name,
+                    'position': column.position,
+                    'tasks': self._serialize_column_tasks(column)
+                }
+                for column in columns
+            ]
+        except Exception as e:
+            logger.error(f"Columns serialization error: {str(e)}")
+            return []
+
+    def _serialize_column_tasks(self, column):
+        """Helper method to serialize tasks for a column safely."""
+        try:
+            from tasks_app.models import Task
+            tasks = Task.objects.filter(column=column).order_by('position')
+            return [
+                {
+                    'id': task.id,
+                    'title': task.title,
+                    'description': task.description,
+                    'position': task.position,
+                    'status': getattr(task, 'status', 'TODO'),
+                    'assignee': self._serialize_user(task.assignee) if task.assignee else None,
+                    'created_at': task.created_at.isoformat() if task.created_at else None,
+                    'updated_at': task.updated_at.isoformat() if task.updated_at else None
+                }
+                for task in tasks
+            ]
+        except Exception as e:
+            logger.error(f"Tasks serialization error: {str(e)}")
+            return []
 
     def to_representation(self, instance):
         """Ensure all data fields are properly formatted for frontend."""
@@ -247,6 +185,8 @@ class BoardDetailSerializer(serializers.ModelSerializer):
                 'id': instance.id,
                 'name': instance.name or '',
                 'description': instance.description or '',
+                'status': instance.status or 'PLANNING',
+                'deadline': instance.deadline.isoformat() if instance.deadline else None,
                 'created_at': instance.created_at.isoformat() if instance.created_at else None,
                 'updated_at': instance.updated_at.isoformat() if instance.updated_at else None,
                 'owner': self._serialize_user(instance.owner),
@@ -263,6 +203,8 @@ class BoardDetailSerializer(serializers.ModelSerializer):
                 'id': getattr(instance, 'id', None),
                 'name': getattr(instance, 'name', ''),
                 'description': getattr(instance, 'description', ''),
+                'status': getattr(instance, 'status', 'PLANNING'),
+                'deadline': None,
                 'owner': None,
                 'members': [],
                 'columns': [],
