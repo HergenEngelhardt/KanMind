@@ -7,11 +7,21 @@ venv/
 db.sqlite3
 
 # Batch files
-*.bat
+up.bat
 
 # Compiled Python files
 __pycache__/
 *.py[cod]
 *$py.class
 
-.log
+# Logs
+*.log
+django.log
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

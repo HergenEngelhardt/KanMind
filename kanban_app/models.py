@@ -3,71 +3,48 @@ from django.contrib.auth.models import User
 
 
 class Board(models.Model):
-    """
-    Kanban board model.
-    
-    Represents a project board containing columns and tasks.
-    Each board has an owner and can have multiple members with different roles.
-    """
-    
-    title = models.CharField(max_length=100)
+    STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('ARCHIVED', 'Archived'),
+        ('COMPLETED', 'Completed'),
+    ]
+
+    title = models.CharField(max_length=100)  # Geändert zurück zu title für Frontend-Kompatibilität
     description = models.TextField(blank=True)
-    owner = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        related_name="owned_boards"
-    )
-    members = models.ManyToManyField(
-        User, 
-        through="BoardMembership", 
-        related_name="member_boards"
-    )
-    deadline = models.DateTimeField(null=True, blank=True, help_text="Board deadline")
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('PLANNING', 'Planning'),
-            ('ACTIVE', 'Active'),
-            ('ON_HOLD', 'On Hold'),
-            ('COMPLETED', 'Completed'),
-            ('CANCELLED', 'Cancelled'),
-        ],
-        default='PLANNING'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_boards')
+    deadline = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Board"
         verbose_name_plural = "Boards"
-        ordering = ["-created_at"]
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.title
 
+    @property
+    def name(self):
+        """Alias für title für Backend-Kompatibilität."""
+        return self.title
+
 
 class BoardMembership(models.Model):
-    """
-    Represents the relationship between a user and a board.
-    
-    Defines user roles within a board (Admin, Editor, Viewer).
-    Each user can have only one role per board.
-    """
-    
+    ROLE_CHOICES = [
+        ('ADMIN', 'Admin'),
+        ('EDITOR', 'Editor'),
+        ('VIEWER', 'Viewer'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    board = models.ForeignKey(Board, on_delete=models.CASCADE)
-    role = models.CharField(
-        max_length=10,
-        choices=[
-            ("ADMIN", "Admin"),
-            ("EDITOR", "Editor"),
-            ("VIEWER", "Viewer"),
-        ],
-        default="VIEWER",
-    )
+    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='members')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='VIEWER')
+    joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "board")
+        unique_together = ['user', 'board']
         verbose_name = "Board Membership"
         verbose_name_plural = "Board Memberships"
 
@@ -76,25 +53,20 @@ class BoardMembership(models.Model):
 
 
 class Column(models.Model):
-    """
-    Kanban column model.
-    
-    Represents a column within a board (e.g., To Do, In Progress, Done).
-    Columns are ordered by position within each board.
-    """
-    
-    title = models.CharField(max_length=100)
-    board = models.ForeignKey(
-        Board, 
-        on_delete=models.CASCADE, 
-        related_name="columns"
-    )
+    name = models.CharField(max_length=100)  # Geändert zu name für Frontend-Kompatibilität
+    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='columns')
     position = models.PositiveIntegerField()
-
+    
     class Meta:
-        ordering = ["position"]
         verbose_name = "Column"
         verbose_name_plural = "Columns"
+        ordering = ['position']
+        unique_together = ['board', 'position']
 
     def __str__(self):
-        return f"{self.board.title} - {self.title}"
+        return f"{self.name} ({self.board.title})"
+
+    @property
+    def title(self):
+        """Alias für name für Backend-Kompatibilität."""
+        return self.name

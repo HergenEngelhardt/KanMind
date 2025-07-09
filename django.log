@@ -11757,3 +11757,363 @@ INFO 2025-07-08 17:48:51,478 board_views 14164 1892 Board 3 retrieved - Columns:
 INFO 2025-07-08 17:48:58,911 board_views 14164 1892 Board 3 retrieved - Columns: 4
 INFO 2025-07-08 17:49:08,561 board_views 14164 1892 Board 3 retrieved - Columns: 4
 INFO 2025-07-08 17:50:01,624 board_views 14164 1892 Board 3 retrieved - Columns: 4
+INFO 2025-07-09 13:47:15,536 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:47:15,537 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:47:15,537 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:47:15,538 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:47:15,539 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:47:15,539 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:47:15,539 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:47:15,539 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:47:15,540 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:16,477 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:16,478 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:16,478 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:16,478 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:16,479 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:16,480 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:16,480 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:16,480 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:16,481 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:16,776 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:16,777 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:16,777 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:16,777 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:16,778 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:16,778 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:16,779 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:16,779 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:16,779 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:17,183 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:17,184 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:17,184 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:17,184 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:17,185 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:17,185 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:17,185 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:17,185 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:17,185 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:17,584 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:17,584 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:17,584 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:17,585 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:17,585 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:17,586 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:17,586 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:17,586 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:17,586 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:18,011 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:18,012 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:18,012 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:18,012 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:18,013 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:18,013 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:18,013 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:18,013 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:18,014 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:18,407 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:18,407 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:18,407 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:18,407 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:18,408 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:18,408 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:18,409 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:18,409 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:18,409 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:18,790 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:18,791 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:18,791 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:18,791 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:18,792 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:18,792 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:18,792 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:18,792 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:18,793 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:19,197 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:19,198 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:19,198 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:19,198 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:19,199 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:19,199 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:19,199 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:19,199 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:19,200 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:19,593 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:19,593 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:19,593 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:19,593 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:19,594 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:19,594 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:19,595 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:19,595 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:19,595 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:19,998 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:19,999 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:19,999 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:19,999 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:20,000 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:20,000 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:20,000 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:20,000 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:20,000 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:20,406 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:20,406 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:20,407 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:20,407 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:20,407 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:20,408 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:20,408 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:20,408 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:20,408 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:20,803 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:20,803 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:20,803 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:20,803 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:20,804 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:20,805 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:20,805 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:20,805 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:20,805 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:21,206 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:21,206 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:21,206 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:21,206 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:21,207 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:21,207 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:21,207 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:21,207 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:21,207 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:21,635 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:21,635 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:21,635 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:21,636 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:21,636 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:21,637 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:21,637 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:21,637 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:21,637 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:22,016 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:22,016 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:22,017 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:22,017 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:22,017 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:22,018 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:22,018 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:22,018 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:22,018 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:22,435 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:22,436 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:22,436 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:22,436 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:22,437 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:22,437 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:22,438 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:22,438 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:22,438 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:22,824 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:22,825 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:22,825 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:22,825 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:22,826 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:22,826 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:22,826 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:22,826 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:22,826 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:23,226 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:23,226 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:23,226 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:23,226 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:23,227 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:23,227 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:23,227 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:23,228 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:23,228 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:23,640 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:23,640 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:23,640 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:23,640 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:23,641 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:23,641 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:23,641 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:23,641 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:23,642 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:24,038 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:24,038 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:24,038 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:24,039 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:24,039 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:24,040 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:24,040 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:24,040 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:24,040 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:24,448 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:24,448 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:24,448 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:24,448 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:24,449 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:24,449 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:24,449 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:24,449 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:24,450 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:24,844 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:24,844 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:24,844 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:24,844 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:24,845 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:24,845 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:24,845 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:24,846 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:24,846 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:25,252 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:25,252 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:25,253 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:25,253 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:25,254 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:25,254 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:25,254 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:25,254 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:25,255 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:25,682 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:25,682 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:25,683 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:25,683 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:25,684 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:25,684 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:25,684 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:25,684 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:25,684 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:26,054 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:26,054 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:26,055 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:26,055 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:26,056 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:26,056 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:26,056 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:26,056 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:26,056 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:26,474 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:26,474 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:26,474 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:26,475 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:26,475 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:26,475 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:26,476 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:26,476 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:26,476 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:26,876 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:26,876 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:26,876 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:26,876 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:26,877 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:26,877 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:26,877 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:26,878 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:26,878 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:27,268 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:27,268 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:27,268 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:27,268 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:27,269 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:27,269 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:27,270 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:27,270 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:27,270 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:27,673 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:27,673 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:27,674 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:27,674 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:27,674 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:27,675 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:27,675 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:27,675 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:27,675 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:28,088 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:28,088 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:28,088 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:28,089 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:28,090 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:28,090 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:28,090 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:28,090 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:28,090 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:28,527 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:28,527 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:28,528 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:28,528 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:28,529 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:28,529 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:28,530 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:28,530 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:28,530 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:28,909 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:28,909 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:28,909 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:28,909 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:28,910 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:28,910 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:28,911 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:28,911 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:28,911 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:29,355 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:29,355 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:29,355 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:29,355 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:29,357 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:29,358 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:29,358 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:29,359 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:29,359 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:29,721 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:29,722 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:29,722 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:29,722 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:29,723 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:29,724 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:29,724 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:29,724 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:29,724 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:30,130 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:30,130 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:30,131 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:30,131 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:30,132 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:30,132 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:30,132 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:30,133 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:30,133 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:30,546 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:30,546 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:30,547 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:30,547 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:30,548 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:30,548 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:30,548 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:30,548 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:30,549 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:30,918 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:30,919 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:30,919 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:30,919 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:30,920 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:30,920 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:30,920 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:30,921 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:30,921 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:31,371 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:31,372 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:31,372 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:31,372 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:31,373 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:31,373 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:31,373 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:31,373 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:31,373 board_views 2612 3132 === END DEBUG ===
+INFO 2025-07-09 13:48:31,759 board_views 2612 3132 === BOARD RETRIEVAL DEBUG ===
+INFO 2025-07-09 13:48:31,759 board_views 2612 3132 Board ID: 7
+INFO 2025-07-09 13:48:31,759 board_views 2612 3132 Board Title: Test Board
+INFO 2025-07-09 13:48:31,759 board_views 2612 3132 Board Description: 
+INFO 2025-07-09 13:48:31,760 board_views 2612 3132 Owner: {'id': 2, 'username': 'test@mail.com', 'email': 'test@mail.com', 'first_name': 'Test', 'last_name': 'Kontakt', 'fullname': 'Test Kontakt'}
+INFO 2025-07-09 13:48:31,761 board_views 2612 3132 Members count: 2
+INFO 2025-07-09 13:48:31,761 board_views 2612 3132 Columns count: 4
+INFO 2025-07-09 13:48:31,761 board_views 2612 3132 Full response keys: ['id', 'title', 'description', 'status', 'deadline', 'owner', 'members', 'columns', 'created_at', 'updated_at']
+INFO 2025-07-09 13:48:31,761 board_views 2612 3132 === END DEBUG ===
