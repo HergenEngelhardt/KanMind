@@ -50,13 +50,11 @@ class BoardCreateSerializer(serializers.ModelSerializer):
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
-    """Optimierter Serializer für Board-Details mit Caching."""
-
     owner = UserSerializer(read_only=True)
     members = serializers.SerializerMethodField()
     columns = serializers.SerializerMethodField()
     tasks = serializers.SerializerMethodField()
-    title = serializers.CharField(source='name', required=True)
+    title = serializers.CharField(required=True)
     deadline = serializers.DateTimeField(required=False, allow_null=True)
 
     class Meta:
@@ -68,10 +66,8 @@ class BoardDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
 
     def get_members(self, obj):
-        """Optimierte Member-Serialisierung mit Caching."""
         cache_key = f"board_members_{obj.id}_{obj.updated_at.timestamp()}"
         cached_members = cache.get(cache_key)
-
         if cached_members:
             return cached_members
 
@@ -86,18 +82,14 @@ class BoardDetailSerializer(serializers.ModelSerializer):
                 }
                 for membership in memberships
             ]
-
             cache.set(cache_key, members_data, 600)
             return members_data
-
-        except Exception as e:
+        except Exception:
             return []
 
     def get_columns(self, obj):
-        """Optimierte Column-Serialisierung mit Caching."""
         cache_key = f"board_columns_{obj.id}_{obj.updated_at.timestamp()}"
         cached_columns = cache.get(cache_key)
-
         if cached_columns:
             return cached_columns
 
@@ -106,24 +98,20 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             columns_data = [
                 {
                     'id': column.id,
-                    'title': column.title,  
-                    'name': column.title,   
+                    'title': column.title,
+                    'name': column.title,
                     'position': column.position
                 }
                 for column in columns
             ]
-
             cache.set(cache_key, columns_data, 600)
             return columns_data
-
-        except Exception as e:
+        except Exception:
             return []
 
     def get_tasks(self, obj):
-        """Optimierte Task-Serialisierung mit Caching."""
         cache_key = f"board_tasks_{obj.id}_{obj.updated_at.timestamp()}"
         cached_tasks = cache.get(cache_key)
-
         if cached_tasks:
             return cached_tasks
 
@@ -132,13 +120,10 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             tasks = []
             for column in obj.columns.all():
                 tasks.extend(column.tasks.all().select_related('assignee', 'created_by').prefetch_related('reviewers'))
-
             tasks_data = TaskSerializer(tasks, many=True, context=self.context).data
-
             cache.set(cache_key, tasks_data, 300)
             return tasks_data
-
-        except Exception as e:
+        except Exception:
             return []
 
     def validate_title(self, value):
@@ -147,29 +132,20 @@ class BoardDetailSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def to_representation(self, instance):
-        """Optimierte Representation mit reduziertem Logging."""
         data = super().to_representation(instance)
-
-        if not hasattr(self.context.get('request', {}), '_board_serialized'):
-            if hasattr(self.context.get('request', {}), 'user'):
-                self.context['request']._board_serialized = True
-
         return data
 
     def update(self, instance, validated_data):
-        """Update mit Cache-Clearing."""
         cache_patterns = [
             f"board_members_{instance.id}_*",
             f"board_columns_{instance.id}_*",
             f"board_tasks_{instance.id}_*",
             f"board_detail_{instance.id}_*"
         ]
-
         for pattern in cache_patterns:
             cache.delete_many([pattern])
-
         return super().update(instance, validated_data)
-
+    
 class BoardMembershipSerializer(serializers.ModelSerializer):
     """Serializer für Board-Membership mit User-Details."""
     
