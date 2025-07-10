@@ -84,7 +84,6 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             
-            # Only author or board owner can delete
             if instance.author != request.user:
                 board_owner = instance.task.column.board.owner
                 if board_owner != request.user:

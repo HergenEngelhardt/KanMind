@@ -27,7 +27,6 @@ class UserSerializer(serializers.ModelSerializer):
             
         fullname = f"{obj.first_name} {obj.last_name}".strip() or obj.username
         
-        # Cache für 1 Stunde
         cache.set(cache_key, fullname, 3600)
         return fullname
 
@@ -51,7 +50,6 @@ class CommentSerializer(serializers.ModelSerializer):
             
         author_data = f"{obj.author.first_name} {obj.author.last_name}".strip() or obj.author.username
         
-        # Cache für 30 Minuten
         cache.set(cache_key, author_data, 1800)
         return author_data
 
@@ -98,7 +96,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'username': reviewer.username
         }
         
-        # Cache für 30 Minuten
         cache.set(cache_key, reviewer_data, 1800)
         return reviewer_data
 
@@ -112,7 +109,6 @@ class TaskSerializer(serializers.ModelSerializer):
             
         count = obj.comments.count()
         
-        # Cache für 5 Minuten
         cache.set(cache_key, count, 300)
         return count
 
@@ -122,14 +118,12 @@ class TaskSerializer(serializers.ModelSerializer):
         assignee_id = validated_data.pop('assignee_id', None)
         reviewer_id = validated_data.pop('reviewer_id', None)
         
-        # Board und Column finden (erste Column des Boards oder Standard-Column)
         if board_id:
             from kanban_app.models import Board
             try:
                 board = Board.objects.get(id=board_id)
                 column = board.columns.first()
                 if not column:
-                    # Erstelle Standard-Columns falls keine existieren
                     from kanban_app.models import Column
                     column = Column.objects.create(
                         name='To Do',
@@ -148,7 +142,6 @@ class TaskSerializer(serializers.ModelSerializer):
             **validated_data
         )
         
-        # Reviewer hinzufügen (ManyToMany)
         if reviewer_id:
             try:
                 reviewer = User.objects.get(id=reviewer_id)
@@ -179,7 +172,6 @@ class TaskSerializer(serializers.ModelSerializer):
                 except User.DoesNotExist:
                     pass
         
-        # Clear related caches
         cache.delete(f"task_comments_count_{instance.id}")
         if instance.column and instance.column.board:
             cache.delete(f"board_tasks_{instance.column.board.id}_*")

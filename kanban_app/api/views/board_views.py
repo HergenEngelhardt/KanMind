@@ -50,12 +50,12 @@ class BoardViewSet(viewsets.ModelViewSet):
             'columns__tasks__reviewers'
         ).distinct()
 
-    @method_decorator(cache_page(30))  # Cache für 30 Sekunden
+    @method_decorator(cache_page(30))  
     def list(self, request, *args, **kwargs):
         """List Boards mit Caching."""
         return super().list(request, *args, **kwargs)
 
-    @method_decorator(cache_page(60))  # Cache für 1 Minute
+    @method_decorator(cache_page(60))  
     def retrieve(self, request, *args, **kwargs):
         """Retrieve einzelnes Board mit Caching."""
         return super().retrieve(request, *args, **kwargs)
@@ -67,10 +67,8 @@ class BoardViewSet(viewsets.ModelViewSet):
     
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            # Save board with current user as owner
             board = serializer.save(owner=request.user)
             
-            # Add owner as ADMIN member (use get_or_create to avoid duplicates)
             membership, created = BoardMembership.objects.get_or_create(
                 board=board,
                 user=request.user,
@@ -81,7 +79,6 @@ class BoardViewSet(viewsets.ModelViewSet):
             else:
                 logger.info(f"User {request.user.username} already member of board {board.title}")
             
-            # Add other members if specified
             member_ids = request.data.get('members', [])
             for member_id in member_ids:
                 if member_id != request.user.id:
@@ -101,7 +98,6 @@ class BoardViewSet(viewsets.ModelViewSet):
             
             logger.info("Board created successfully")
             
-            # Return detailed board data
             detail_serializer = BoardDetailSerializer(board)
             response_data = detail_serializer.data
             logger.info(f"Board response data: {response_data}")
@@ -121,7 +117,6 @@ class BoardViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Clear cache after update
         cache_key = f"board_detail_{board.id}"
         cache.delete(cache_key)
         
@@ -137,7 +132,6 @@ class BoardViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Clear cache after deletion
         cache_key = f"board_detail_{board.id}"
         cache.delete(cache_key)
         
@@ -169,7 +163,6 @@ class BoardViewSet(viewsets.ModelViewSet):
                 membership.role = role
                 membership.save()
             
-            # Clear cache
             cache_key = f"board_detail_{board.id}"
             cache.delete(cache_key)
             
@@ -204,7 +197,6 @@ class BoardViewSet(viewsets.ModelViewSet):
             
             BoardMembership.objects.filter(board=board, user=user).delete()
             
-            # Clear cache
             cache_key = f"board_detail_{board.id}"
             cache.delete(cache_key)
             
@@ -242,7 +234,6 @@ class BoardDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             
-            # Cache-Key basierend auf Board ID und Update-Zeit
             cache_key = f"board_detail_{instance.id}_{instance.updated_at.timestamp()}"
             cached_data = cache.get(cache_key)
             
@@ -252,10 +243,8 @@ class BoardDetailView(generics.RetrieveUpdateDestroyAPIView):
             serializer = self.get_serializer(instance)
             data = serializer.data
             
-            # Cache für 5 Minuten
             cache.set(cache_key, data, 300)
             
-            # Reduziertes Logging
             if not hasattr(request, '_logged_board_access'):
                 logger.warning(f"Board {instance.id} accessed by user {request.user.username}")
                 request._logged_board_access = True
@@ -277,7 +266,6 @@ class BoardDetailView(generics.RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Clear related caches
         cache_pattern = f"board_detail_{instance.id}_*"
         cache.delete_many([cache_pattern])
         
@@ -293,7 +281,6 @@ class BoardDetailView(generics.RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Clear related caches
         cache_pattern = f"board_detail_{instance.id}_*"
         cache.delete_many([cache_pattern])
         
