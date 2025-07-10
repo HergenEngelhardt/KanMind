@@ -5,10 +5,13 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from kanban_app.api.serializers.user_serializers import UserSerializer
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EmailCheckView(APIView):
-    """Check if user exists by email address."""
+    """Check if user exists by email address and return user data for board member invitation."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -25,9 +28,10 @@ class EmailCheckView(APIView):
             user = User.objects.get(email=email)
             return self._user_found_response(user)
         except User.DoesNotExist:
-            return Response({"exists": False}, status=status.HTTP_200_OK)
+            return Response(None, status=status.HTTP_200_OK)
 
     def _user_found_response(self, user):
+        """Frontend-kompatible User-Daten zurückgeben."""
         first_name = (user.first_name or "").strip()
         last_name = (user.last_name or "").strip()
         
@@ -38,17 +42,18 @@ class EmailCheckView(APIView):
         elif last_name:
             fullname = last_name
         else:
-            fullname = user.email.split('@')[0] if user.email else "User"
+            fullname = user.email.split('@')[0] if user.email else user.username
         
-        return Response(
-            {
-                "id": user.id,
-                "email": user.email,
-                "fullname": fullname,
-                "exists": True
-            },
-            status=status.HTTP_200_OK,
-        )
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "fullname": fullname,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        }
+        
+        return Response(user_data, status=status.HTTP_200_OK)
 
 
 class TaskReorderView(APIView):
@@ -57,4 +62,9 @@ class TaskReorderView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        return Response({"message": "Task reordering not implemented yet"})
+
+        logger.info(f"Task reorder request from {request.user}: {request.data}")
+        return Response(
+            {"message": "Task reordering not implemented yet"}, 
+            status=status.HTTP_501_NOT_IMPLEMENTED
+        )

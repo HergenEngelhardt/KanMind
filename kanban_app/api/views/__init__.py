@@ -1,7 +1,6 @@
 from .board_views import (
-    BoardListCreateView,
-    BoardDetailView,
-    BoardMembersView
+    BoardViewSet,
+    BoardDetailView
 )
 from .column_views import (
     ColumnListCreateView,
@@ -13,9 +12,8 @@ from .utils_views import (
 )
 
 __all__ = [
-    'BoardListCreateView',
+    'BoardViewSet',
     'BoardDetailView',
-    'BoardMembersView',
     'ColumnListCreateView',
     'ColumnDetailView',
     'EmailCheckView',

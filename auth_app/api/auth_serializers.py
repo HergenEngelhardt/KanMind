@@ -67,19 +67,22 @@ class CustomAuthTokenSerializer(serializers.Serializer):
         return user
 
     def _get_or_create_guest_user(self):
+        guest_email = getattr(settings, 'GUEST_EMAIL', 'kevin@kovacsi.de')
         try:
-            return User.objects.get(username="guest@example.com")
+            return User.objects.get(username=guest_email)
         except User.DoesNotExist:
             return self._create_guest_user()
 
     def _create_guest_user(self):
+        guest_email = getattr(settings, 'GUEST_EMAIL', 'kevin@kovacsi.de')
+        guest_password = getattr(settings, 'GUEST_PASSWORD', 'asdasdasd')
         return User.objects.create_user(
-            username="guest@example.com",
-            email="guest@example.com",
-            password="guest1234",
+            username=guest_email,
+            email=guest_email,
+            password=guest_password,
             first_name="Guest",
             last_name="User",
-        )
+    )
 
     def _get_username_from_email(self, email):
         try:

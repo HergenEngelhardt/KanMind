@@ -1,38 +1,50 @@
 from rest_framework import serializers
+from django.core.cache import cache
 import logging
 
-from ...models import Column
+from kanban_app.models import Column
 
 logger = logging.getLogger(__name__)
 
+
 class ColumnSerializer(serializers.ModelSerializer):
-    """
-    Serializer for board columns.
-    
-    Includes associated tasks for complete column representation.
-    Board field is read-only to prevent unauthorized modifications.
-    """
     tasks = serializers.SerializerMethodField(read_only=True)
     board = serializers.PrimaryKeyRelatedField(read_only=True)
+    name = serializers.CharField(source='title', read_only=True)
 
     class Meta:
         model = Column
-        fields = ['id', 'name', 'position', 'board', 'tasks']
+        fields = ['id', 'title', 'name', 'position', 'board', 'tasks']
         read_only_fields = ['id', 'board']
 
     def get_tasks(self, obj):
+        cache_key = f"column_tasks_{obj.id}_{obj.updated_at.timestamp()}"
+        cached_tasks = cache.get(cache_key)
+        
+        if cached_tasks:
+            return cached_tasks
+            
         try:
             from tasks_app.api.serializers import TaskSerializer
-            # Sortiere nach position, dann nach created_at
-            tasks = obj.tasks.all().order_by('position', 'created_at')
-            return TaskSerializer(tasks, many=True, context=self.context).data
+            tasks = obj.tasks.all().select_related(
+                'assignee', 'created_by'
+            ).prefetch_related('reviewers').order_by('position', 'created_at')
+            
+            tasks_data = TaskSerializer(tasks, many=True, context=self.context).data
+            
+            cache.set(cache_key, tasks_data, 300)
+            return tasks_data
+            
         except Exception as e:
             logger.error(f"Error serializing tasks for column {obj.id}: {str(e)}")
             return []
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        logger.info(f"Column {instance.id} '{instance.name}' serialized with {len(data.get('tasks', []))} tasks")
+        
+        if len(data.get('tasks', [])) == 0 and instance.tasks.exists():
+            logger.warning(f"Column {instance.id} has tasks but serialization returned empty list")
+        
         return data
 
     def validate_position(self, value):
@@ -40,12 +52,16 @@ class ColumnSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Position must be positive")
         return value
 
+
 class ColumnCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating new columns."""
-    
     class Meta:
         model = Column
-        fields = ['name', 'position']
+        fields = ['title', 'position']
+        
+    def validate_title(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Column title cannot be empty")
+        return value.strip()
         
     def validate_position(self, value):
         if value < 1:
@@ -54,13 +70,38 @@ class ColumnCreateSerializer(serializers.ModelSerializer):
 
 
 class ColumnUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating columns."""
-    
     class Meta:
         model = Column
-        fields = ['name', 'position']
+        fields = ['title', 'position']
+        
+    def validate_title(self, value):
+        if value and not value.strip():
+            raise serializers.ValidationError("Column title cannot be empty")
+        return value.strip() if value else value
         
     def validate_position(self, value):
         if value < 1:
             raise serializers.ValidationError("Position must be positive")
         return value
+
+    def update(self, instance, validated_data):
+        cache.delete(f"column_tasks_{instance.id}_*")
+        if instance.board:
+            cache.delete(f"board_columns_{instance.board.id}_*")
+            cache.delete(f"board_tasks_{instance.board.id}_*")
+            
+        return super().update(instance, validated_data)
+
+
+class ColumnSimpleSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='title', read_only=True)
+    
+    class Meta:
+        model = Column
+        fields = ['id', 'title', 'name', 'position']
+        read_only_fields = ['id']
+        
+    def validate_title(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Column title cannot be empty")
+        return value.strip()

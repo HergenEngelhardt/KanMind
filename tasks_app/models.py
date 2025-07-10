@@ -5,24 +5,23 @@ from kanban_app.models import Column
 
 class Task(models.Model):
     PRIORITY_CHOICES = [
-        ('LOW', 'Low'),
-        ('MEDIUM', 'Medium'),
-        ('HIGH', 'High'),
-        ('URGENT', 'Urgent'),
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
     ]
     
     STATUS_CHOICES = [
-        ('OPEN', 'Open'),
-        ('IN_PROGRESS', 'In Progress'),
-        ('REVIEW', 'Review'),
-        ('DONE', 'Done'),
-        ('CLOSED', 'Closed'),
+        ('to-do', 'To-do'),
+        ('in-progress', 'In Progress'),
+        ('review', 'Review'),
+        ('done', 'Done'),
     ]
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='MEDIUM')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='to-do')
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     assignee = models.ForeignKey(
         User, 
         on_delete=models.SET_NULL, 
@@ -45,7 +44,7 @@ class Task(models.Model):
         on_delete=models.CASCADE, 
         related_name='tasks'
     )
-    position = models.PositiveIntegerField(default=0, help_text="Position within column")
+    position = models.PositiveIntegerField(default=0)
     due_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -57,6 +56,10 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.status})"
+
+    @property
+    def board(self):
+        return self.column.board.id if self.column and self.column.board else None
 
 
 class Comment(models.Model):

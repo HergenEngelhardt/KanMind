@@ -39,15 +39,15 @@ class GuestUserMixin:
     
     def _get_or_create_guest_user(self):
         try:
-            return User.objects.get(username="guest@example.com")
+            return User.objects.get(username="kevin@kovacsi.de")
         except User.DoesNotExist:
             return self._create_guest_user()
 
     def _create_guest_user(self):
         return User.objects.create_user(
-            username="guest@example.com",
-            email="guest@example.com",
-            password="guest1234",
+            username="kevin@kovacsi.de",
+            email="kevin@kovacsi.de",
+            password="asdasdasd",
             first_name="Guest",
             last_name="User",
         )

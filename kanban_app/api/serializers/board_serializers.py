@@ -1,83 +1,153 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from django.core.cache import cache
 import logging
 
-from ...models import Board, BoardMembership
-from .user_serializers import UserSerializer
-from .column_serializers import ColumnSerializer
+from kanban_app.models import Board, BoardMembership
+from auth_app.api.serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class BoardMembershipSerializer(serializers.ModelSerializer):
-    """Serializer for board membership relationships."""
-    user = UserSerializer(read_only=True)
-    
-    class Meta:
-        model = BoardMembership
-        fields = ['id', 'user', 'role']
-
-
 class BoardListSerializer(serializers.ModelSerializer):
-    """Serializer for board list view."""
+    """Optimierter Serializer für Board-Listen mit weniger Daten."""
+    
     owner = UserSerializer(read_only=True)
-    members_count = serializers.SerializerMethodField()
+    member_count = serializers.ReadOnlyField()
+    ticket_count = serializers.ReadOnlyField()
     
     class Meta:
         model = Board
-        fields = ['id', 'title', 'description', 'status', 'owner', 'members_count', 'created_at', 'updated_at']
+        fields = [
+            'id', 'title', 'description', 'status', 'owner', 
+            'member_count', 'ticket_count', 'created_at', 'updated_at'
+        ]
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
-    
-    def get_members_count(self, obj):
-        return obj.members.count()
 
 
 class BoardCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating boards."""
-    title = serializers.CharField(required=True)
+    """Serializer für Board-Erstellung."""
+    
     members = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=False
+        child=serializers.IntegerField(), 
+        required=False, 
+        allow_empty=True
     )
     
     class Meta:
         model = Board
-        fields = ['title', 'description', 'status', 'deadline', 'members']
+        fields = ['title', 'description', 'members']
         
     def validate_title(self, value):
         if not value.strip():
             raise serializers.ValidationError("Board title cannot be empty")
         return value.strip()
+        
+    def validate_members(self, value):
+        if value:
+            # Überprüfe ob alle User-IDs existieren
+            existing_users = User.objects.filter(id__in=value).count()
+            if existing_users != len(value):
+                raise serializers.ValidationError("Some user IDs do not exist")
+        return value
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
-    """Serializer for detailed board view with all related data."""
+    """Optimierter Serializer für Board-Details mit Caching."""
     
     owner = UserSerializer(read_only=True)
-    members = BoardMembershipSerializer(
-        source="members", 
-        many=True, 
-        read_only=True
-    )
-    title = serializers.CharField(required=True)
+    members = serializers.SerializerMethodField()
+    columns = serializers.SerializerMethodField()
+    tasks = serializers.SerializerMethodField()
+    title = serializers.CharField(source='title', required=True) 
     deadline = serializers.DateTimeField(required=False, allow_null=True)
-    columns = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Board
         fields = [
             'id', 'title', 'description', 'status', 'owner', 'members', 
-            'columns', 'deadline', 'created_at', 'updated_at'
+            'columns', 'tasks', 'deadline', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
 
-    def get_columns(self, obj):
+    def get_members(self, obj):
+        """Optimierte Member-Serialisierung mit Caching."""
+        cache_key = f"board_members_{obj.id}_{obj.updated_at.timestamp()}"
+        cached_members = cache.get(cache_key)
+        
+        if cached_members:
+            return cached_members
+            
         try:
-            from .column_serializers import ColumnSerializer
+            memberships = BoardMembership.objects.filter(board=obj).select_related('user')
+            members_data = [
+                {
+                    'id': membership.user.id,
+                    'fullname': f"{membership.user.first_name} {membership.user.last_name}".strip() or membership.user.username,
+                    'email': membership.user.email,
+                    'role': membership.role
+                }
+                for membership in memberships
+            ]
+            
+            # Cache für 10 Minuten
+            cache.set(cache_key, members_data, 600)
+            return members_data
+            
+        except Exception as e:
+            logger.error(f"Error serializing members for board {obj.id}: {str(e)}")
+            return []
+
+    def get_columns(self, obj):
+        """Optimierte Column-Serialisierung mit Caching."""
+        cache_key = f"board_columns_{obj.id}_{obj.updated_at.timestamp()}"
+        cached_columns = cache.get(cache_key)
+        
+        if cached_columns:
+            return cached_columns
+            
+        try:
             columns = obj.columns.all().order_by('position')
-            return ColumnSerializer(columns, many=True, context=self.context).data
+            columns_data = [
+                {
+                    'id': column.id,
+                    'title': column.title,  # KORREKTUR: title statt name
+                    'name': column.title,   # Für Backend-Kompatibilität
+                    'position': column.position
+                }
+                for column in columns
+            ]
+            
+            # Cache für 10 Minuten
+            cache.set(cache_key, columns_data, 600)
+            return columns_data
+            
         except Exception as e:
             logger.error(f"Error serializing columns for board {obj.id}: {str(e)}")
+            return []
+
+    def get_tasks(self, obj):
+        """Optimierte Task-Serialisierung mit Caching."""
+        cache_key = f"board_tasks_{obj.id}_{obj.updated_at.timestamp()}"
+        cached_tasks = cache.get(cache_key)
+        
+        if cached_tasks:
+            return cached_tasks
+            
+        try:
+            from tasks_app.api.serializers import TaskSerializer
+            tasks = []
+            for column in obj.columns.all():
+                tasks.extend(column.tasks.all().select_related('assignee', 'created_by').prefetch_related('reviewers'))
+            
+            tasks_data = TaskSerializer(tasks, many=True, context=self.context).data
+            
+            # Cache für 5 Minuten (Tasks ändern sich häufiger)
+            cache.set(cache_key, tasks_data, 300)
+            return tasks_data
+            
+        except Exception as e:
+            logger.error(f"Error serializing tasks for board {obj.id}: {str(e)}")
             return []
 
     def validate_title(self, value):
@@ -86,37 +156,39 @@ class BoardDetailSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def to_representation(self, instance):
+        """Optimierte Representation mit reduziertem Logging."""
         data = super().to_representation(instance)
         
-        try:
-            memberships = BoardMembership.objects.filter(board=instance).select_related('user')
-            members_data = []
-            for membership in memberships:
-                member_data = {
-                    'id': membership.id,
-                    'user': UserSerializer(membership.user).data,
-                    'role': membership.role
-                }
-                members_data.append(member_data)
-            data['members'] = members_data
-        except Exception as e:
-            logger.error(f"Error serializing members for board {instance.id}: {str(e)}")
-            data['members'] = []
+        # Nur bei Fehlern oder wichtigen Events loggen
+        if not hasattr(self.context.get('request', {}), '_board_serialized'):
+            logger.info(f"Board {instance.id} '{instance.title}' serialized")
+            if hasattr(self.context.get('request', {}), 'user'):
+                self.context['request']._board_serialized = True
         
-        logger.info(f"Board {instance.id} '{instance.title}' serialized with {len(data.get('columns', []))} columns and {len(data.get('members', []))} members")
         return data
 
+    def update(self, instance, validated_data):
+        """Update mit Cache-Clearing."""
+        # Clear related caches before update
+        cache_patterns = [
+            f"board_members_{instance.id}_*",
+            f"board_columns_{instance.id}_*",
+            f"board_tasks_{instance.id}_*",
+            f"board_detail_{instance.id}_*"
+        ]
+        
+        for pattern in cache_patterns:
+            cache.delete_many([pattern])
+        
+        return super().update(instance, validated_data)
 
-class BoardSerializer(serializers.ModelSerializer):
-    """General purpose board serializer."""
-    owner = UserSerializer(read_only=True)
+
+class BoardMembershipSerializer(serializers.ModelSerializer):
+    """Serializer für Board-Membership mit User-Details."""
+    
+    user = UserSerializer(read_only=True)
     
     class Meta:
-        model = Board
-        fields = ['id', 'title', 'description', 'status', 'owner', 'deadline', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
-        
-    def validate_title(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Board title cannot be empty")
-        return value.strip()
+        model = BoardMembership
+        fields = ['id', 'user', 'role', 'joined_at']
+        read_only_fields = ['id', 'joined_at']
