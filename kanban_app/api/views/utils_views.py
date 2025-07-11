@@ -1,37 +1,34 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
-from kanban_app.api.serializers.user_serializers import UserSerializer
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class EmailCheckView(APIView):
-    """Check if user exists by email address and return user data for board member invitation."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        email = request.query_params.get("email")
-
+        email = request.query_params.get('email')
+        
         if not email:
             return Response(
-                {"error": "Email parameter is required"},
+                {"error": "Email parameter is required"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-
+        
         try:
             user = User.objects.get(email=email)
             return self._user_found_response(user)
         except User.DoesNotExist:
-            return Response(None, status=status.HTTP_200_OK)
+            return Response(
+                {"error": "User not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
     def _user_found_response(self, user):
-        """Frontend-kompatible User-Daten zurückgeben."""
         first_name = (user.first_name or "").strip()
         last_name = (user.last_name or "").strip()
         
@@ -54,17 +51,3 @@ class EmailCheckView(APIView):
         }
         
         return Response(user_data, status=status.HTTP_200_OK)
-
-
-class TaskReorderView(APIView):
-    """Reorder tasks within or between columns."""
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-
-        logger.info(f"Task reorder request from {request.user}: {request.data}")
-        return Response(
-            {"message": "Task reordering not implemented yet"}, 
-            status=status.HTTP_501_NOT_IMPLEMENTED
-        )

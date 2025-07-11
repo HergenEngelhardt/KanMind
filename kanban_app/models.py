@@ -45,26 +45,42 @@ class Board(models.Model):
     def tasks_to_do_count(self):
         total = 0
         for column in self.columns.all():
-            total += column.tasks.filter(status='OPEN').count()
+            total += column.tasks.filter(status='to-do').count()
         return total
 
     @property
     def tasks_high_prio_count(self):
         total = 0
         for column in self.columns.all():
-            total += column.tasks.filter(priority='HIGH').count()
+            total += column.tasks.filter(priority='high').count()
         return total
 
-    @property
-    def tasks(self):
-        from tasks_app.models import Task
-        return Task.objects.filter(column__board=self)
+
+class BoardMembership(models.Model):
+    ROLE_CHOICES = [
+        ('ADMIN', 'Admin'),
+        ('EDITOR', 'Editor'),
+        ('VIEWER', 'Viewer'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='VIEWER')
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'board']
+        verbose_name = "Board Membership"
+        verbose_name_plural = "Board Memberships"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.board.title} ({self.role})"
 
 
 class Column(models.Model):
-    title = models.CharField(max_length=100)
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='columns')
-    position = models.PositiveIntegerField()
+    name = models.CharField(max_length=50)
+    position = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -73,28 +89,4 @@ class Column(models.Model):
         unique_together = ['board', 'position']
 
     def __str__(self):
-        return f"{self.board.title} - {self.title}"
-
-    @property
-    def name(self):
-        return self.title
-
-
-class BoardMembership(models.Model):
-    ROLE_CHOICES = [
-        ('OWNER', 'Owner'),
-        ('ADMIN', 'Admin'),
-        ('EDITOR', 'Editor'),
-        ('VIEWER', 'Viewer'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='board_memberships')
-    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='board_memberships')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='EDITOR')
-    joined_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['user', 'board']
-
-    def __str__(self):
-        return f"{self.user.username} - {self.board.title} ({self.role})"
+        return f"{self.board.title} - {self.name}"

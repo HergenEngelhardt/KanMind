@@ -1,30 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import (
-    TaskViewSet,
-    TaskListCreateView,
-    TaskRetrieveUpdateDestroyView,
-    TasksAssignedToMeView,
-    TasksReviewingView,
-    CommentListCreateView,
-    CommentDetailView,
-    assigned_to_me,
-    reviewing
-)
-
-router = DefaultRouter()
-router.register(r'tasks-api', TaskViewSet, basename='task-api')
+from django.urls import path
+from .views import TaskViewSet
+from .comment_views import CommentListCreateView, CommentDetailView
 
 urlpatterns = [
-    path('', include(router.urls)),
-    
-    path('assigned-to-me/', assigned_to_me, name='assigned-to-me'),
-    path('reviewing/', reviewing, name='reviewing'),
-    path('tasks/assigned-to-me/', TasksAssignedToMeView.as_view(), name='tasks-assigned-to-me'),
-    path('tasks/reviewing/', TasksReviewingView.as_view(), name='tasks-reviewing'),
-    path('tasks/', TaskListCreateView.as_view(), name='task-list-create'),
-    path('tasks/<int:pk>/', TaskRetrieveUpdateDestroyView.as_view(), name='task-detail'),
-    
+    path('tasks/assigned-to-me/', TaskViewSet.as_view({'get': 'assigned_to_me'}), name='tasks-assigned-to-me'),
+    path('tasks/reviewing/', TaskViewSet.as_view({'get': 'reviewing'}), name='tasks-reviewing'),
+    path('tasks/', TaskViewSet.as_view({'get': 'list', 'post': 'create'}), name='task-list-create'),
+    path('tasks/<int:pk>/', TaskViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}), name='task-detail'),
     path('tasks/<int:task_id>/comments/', CommentListCreateView.as_view(), name='comment-list-create'),
     path('tasks/<int:task_id>/comments/<int:pk>/', CommentDetailView.as_view(), name='comment-detail'),
 ]

@@ -1,73 +1,26 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from django.core.cache import cache
-import logging
 
 from tasks_app.models import Task, Comment
-
-logger = logging.getLogger(__name__)
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Optimierter User Serializer mit Caching."""
-    
-    fullname = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'fullname', 'username']
-
-    def get_fullname(self, obj):
-        """Cached fullname generation."""
-        cache_key = f"user_fullname_{obj.id}"
-        cached_fullname = cache.get(cache_key)
-        
-        if cached_fullname:
-            return cached_fullname
-            
-        fullname = f"{obj.first_name} {obj.last_name}".strip() or obj.username
-        
-        cache.set(cache_key, fullname, 3600)
-        return fullname
+from auth_app.api.serializers import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Optimierter Comment Serializer."""
+    author = serializers.CharField(source='created_by.username', read_only=True)
     
-    author = serializers.SerializerMethodField()
-
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'author', 'created_at']
-
-    def get_author(self, obj):
-        """Cached author information."""
-        cache_key = f"user_info_{obj.author.id}"
-        cached_author = cache.get(cache_key)
-        
-        if cached_author:
-            return cached_author
-            
-        author_data = f"{obj.author.first_name} {obj.author.last_name}".strip() or obj.author.username
-        
-        cache.set(cache_key, author_data, 1800)
-        return author_data
-
-    def validate_content(self, value):
-        if not value.strip():
-            raise serializers.ValidationError("Comment content cannot be empty")
-        return value.strip()
+        fields = ['id', 'content', 'author', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'author', 'created_at', 'updated_at']
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    """Optimierter Task Serializer mit Caching."""
-    
     assignee = UserSerializer(read_only=True)
     reviewer = serializers.SerializerMethodField()
     assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     reviewer_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     comments_count = serializers.SerializerMethodField()
-    board = serializers.IntegerField(write_only=True, required=False)
+    board = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -77,44 +30,37 @@ class TaskSerializer(serializers.ModelSerializer):
             'due_date', 'comments_count', 'board', 'created_at', 'updated_at'
         ]
 
+    def get_board(self, obj):
+        return obj.column.board.id if obj.column and obj.column.board else None
+
     def get_reviewer(self, obj):
-        """Cached reviewer information."""
         if not obj.reviewers.exists():
             return None
             
         reviewer = obj.reviewers.first()
-        cache_key = f"user_info_detailed_{reviewer.id}"
-        cached_reviewer = cache.get(cache_key)
-        
-        if cached_reviewer:
-            return cached_reviewer
-            
-        reviewer_data = {
+        return {
             'id': reviewer.id,
             'fullname': f"{reviewer.first_name} {reviewer.last_name}".strip() or reviewer.username,
             'email': reviewer.email,
             'username': reviewer.username
         }
-        
-        cache.set(cache_key, reviewer_data, 1800)
-        return reviewer_data
 
     def get_comments_count(self, obj):
-        """Cached comments count."""
-        cache_key = f"task_comments_count_{obj.id}"
-        cached_count = cache.get(cache_key)
+        return obj.comments.count()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
         
-        if cached_count is not None:
-            return cached_count
-            
-        count = obj.comments.count()
+        # Ensure assignee has fullname
+        if 'assignee' in data and data['assignee']:
+            assignee = data['assignee']
+            if 'fullname' not in assignee:
+                assignee['fullname'] = f"{assignee.get('first_name', '')} {assignee.get('last_name', '')}".strip() or assignee.get('username', '')
         
-        cache.set(cache_key, count, 300)
-        return count
+        return data
 
     def create(self, validated_data):
-        """Optimierte Task-Erstellung."""
-        board_id = validated_data.pop('board', None)
+        board_id = self.context['request'].data.get('board')
         assignee_id = validated_data.pop('assignee_id', None)
         reviewer_id = validated_data.pop('reviewer_id', None)
         
@@ -122,11 +68,21 @@ class TaskSerializer(serializers.ModelSerializer):
             from kanban_app.models import Board
             try:
                 board = Board.objects.get(id=board_id)
-                column = board.columns.first()
+                status_to_column = {
+                    'to-do': 'To-do',
+                    'in-progress': 'In-progress', 
+                    'review': 'Review',
+                    'done': 'Done'
+                }
+                
+                status = validated_data.get('status', 'to-do')
+                column_name = status_to_column.get(status, 'To-do')
+                
+                column = board.columns.filter(name=column_name).first()
                 if not column:
                     from kanban_app.models import Column
                     column = Column.objects.create(
-                        name='To Do',
+                        name=column_name,
                         board=board,
                         position=0
                     )
@@ -149,16 +105,11 @@ class TaskSerializer(serializers.ModelSerializer):
             except User.DoesNotExist:
                 pass
         
-        cache.delete(f"board_tasks_{board_id}_*")
-        cache.delete(f"task_comments_count_{task.id}")
-        
         return task
 
     def update(self, instance, validated_data):
-        """Optimierte Task-Update."""
         assignee_id = validated_data.pop('assignee_id', None)
         reviewer_id = validated_data.pop('reviewer_id', None)
-        validated_data.pop('board', None)  
         
         if assignee_id is not None:
             instance.assignee_id = assignee_id
@@ -172,8 +123,21 @@ class TaskSerializer(serializers.ModelSerializer):
                 except User.DoesNotExist:
                     pass
         
-        cache.delete(f"task_comments_count_{instance.id}")
-        if instance.column and instance.column.board:
-            cache.delete(f"board_tasks_{instance.column.board.id}_*")
+        old_status = instance.status
+        new_status = validated_data.get('status', old_status)
+        
+        if old_status != new_status and instance.column:
+            status_to_column = {
+                'to-do': 'To-do',
+                'in-progress': 'In-progress',
+                'review': 'Review', 
+                'done': 'Done'
+            }
+            
+            column_name = status_to_column.get(new_status, 'To-do')
+            new_column = instance.column.board.columns.filter(name=column_name).first()
+            
+            if new_column:
+                instance.column = new_column
             
         return super().update(instance, validated_data)

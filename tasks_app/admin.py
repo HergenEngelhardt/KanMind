@@ -10,7 +10,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['task', 'author', 'content', 'created_at']
+    list_display = ['task', 'created_by', 'content', 'created_at']
     list_filter = ['created_at']
     search_fields = ['content', 'task__title']
     ordering = ['-created_at']

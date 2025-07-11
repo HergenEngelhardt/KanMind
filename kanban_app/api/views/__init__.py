@@ -1,21 +1,13 @@
-from .board_views import (
-    BoardViewSet,
-    BoardDetailView
-)
+from .board_views import BoardViewSet
 from .column_views import (
     ColumnListCreateView,
     ColumnDetailView
 )
-from .utils_views import (
-    EmailCheckView,
-    TaskReorderView
-)
+from .utils_views import EmailCheckView
 
 __all__ = [
     'BoardViewSet',
-    'BoardDetailView',
     'ColumnListCreateView',
     'ColumnDetailView',
-    'EmailCheckView',
-    'TaskReorderView'
+    'EmailCheckView'
 ]
