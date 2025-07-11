@@ -28,7 +28,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
         try:
             task = Task.objects.get(id=task_id)
             board = task.column.board
-            if not (board.owner == self.request.user or self.request.user in board.members.all()):
+            # Check if user is owner or has membership
+            if not (board.owner == self.request.user or 
+                   board.boardmembership_set.filter(user=self.request.user).exists()):
                 return Comment.objects.none()
         except Task.DoesNotExist:
             return Comment.objects.none()
@@ -41,10 +43,12 @@ class CommentListCreateView(generics.ListCreateAPIView):
         task = get_object_or_404(Task, id=task_id)
         
         board = task.column.board
-        if not (board.owner == self.request.user or self.request.user in board.members.all()):
+        # Check if user is owner or has membership
+        if not (board.owner == self.request.user or 
+               board.boardmembership_set.filter(user=self.request.user).exists()):
             raise PermissionDenied("You don't have permission to comment on this task")
         
-        comment = serializer.save(task=task, author=self.request.user)
+        comment = serializer.save(task=task, created_by=self.request.user)
         logger.info(f"Comment {comment.id} created by {self.request.user} on task '{task.title}'")
 
     def create(self, request, *args, **kwargs):
@@ -76,7 +80,7 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
             task_id=task_id
         ).filter(
             models.Q(task__column__board__owner=user) | 
-            models.Q(task__column__board__members=user)
+            models.Q(task__column__board__boardmembership__user=user)
         )
 
     def destroy(self, request, *args, **kwargs):
@@ -84,7 +88,7 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             
-            if instance.author != request.user:
+            if instance.created_by != request.user:
                 board_owner = instance.task.column.board.owner
                 if board_owner != request.user:
                     return Response(

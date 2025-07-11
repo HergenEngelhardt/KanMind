@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 import logging
 
 from .serializers import TaskSerializer
-from ..models import Task, Comment
+from ..models import Task
 
 logger = logging.getLogger(__name__)
 
@@ -20,147 +20,80 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return Task.objects.filter(
-            Q(column__board__owner=user) | 
-            Q(column__board__members=user)
-        ).distinct().order_by('-created_at')
+        queryset = Task.objects.filter(
+            Q(column__board__boardmembership__user=self.request.user) |
+            Q(assignee=self.request.user) |
+            Q(reviewers=self.request.user)
+        ).select_related(
+            'assignee', 'column', 'column__board', 'created_by'
+        ).prefetch_related('reviewers').distinct()
+        
+        board_id = self.request.query_params.get('board', None)
+        if board_id:
+            queryset = queryset.filter(column__board_id=board_id)
+            
+        return queryset
 
     def perform_create(self, serializer):
-        column = serializer.validated_data.get('column')
-        if column:
-            if not (column.board.owner == self.request.user or 
-                    self.request.user in column.board.members.all()):
-                raise PermissionDenied('You do not have permission to create tasks in this board')
+        board_id = self.request.data.get('board')
+        if board_id:
+            from kanban_app.models import Board
+            try:
+                board = Board.objects.get(id=board_id)
+                if not board.boardmembership_set.filter(user=self.request.user).exists() and board.owner != self.request.user:
+                    raise PermissionError("You don't have permission to create tasks on this board")
+            except Board.DoesNotExist:
+                raise ValueError("Board not found")
         
-        task = serializer.save(created_by=self.request.user)
-        logger.info(f"Task '{task.title}' created by {self.request.user.username}")
+        serializer.save()
 
-    @action(detail=True, methods=['get', 'post'])
-    def comments(self, request, pk=None):
-        task = self.get_object()
-        
-        if request.method == 'GET':
-            comments = task.comments.all().order_by('-created_at')
-            serialized_comments = []
-            for comment in comments:
-                author_name = f"{comment.author.first_name} {comment.author.last_name}".strip() or comment.author.username
-                serialized_comments.append({
-                    'id': comment.id,
-                    'content': comment.content,
-                    'author': author_name,
-                    'created_at': comment.created_at.isoformat()
-                })
-            return Response(serialized_comments)
-        
-        elif request.method == 'POST':
-            content = request.data.get('content')
-            if not content:
-                return Response({'error': 'Content required'}, status=400)
-            
-            comment = Comment.objects.create(
-                task=task,
-                author=request.user,
-                content=content
-            )
-            
-            author_name = f"{comment.author.first_name} {comment.author.last_name}".strip() or comment.author.username
-            return Response({
-                'id': comment.id,
-                'content': comment.content,
-                'author': author_name,
-                'created_at': comment.created_at.isoformat()
-            }, status=201)
-
-    @action(detail=True, methods=['delete'], url_path='comments/(?P<comment_id>[^/.]+)')
-    def delete_comment(self, request, pk=None, comment_id=None):
+    def create(self, request, *args, **kwargs):
         try:
-            comment = Comment.objects.get(id=comment_id, task_id=pk)
-            if comment.author != request.user:
-                return Response({'error': 'Permission denied'}, status=403)
-            comment.delete()
-            return Response(status=204)
-        except Comment.DoesNotExist:
-            return Response({'error': 'Comment not found'}, status=404)
+            return super().create(request, *args, **kwargs)
+        except (PermissionError, ValueError) as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Task creation error: {str(e)}")
+            return Response(
+                {"error": "Could not create task"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='assigned-to-me')
     def assigned_to_me(self, request):
-        tasks = self.get_queryset().filter(assignee=request.user)
-        serializer = self.get_serializer(tasks, many=True)
-        return Response(serializer.data)
+        try:
+            tasks = Task.objects.filter(
+                assignee=request.user
+            ).select_related(
+                'assignee', 'column', 'column__board', 'created_by'
+            ).prefetch_related('reviewers')
+            
+            serializer = self.get_serializer(tasks, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Assigned tasks error: {str(e)}")
+            return Response(
+                {"error": "Could not fetch assigned tasks"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='reviewing')
     def reviewing(self, request):
-        tasks = self.get_queryset().filter(reviewers=request.user)
-        serializer = self.get_serializer(tasks, many=True)
-        return Response(serializer.data)
-
-
-class TaskListCreateView(generics.ListCreateAPIView):
-    serializer_class = TaskSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        user = self.request.user
-        return Task.objects.filter(
-            Q(column__board__owner=user) | 
-            Q(column__board__members=user)
-        ).distinct().order_by('-created_at')
-
-    def perform_create(self, serializer):
-        logger.info(f"Creating task by user: {self.request.user.username}")
-        task = serializer.save(created_by=self.request.user)
-        logger.info(f"Task '{task.title}' created successfully with ID {task.id}")
-
-
-class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = TaskSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        user = self.request.user
-        return Task.objects.filter(
-            Q(column__board__owner=user) | 
-            Q(column__board__members=user)
-        ).distinct()
-
-    def perform_update(self, serializer):
-        task_id = serializer.instance.id
-        old_status = serializer.instance.status
-        logger.info(f"Updating task {task_id} by user: {self.request.user.username}")
-        
-        task = serializer.save()
-        
-        if 'status' in serializer.validated_data and old_status != task.status:
-            logger.info(f"Task {task_id} status changed from '{old_status}' to '{task.status}'")
-
-    def perform_destroy(self, instance):
-        task_id = instance.id
-        task_title = instance.title
-        logger.info(f"Deleting task {task_id} '{task_title}' by user: {self.request.user.username}")
-        instance.delete()
-        logger.info(f"Task {task_id} successfully deleted")
-
-
-class TasksAssignedToMeView(generics.ListAPIView):
-    serializer_class = TaskSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return Task.objects.filter(
-            assignee=self.request.user
-        ).order_by('due_date', '-created_at')
-
-
-class TasksReviewingView(generics.ListAPIView):
-    serializer_class = TaskSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return Task.objects.filter(
-            reviewers=self.request.user
-        ).order_by('due_date', '-created_at')
+        try:
+            tasks = Task.objects.filter(
+                reviewers=request.user
+            ).select_related(
+                'assignee', 'column', 'column__board', 'created_by'
+            ).prefetch_related('reviewers')
+            
+            serializer = self.get_serializer(tasks, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Reviewing tasks error: {str(e)}")
+            return Response(
+                {"error": "Could not fetch reviewing tasks"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

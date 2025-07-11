@@ -6,13 +6,17 @@ from auth_app.api.serializers import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.CharField(source='created_by.username', read_only=True)
+    author = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
         fields = ['id', 'content', 'author', 'created_at', 'updated_at']
         read_only_fields = ['id', 'author', 'created_at', 'updated_at']
-
+    
+    def get_author(self, obj):
+        user = obj.created_by
+        fullname = f"{user.first_name} {user.last_name}".strip()
+        return fullname if fullname else user.username
 
 class TaskSerializer(serializers.ModelSerializer):
     assignee = UserSerializer(read_only=True)
@@ -55,7 +59,8 @@ class TaskSerializer(serializers.ModelSerializer):
         if 'assignee' in data and data['assignee']:
             assignee = data['assignee']
             if 'fullname' not in assignee:
-                assignee['fullname'] = f"{assignee.get('first_name', '')} {assignee.get('last_name', '')}".strip() or assignee.get('username', '')
+                user = instance.assignee
+                assignee['fullname'] = f"{user.first_name} {user.last_name}".strip() or user.username
         
         return data
 
@@ -65,27 +70,12 @@ class TaskSerializer(serializers.ModelSerializer):
         reviewer_id = validated_data.pop('reviewer_id', None)
         
         if board_id:
-            from kanban_app.models import Board
+            from kanban_app.models import Board, Column
             try:
                 board = Board.objects.get(id=board_id)
-                status_to_column = {
-                    'to-do': 'To-do',
-                    'in-progress': 'In-progress', 
-                    'review': 'Review',
-                    'done': 'Done'
-                }
-                
-                status = validated_data.get('status', 'to-do')
-                column_name = status_to_column.get(status, 'To-do')
-                
-                column = board.columns.filter(name=column_name).first()
+                column = board.columns.first()
                 if not column:
-                    from kanban_app.models import Column
-                    column = Column.objects.create(
-                        name=column_name,
-                        board=board,
-                        position=0
-                    )
+                    raise serializers.ValidationError("Board has no columns")
             except Board.DoesNotExist:
                 raise serializers.ValidationError("Board not found")
         else:
@@ -127,17 +117,15 @@ class TaskSerializer(serializers.ModelSerializer):
         new_status = validated_data.get('status', old_status)
         
         if old_status != new_status and instance.column:
-            status_to_column = {
-                'to-do': 'To-do',
-                'in-progress': 'In-progress',
-                'review': 'Review', 
-                'done': 'Done'
-            }
-            
-            column_name = status_to_column.get(new_status, 'To-do')
-            new_column = instance.column.board.columns.filter(name=column_name).first()
-            
-            if new_column:
-                instance.column = new_column
+            from kanban_app.models import Column
+            try:
+                new_column = Column.objects.filter(
+                    board=instance.column.board,
+                    name__icontains=new_status
+                ).first()
+                if new_column:
+                    instance.column = new_column
+            except:
+                pass
             
         return super().update(instance, validated_data)
