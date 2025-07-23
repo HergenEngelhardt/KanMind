@@ -37645,3 +37645,4 @@ Assigned tasks error: no such column: kanban_app_column.name
 Comment 1 created by engel on task 'Test'
 Comment 2 created by engel on task 'Test'
 Comment 2 deleted by engel from task 'Test'
+Comment 3 created by engel on task 'Test'

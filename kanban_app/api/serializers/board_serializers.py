@@ -47,21 +47,18 @@ class BoardCreateSerializer(serializers.Serializer):  # Verwende Serializer stat
         description = validated_data.get('description', '')
         member_ids = validated_data.get('members', [])
         
-        # Board erstellen
         board = Board.objects.create(
             title=title,
             description=description,
             owner=self.context['request'].user
         )
         
-        # Erstelle Admin-Membership für den Owner
         BoardMembership.objects.create(
             user=self.context['request'].user,
             board=board,
             role='ADMIN'
         )
         
-        # Füge andere Mitglieder hinzu
         for member_id in member_ids:
             try:
                 user = User.objects.get(id=member_id)
@@ -74,19 +71,18 @@ class BoardCreateSerializer(serializers.Serializer):  # Verwende Serializer stat
             except User.DoesNotExist:
                 continue
         
-        # Erstelle Standard-Spalten
         from kanban_app.models import Column
         default_columns = [
-            {'name': 'To-do', 'position': 0},
-            {'name': 'In-progress', 'position': 1},
-            {'name': 'Review', 'position': 2},
-            {'name': 'Done', 'position': 3}
+            {'title': 'To-do', 'position': 0},
+            {'title': 'In-progress', 'position': 1},
+            {'title': 'Review', 'position': 2},
+            {'title': 'Done', 'position': 3}
         ]
         
         for col_data in default_columns:
             Column.objects.create(
                 board=board,
-                name=col_data['name'],
+                name=col_data['title'],
                 position=col_data['position']
             )
         

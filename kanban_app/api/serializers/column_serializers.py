@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class ColumnSerializer(serializers.ModelSerializer):
     tasks = serializers.SerializerMethodField(read_only=True)
     board = serializers.PrimaryKeyRelatedField(read_only=True)
-    name = serializers.CharField(source='title', read_only=True)
+    title = serializers.CharField(source='title', read_only=True)
 
     class Meta:
         model = Column
@@ -94,7 +94,7 @@ class ColumnUpdateSerializer(serializers.ModelSerializer):
 
 
 class ColumnSimpleSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='title', read_only=True)
+    title = serializers.CharField(source='title', read_only=True)
     
     class Meta:
         model = Column

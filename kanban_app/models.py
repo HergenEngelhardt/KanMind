@@ -79,7 +79,7 @@ class BoardMembership(models.Model):
 
 class Column(models.Model):
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='columns')
-    name = models.CharField(max_length=50)
+    title = models.CharField(max_length=50)  
     position = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -89,4 +89,4 @@ class Column(models.Model):
         unique_together = ['board', 'position']
 
     def __str__(self):
-        return f"{self.board.title} - {self.name}"
+        return f"{self.board.title} - {self.title}" 

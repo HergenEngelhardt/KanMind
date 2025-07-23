@@ -1,49 +1,20 @@
 from django.contrib import admin
-from .models import Board, Column, BoardMembership
-
+from .models import Board, BoardMembership, Column
 
 @admin.register(Board)
 class BoardAdmin(admin.ModelAdmin):
-    """Admin interface for Board model."""
-    
-    list_display = ('title', 'owner', 'status', 'created_at', 'updated_at')
-    list_filter = ('status', 'created_at', 'updated_at')
-    search_fields = ('title', 'description', 'owner__username', 'owner__email')
-    readonly_fields = ('created_at', 'updated_at')
-    
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('title', 'description', 'owner')
-        }),
-        ('Project Management', {
-            'fields': ('status',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
-@admin.register(Column)
-class ColumnAdmin(admin.ModelAdmin):
-    """Admin interface for Column model."""
-    
-    list_display = ('name', 'board', 'position')
-    list_filter = ('board', 'board__status')
-    search_fields = ('name', 'board__title')
-    ordering = ('board', 'position')
-
+    list_display = ['title', 'owner', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['title', 'description']
 
 @admin.register(BoardMembership)
 class BoardMembershipAdmin(admin.ModelAdmin):
-    """Admin interface for BoardMembership model."""
-    
-    list_display = ('user', 'board', 'role', 'board_status')
-    list_filter = ('role', 'board__status')
-    search_fields = ('user__username', 'user__email', 'board__title')
-    
-    def board_status(self, obj):
-        """Display board status in membership admin."""
-        return obj.board.status
-    board_status.short_description = 'Board Status'
+    list_display = ['user', 'board', 'role', 'joined_at']
+    list_filter = ['role', 'joined_at']
+
+@admin.register(Column)
+class ColumnAdmin(admin.ModelAdmin):
+    list_display = ['title', 'board', 'position', 'created_at']  # ✅ Geändert von 'name' zu 'title'
+    list_filter = ['board', 'position']
+    search_fields = ['title']  # ✅ Geändert von 'name' zu 'title'
+    ordering = ['board', 'position']

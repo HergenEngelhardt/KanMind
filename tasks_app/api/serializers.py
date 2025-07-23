@@ -118,14 +118,21 @@ class TaskSerializer(serializers.ModelSerializer):
         
         if old_status != new_status and instance.column:
             from kanban_app.models import Column
-            try:
-                new_column = Column.objects.filter(
-                    board=instance.column.board,
-                    name__icontains=new_status
-                ).first()
-                if new_column:
+            status_to_column = {
+                'to-do': 'To-do',
+                'in-progress': 'In-progress', 
+                'review': 'Review',
+                'done': 'Done'
+            }
+            column_title = status_to_column.get(new_status)
+            if column_title:
+                try:
+                    new_column = Column.objects.get(
+                        board=instance.column.board,
+                        title=column_title 
+                    )
                     instance.column = new_column
-            except:
-                pass
-            
+                except Column.DoesNotExist:
+                    pass
+        
         return super().update(instance, validated_data)
