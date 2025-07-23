@@ -82,7 +82,7 @@ class BoardCreateSerializer(serializers.Serializer):  # Verwende Serializer stat
         for col_data in default_columns:
             Column.objects.create(
                 board=board,
-                name=col_data['title'],
+                title=col_data['title'],
                 position=col_data['position']
             )
         

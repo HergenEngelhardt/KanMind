@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from kanban_app.models import Board, BoardMembership
+from kanban_app.models import Board, BoardMembership, Column
 from kanban_app.api.serializers.board_serializers import (
     BoardListSerializer, 
     BoardDetailSerializer, 
@@ -48,23 +48,23 @@ class BoardViewSet(viewsets.ModelViewSet):
             )
 
     def create(self, request, *args, **kwargs):
-        print(f"DEBUG - Request data: {request.data}")  # Debug-Zeile hinzufügen
-        print(f"DEBUG - Request content type: {request.content_type}")  # Debug-Zeile hinzufügen
+        print(f"DEBUG - Request data: {request.data}")
+        print(f"DEBUG - Request content type: {request.content_type}")
         try:
             serializer = self.get_serializer(data=request.data)
             if not serializer.is_valid():
-                print(f"DEBUG - Serializer errors: {serializer.errors}")  # Debug-Zeile hinzufügen
+                print(f"DEBUG - Serializer errors: {serializer.errors}")
             serializer.is_valid(raise_exception=True)
             board = serializer.save()
-        
+                    
             response_serializer = BoardDetailSerializer(board, context={'request': request})
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            print(f"DEBUG - Exception: {str(e)}")  # Debug-Zeile hinzufügen
+            print(f"DEBUG - Exception: {str(e)}")
             return Response(
                 {"error": "Could not create board"}, 
                 status=status.HTTP_400_BAD_REQUEST
-        )
+            )
 
     def update(self, request, *args, **kwargs):
         try:

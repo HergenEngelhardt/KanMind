@@ -14,7 +14,7 @@ class ColumnSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Column
-        fields = ['id', 'title', 'name', 'position', 'board', 'tasks']
+        fields = ['id', 'title', 'order', 'created_at', 'updated_at', 'position', 'board', 'tasks']
         read_only_fields = ['id', 'board']
 
     def get_tasks(self, obj):
