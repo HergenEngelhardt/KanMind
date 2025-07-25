@@ -1,99 +1,83 @@
-from rest_framework import generics, status, viewsets
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.response import Response
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
-from django.db.models import Q
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 import logging
 
-from .serializers import TaskSerializer
 from ..models import Task
+from .serializers import TaskSerializer, TaskUpdateSerializer
+from kanban_app.models import Board, BoardMembership
 
 logger = logging.getLogger(__name__)
 
-
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Task.objects.filter(
-            Q(column__board__boardmembership__user=self.request.user) |
-            Q(assignee=self.request.user) |
-            Q(reviewers=self.request.user)
-        ).select_related(
-            'assignee', 'column', 'column__board', 'created_by'
-        ).prefetch_related('reviewers').distinct()
-        
-        board_id = self.request.query_params.get('board', None)
-        if board_id:
-            queryset = queryset.filter(column__board_id=board_id)
-            
-        return queryset
+        return Task.objects.all().select_related('assignee', 'column__board').prefetch_related('reviewers')
 
-    def perform_create(self, serializer):
-        board_id = self.request.data.get('board')
-        if board_id:
-            from kanban_app.models import Board
-            try:
-                board = Board.objects.get(id=board_id)
-                if not board.boardmembership_set.filter(user=self.request.user).exists() and board.owner != self.request.user:
-                    raise PermissionError("You are not a member of this board")
-            except Board.DoesNotExist:
-                raise ValueError("Board not found")
-        
-        serializer.save()
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update']:
+            return TaskUpdateSerializer
+        return TaskSerializer
 
     def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except (PermissionError, ValueError) as e:
-            return Response(
-                {"error": str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            logger.error(f"Task creation error: {str(e)}")
-            return Response(
-                {"error": "Could not create task"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        logger.info(f"Task creation request from user: {request.user}")
+        logger.info(f"Request data: {request.data}")
+        
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            task = serializer.save()
+            logger.info(f"Task created successfully: {task.title}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            logger.error(f"Task creation failed: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'], url_path='assigned-to-me')
-    def assigned_to_me(self, request):
-        try:
-            tasks = Task.objects.filter(
-                assignee=request.user
-            ).select_related(
-                'assignee', 'column', 'column__board', 'created_by'
-            ).prefetch_related('reviewers')
-            
-            serializer = self.get_serializer(tasks, many=True)
+    def update(self, request, *args, **kwargs):
+        logger.info(f"Task update request from user: {request.user}")
+        logger.info(f"Request data: {request.data}")
+        
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        
+        if serializer.is_valid():
+            task = serializer.save()
+            logger.info(f"Task updated successfully: {task.title}")
             return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"Assigned tasks error: {str(e)}")
-            return Response(
-                {"error": "Could not fetch assigned tasks"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        else:
+            logger.error(f"Task update failed: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'], url_path='reviewing')
-    def reviewing(self, request):
+    def destroy(self, request, *args, **kwargs):
+        logger.info(f"Task deletion request from user: {request.user}")
+        instance = self.get_object()
+        task_title = instance.title
+        self.perform_destroy(instance)
+        logger.info(f"Task deleted successfully: {task_title}")
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def move_to_column(self, request, pk=None):
+        logger.info(f"Move task request from user: {request.user}")
+        logger.info(f"Request data: {request.data}")
+        
+        task = self.get_object()
+        column_id = request.data.get('column_id')
+        
+        if not column_id:
+            return Response({'error': 'column_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        from kanban_app.models import Column
         try:
-            tasks = Task.objects.filter(
-                reviewers=request.user
-            ).select_related(
-                'assignee', 'column', 'column__board', 'created_by'
-            ).prefetch_related('reviewers')
-            
-            serializer = self.get_serializer(tasks, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"Reviewing tasks error: {str(e)}")
-            return Response(
-                {"error": "Could not fetch reviewing tasks"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            column = Column.objects.get(id=column_id)
+            task.column = column
+            task.save()
+            logger.info(f"Task moved successfully: {task.title} to column {column.name}")
+            return Response({'message': 'Task moved successfully'})
+        except Column.DoesNotExist:
+            logger.error(f"Column not found: {column_id}")
+            return Response({'error': 'Column not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -1,17 +1,14 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from .views import TaskViewSet
 from .comment_views import CommentListCreateView, CommentDetailView
 
+router = DefaultRouter()
+router.register(r'tasks', TaskViewSet, basename='task')
+
 urlpatterns = [
-    path('tasks/assigned-to-me/', TaskViewSet.as_view({'get': 'assigned_to_me'}), name='tasks-assigned-to-me'),
-    path('tasks/reviewing/', TaskViewSet.as_view({'get': 'reviewing'}), name='tasks-reviewing'),
-    path('tasks/', TaskViewSet.as_view({'get': 'list', 'post': 'create'}), name='task-list-create'),
-    path('tasks/<int:pk>/', TaskViewSet.as_view({
-        'get': 'retrieve', 
-        'put': 'update',       
-        'patch': 'partial_update', 
-        'delete': 'destroy'
-    }), name='task-detail'),
+    path('', include(router.urls)),
     path('tasks/<int:task_id>/comments/', CommentListCreateView.as_view(), name='comment-list-create'),
     path('tasks/<int:task_id>/comments/<int:pk>/', CommentDetailView.as_view(), name='comment-detail'),
 ]

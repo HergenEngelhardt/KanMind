@@ -18,6 +18,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fullname = f"{user.first_name} {user.last_name}".strip()
         return fullname if fullname else user.username
 
+
 class TaskSerializer(serializers.ModelSerializer):
     assignee = UserSerializer(read_only=True)
     reviewer = serializers.SerializerMethodField()
@@ -55,7 +56,6 @@ class TaskSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         
-        # Ensure assignee has fullname
         if 'assignee' in data and data['assignee']:
             assignee = data['assignee']
             if 'fullname' not in assignee:
@@ -136,3 +136,59 @@ class TaskSerializer(serializers.ModelSerializer):
                     pass
         
         return super().update(instance, validated_data)
+
+
+class TaskUpdateSerializer(serializers.ModelSerializer):
+    assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    reviewer_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
+    class Meta:
+        model = Task
+        fields = [
+            'id', 'title', 'description', 'status', 'priority',
+            'assignee_id', 'reviewer_id', 'due_date', 'column'
+        ]
+        
+    def update(self, instance, validated_data):
+        assignee_id = validated_data.pop('assignee_id', None)
+        reviewer_id = validated_data.pop('reviewer_id', None)
+        
+        if assignee_id is not None:
+            instance.assignee_id = assignee_id
+        
+        if reviewer_id is not None:
+            instance.reviewers.clear()
+            if reviewer_id:
+                try:
+                    reviewer = User.objects.get(id=reviewer_id)
+                    instance.reviewers.add(reviewer)
+                except User.DoesNotExist:
+                    pass
+        
+        old_status = instance.status
+        new_status = validated_data.get('status', old_status)
+        
+        if old_status != new_status and instance.column:
+            from kanban_app.models import Column
+            status_to_column = {
+                'to-do': 'To-do',
+                'in-progress': 'In-progress', 
+                'review': 'Review',
+                'done': 'Done'
+            }
+            column_title = status_to_column.get(new_status)
+            if column_title:
+                try:
+                    new_column = Column.objects.get(
+                        board=instance.column.board,
+                        title=column_title 
+                    )
+                    instance.column = new_column
+                except Column.DoesNotExist:
+                    pass
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance

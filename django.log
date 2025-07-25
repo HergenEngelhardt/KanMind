@@ -37773,3 +37773,8 @@ Task creation error: [ErrorDetail(string='Board has no columns', code='invalid')
 Task creation error: [ErrorDetail(string='Board has no columns', code='invalid')]
 Task creation error: [ErrorDetail(string='Board has no columns', code='invalid')]
 Comment 1 created by test@mail.com on task 'Test'
+Task deletion request from user: test@mail.com
+Task deleted successfully: Test222
+Task update request from user: test@mail.com
+Request data: {'title': 'Updated Task Title', 'description': 'Updated description', 'status': 'in-progress', 'priority': 'high'}
+Task updated successfully: Updated Task Title

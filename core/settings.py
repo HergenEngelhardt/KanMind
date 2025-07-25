@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import logging
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,9 +8,10 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '127.0.0.1:8000', 'localhost:8000']
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -18,7 +20,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'corsheaders',
     'auth_app',
     'kanban_app',
     'tasks_app',
@@ -29,8 +30,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # CSRF Middleware entfernt für API-Endpunkte
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -83,7 +83,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -94,25 +94,21 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
 }
 
-# Vereinfachte CORS-Konfiguration - entfernt widersprüchliche Einstellungen
+# CORS Einstellungen
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_PREFLIGHT_MAX_AGE = 86400
 
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
+    'HEAD',
     'OPTIONS',
-    'PATCH',  
+    'PATCH',
     'POST',
     'PUT',
 ]
-
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -124,43 +120,34 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'cache-control',
+    'pragma',
 ]
 
-# CSRF-Konfiguration für API deaktiviert
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
+CORS_PREFLIGHT_MAX_AGE = 0
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'django.log',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'tasks_app.api.views': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'auth_app': {
             'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
         },
-        'kanban_app': {
+        'kanban_app.api.views': {
             'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
         },
-        'tasks_app': {
+        'auth_app.api.views': {
             'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
