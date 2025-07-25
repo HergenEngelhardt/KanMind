@@ -103,6 +103,17 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_PREFLIGHT_MAX_AGE = 86400
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',  
+    'POST',
+    'PUT',
+]
+
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
