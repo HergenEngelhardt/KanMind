@@ -1,40 +1,45 @@
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from rest_framework.exceptions import ValidationError
-from .auth_serializers import CustomAuthTokenSerializer
-from .auth_utils import AuthResponseMixin
+from .auth_utils import AuthResponseMixin, GuestUserMixin
 
 
-class LoginView(ObtainAuthToken, AuthResponseMixin):
-    """User login endpoint."""
+class GuestLoginView(APIView, AuthResponseMixin, GuestUserMixin):
+    """
+    API view for guest user login.
+    
+    Provides endpoint for creating or retrieving guest users and their authentication tokens.
+    """
     authentication_classes = []
     permission_classes = [AllowAny]
-    serializer_class = CustomAuthTokenSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
+        """
+        Handle POST request for guest login.
+        
+        Creates or retrieves a guest user and generates an authentication token.
+        
+        Args:
+            request: HTTP request object containing the login request data.
+            
+        Returns:
+            Response: JSON response containing user data and authentication token
+                     with HTTP 200 status code.
+                     
+        Raises:
+            Exception: May raise exceptions from token generation or user creation.
+        """
         try:
-            serializer = self._get_validated_serializer(request)
-            user = serializer.validated_data["user"]
-            token = self._get_or_create_token(user)
+            guest_user = self._get_or_create_guest_user()
+            token = self._get_or_create_token(guest_user)
             
-            return Response(self._build_user_data(user, token))
-            
-        except ValidationError as e:
             return Response(
-                {"error": "Invalid credentials provided"},
-                status=status.HTTP_400_BAD_REQUEST
+                self._build_user_data(guest_user, token),
+                status=status.HTTP_200_OK,
             )
         except Exception as e:
             return Response(
-                {"error": "Login failed due to server error"},
+                {"error": "Guest login failed due to server error"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-    def _get_validated_serializer(self, request):
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        return serializer

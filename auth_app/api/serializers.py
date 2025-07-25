@@ -22,7 +22,6 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     Handles user creation with email as primary identifier.
     Supports both separate first_name/last_name fields and combined full_name.
-    Automatically sets username to email if not provided.
     """
     
     email = serializers.EmailField(required=True)
@@ -43,29 +42,54 @@ class RegisterSerializer(serializers.ModelSerializer):
             'username': {'required': False},
         }
     
+    def _set_username_from_email(self, attrs):
+        """
+        Set username to email if username is not provided.
+        
+        Args:
+            attrs (dict): Serializer attributes
+            
+        Returns:
+            dict: Modified attributes with username set
+        """
+        if not attrs.get("username"):
+            attrs["username"] = attrs.get("email")
+        return attrs
+    
+    def _parse_full_name(self, attrs):
+        """
+        Parse full_name or fullname field into first_name and last_name.
+        
+        Args:
+            attrs (dict): Serializer attributes
+            
+        Returns:
+            dict: Modified attributes with first_name and last_name set
+        """
+        full_name_value = attrs.pop('full_name', None) or attrs.pop('fullname', None)
+        
+        if full_name_value:
+            name_parts = full_name_value.split(' ', 1)
+            attrs['first_name'] = name_parts[0]
+            attrs['last_name'] = name_parts[1] if len(name_parts) > 1 else ''
+        
+        return attrs
+    
     def validate(self, attrs):
         """
         Validate and process registration data.
-        
-        Sets username to email if not provided.
-        Splits full_name into first_name and last_name if provided.
         
         Args:
             attrs (dict): Serializer attributes
             
         Returns:
             dict: Validated and processed attributes
+            
+        Raises:
+            serializers.ValidationError: If validation fails
         """
-        if not attrs.get("username"):
-            attrs["username"] = attrs.get("email")
-        
-        full_name_value = attrs.pop('full_name', None) or attrs.pop('fullname', None)
-    
-        if full_name_value:
-            name_parts = full_name_value.split(' ', 1)
-            attrs['first_name'] = name_parts[0]
-            attrs['last_name'] = name_parts[1] if len(name_parts) > 1 else ''
-        
+        attrs = self._set_username_from_email(attrs)
+        attrs = self._parse_full_name(attrs)
         return attrs
     
     def create(self, validated_data):
@@ -77,6 +101,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             
         Returns:
             User: Created user instance
+            
+        Raises:
+            ValidationError: If user creation fails
         """
         user = User.objects.create(
             username=validated_data['username'],

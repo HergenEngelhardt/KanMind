@@ -20,39 +20,85 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Return comments for the specific task ordered by creation time."""
+        """
+        Return comments for the specific task ordered by creation time.
+        
+        Returns:
+            QuerySet: Comments for the specified task if user has access, 
+                     empty QuerySet otherwise.
+        """
         task_id = self.kwargs.get('task_id')
         if not task_id:
             return Comment.objects.none()
         
-        try:
-            task = Task.objects.get(id=task_id)
-            board = task.column.board
-            # Check if user is owner or has membership
-            if not (board.owner == self.request.user or 
-                   board.boardmembership_set.filter(user=self.request.user).exists()):
-                return Comment.objects.none()
-        except Task.DoesNotExist:
+        if not self._user_has_task_access(task_id):
             return Comment.objects.none()
         
         return Comment.objects.filter(task_id=task_id).order_by('created_at')
 
+    def _user_has_task_access(self, task_id):
+        """
+        Check if user has access to the task.
+        
+        Args:
+            task_id (int): ID of the task to check access for.
+            
+        Returns:
+            bool: True if user has access, False otherwise.
+        """
+        try:
+            task = Task.objects.get(id=task_id)
+            board = task.column.board
+            return (board.owner == self.request.user or 
+                   board.boardmembership_set.filter(user=self.request.user).exists())
+        except Task.DoesNotExist:
+            return False
+
     def perform_create(self, serializer):
-        """Create comment with task and author."""
+        """
+        Create comment with task and author.
+        
+        Args:
+            serializer (CommentSerializer): Validated serializer instance.
+            
+        Raises:
+            PermissionDenied: If user doesn't have permission to comment.
+        """
         task_id = self.kwargs.get('task_id')
         task = get_object_or_404(Task, id=task_id)
         
-        board = task.column.board
-        # Check if user is owner or has membership
-        if not (board.owner == self.request.user or 
-               board.boardmembership_set.filter(user=self.request.user).exists()):
+        if not self._user_can_comment_on_task(task):
             raise PermissionDenied("You don't have permission to comment on this task")
         
         comment = serializer.save(task=task, created_by=self.request.user)
         logger.info(f"Comment {comment.id} created by {self.request.user} on task '{task.title}'")
 
+    def _user_can_comment_on_task(self, task):
+        """
+        Check if user can comment on the given task.
+        
+        Args:
+            task (Task): Task instance to check permissions for.
+            
+        Returns:
+            bool: True if user can comment, False otherwise.
+        """
+        board = task.column.board
+        return (board.owner == self.request.user or 
+               board.boardmembership_set.filter(user=self.request.user).exists())
+
     def create(self, request, *args, **kwargs):
-        """Override create to return proper response format."""
+        """
+        Override create to return proper response format.
+        
+        Args:
+            request (Request): HTTP request object.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            Response: HTTP response with comment data or validation errors.
+        """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
@@ -70,7 +116,12 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Return comments that user can access."""
+        """
+        Return comments that user can access.
+        
+        Returns:
+            QuerySet: Comments the user has access to based on board permissions.
+        """
         task_id = self.kwargs.get('task_id')
         if not task_id:
             return Comment.objects.none()
@@ -84,27 +135,68 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         )
 
     def destroy(self, request, *args, **kwargs):
-        """Delete comment with proper permissions."""
+        """
+        Delete comment with proper permissions.
+        
+        Args:
+            request (Request): HTTP request object.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+            
+        Returns:
+            Response: HTTP response indicating success or failure.
+            
+        Raises:
+            Comment.DoesNotExist: If comment is not found.
+        """
         try:
             instance = self.get_object()
             
-            if instance.created_by != request.user:
-                board_owner = instance.task.column.board.owner
-                if board_owner != request.user:
-                    return Response(
-                        {"error": "You can only delete your own comments or as board owner"}, 
-                        status=status.HTTP_403_FORBIDDEN
-                    )
+            if not self._user_can_delete_comment(instance, request.user):
+                return Response(
+                    {"error": "You can only delete your own comments or as board owner"}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
             
-            comment_id = instance.id
-            task_title = instance.task.title
-            self.perform_destroy(instance)
-            
-            logger.info(f"Comment {comment_id} deleted by {request.user} from task '{task_title}'")
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return self._perform_comment_deletion(instance, request.user)
             
         except Comment.DoesNotExist:
             return Response({"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Error deleting comment: {str(e)}")
             return Response({"error": "Failed to delete comment"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def _user_can_delete_comment(self, comment, user):
+        """
+        Check if user can delete the comment.
+        
+        Args:
+            comment (Comment): Comment instance to check permissions for.
+            user (User): User attempting to delete the comment.
+            
+        Returns:
+            bool: True if user can delete, False otherwise.
+        """
+        if comment.created_by == user:
+            return True
+        
+        board_owner = comment.task.column.board.owner
+        return board_owner == user
+
+    def _perform_comment_deletion(self, instance, user):
+        """
+        Perform the actual comment deletion and logging.
+        
+        Args:
+            instance (Comment): Comment instance to delete.
+            user (User): User performing the deletion.
+            
+        Returns:
+            Response: HTTP response indicating successful deletion.
+        """
+        comment_id = instance.id
+        task_title = instance.task.title
+        self.perform_destroy(instance)
+        
+        logger.info(f"Comment {comment_id} deleted by {user} from task '{task_title}'")
+        return Response(status=status.HTTP_204_NO_CONTENT)

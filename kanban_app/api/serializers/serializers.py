@@ -1,3 +1,10 @@
+"""
+Main serializers module for the Kanban API.
+
+This module provides a centralized import point for all serializers
+used in the Kanban application, including board, user, and column serializers.
+"""
+
 from .board_serializers import *
 from .user_serializers import *
 from .column_serializers import *
