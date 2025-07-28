@@ -3,7 +3,6 @@ from .column_views import (
     ColumnListCreateView,
     ColumnDetailView
 )
-from .utils_views import EmailCheckView
 
 __all__ = [
     'BoardViewSet',

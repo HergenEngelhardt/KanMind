@@ -5,10 +5,8 @@ from .views.board_views import (
 )
 from .views.column_views import (
     ColumnListCreateView,
-    ColumnDetailView
-)
-from .views.utils_views import (
-    EmailCheckView,
+    ColumnDetailView,
+        EmailCheckView,
 )
 
 router = DefaultRouter()

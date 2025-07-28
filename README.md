@@ -15,28 +15,9 @@ KanMind is a Kanban board application built with Django REST Framework backend a
 ## Technology Stack
 
 - **Backend**: Django 5.2.3, Django REST Framework 3.16.0
-- **Database**: SQLite
+- **Database**: SQLite (development), PostgreSQL (production ready)
 - **Frontend**: HTML, CSS, JavaScript
 - **Authentication**: Token-based authentication
-
-## Dependencies
-
-The project requires the following packages:
-- asgiref==3.8.1
-- Django==5.2.3
-- django-cors-headers==4.7.0
-- djangorestframework==3.16.0
-- sqlparse==0.5.3
-- tzdata==2025.2
-
-All dependencies are listed in the requirements.txt file.
-
-## Project Structure
-
-- `auth_app/`: Authentication and user management
-- `kanban_app/`: Board and column management
-- `tasks_app/`: Task and comment management
-- `core/`: Project settings and main URL configuration
 
 ## Prerequisites
 
@@ -46,47 +27,67 @@ All dependencies are listed in the requirements.txt file.
 
 ## Installation
 
-### Clone the repository
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 cd KanMind
 ```
 
-### Set up virtual environment
+### 2. Set up virtual environment
 
 ```bash
 python -m venv env
 ```
 
 #### On Windows:
-
 ```bash
 env\Scripts\activate
 ```
 
 #### On macOS/Linux:
-
 ```bash
 source env/bin/activate
 ```
 
-### Install dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Database setup
+### 4. Environment Configuration
+
+Create a `.env` file in the root directory (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file with your settings:
+```env
+SECRET_KEY=your-unique-secret-key-here
+DEBUG=True
+GUEST_EMAIL=your-guest-email@example.com
+GUEST_PASSWORD=your-guest-password
+```
+
+### 5. Database setup
 
 ```bash
 python manage.py migrate
 ```
 
-### Create a superuser
+### 6. Create a superuser
 
 ```bash
 python manage.py createsuperuser
+```
+
+### 7. (Optional) Load sample data
+
+```bash
+python manage.py loaddata fixtures/sample_data.json
 ```
 
 ## Running the Project
@@ -99,40 +100,65 @@ python manage.py runserver
 
 The server will start at http://127.0.0.1:8000/
 
-### Access the frontend
+### Access the application
 
-Open `KanMind_Frontend/project.KanMind/index.html` in your web browser or use a local development server.
+- **API**: http://127.0.0.1:8000/api/
+- **Admin Interface**: http://127.0.0.1:8000/admin/
+- **Frontend**: Open your frontend files in a local development server
 
 ## API Endpoints
 
-- Authentication: `/api/auth/`
-- Kanban boards and columns: `/api/boards/`
-- Tasks and comments: `/api/tasks/`
-
-## API Documentation
-
-You can explore the API by navigating to the endpoints in your browser after running the server.
-
-## Admin Interface
-
-Access the admin interface at http://127.0.0.1:8000/admin/ using your superuser credentials.
+| Endpoint | Description |
+|----------|-------------|
+| `/api/auth/` | Authentication endpoints |
+| `/api/boards/` | Board and column management |
+| `/api/tasks/` | Task and comment management |
 
 ## Development
 
-### Making Changes
-
-After making changes, you can use the provided `up.bat` script to commit and push your changes:
+### Code Quality
 
 ```bash
-up.bat "Your commit message here"
+# Format code
+black .
+
+# Lint code  
+flake8 .
+
+# Run tests
+pytest
 ```
 
-This will pull the latest changes, add your changes, commit with your message, and push to the repository.
+### Database Operations
 
-## CORS Configuration
+```bash
+# Create new migration
+python manage.py makemigrations
 
-The application allows CORS from the following origins:
-- http://localhost:5500
-- http://127.0.0.1:5500
+# Apply migrations
+python manage.py migrate
 
-If you need to add more origins, modify the `CORS_ALLOWED_ORIGINS` setting in `core/settings.py`.
+# Create superuser
+python manage.py createsuperuser
+```
+
+## Production Deployment
+
+1. Set `DEBUG=False` in your environment
+2. Configure proper database (PostgreSQL recommended)
+3. Set up proper CORS settings
+4. Use environment variables for sensitive data
+5. Configure static file serving
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Migration errors**: Run `python manage.py migrate --fake-initial`
+2. **Permission errors**: Ensure proper file permissions on database
+3. **CORS errors**: Check CORS settings in `settings.py`
+
+### Support
+
+For issues and questions, please check the documentation or create an issue in the repository.
+
