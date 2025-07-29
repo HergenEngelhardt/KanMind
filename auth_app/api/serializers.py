@@ -4,26 +4,17 @@ from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for User model representation.
-    
-    Used for displaying user information in API responses.
-    Includes basic user fields without sensitive data.
-    """
-    
+    fullname = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ("id", "username", "email", "first_name", "last_name")
+        fields = ("id", "username", "email", "first_name", "last_name", "fullname")
+
+    def get_fullname(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user registration.
-    
-    Handles user creation with email as primary identifier.
-    Supports both separate first_name/last_name fields and combined full_name.
-    """
-    
     email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True, 
@@ -43,74 +34,47 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
     
     def _set_username_from_email(self, attrs):
-        """
-        Set username to email if username is not provided.
-        
-        Args:
-            attrs (dict): Serializer attributes
-            
-        Returns:
-            dict: Modified attributes with username set
-        """
         if not attrs.get("username"):
             attrs["username"] = attrs.get("email")
         return attrs
     
     def _parse_full_name(self, attrs):
-        """
-        Parse full_name or fullname field into first_name and last_name.
-        
-        Args:
-            attrs (dict): Serializer attributes
-            
-        Returns:
-            dict: Modified attributes with first_name and last_name set
-        """
-        full_name_value = attrs.pop('full_name', None) or attrs.pop('fullname', None)
-        
-        if full_name_value:
-            name_parts = full_name_value.split(' ', 1)
-            attrs['first_name'] = name_parts[0]
-            attrs['last_name'] = name_parts[1] if len(name_parts) > 1 else ''
-        
+        full_name = attrs.get('full_name') or attrs.get('fullname')
+        if full_name and not (attrs.get('first_name') or attrs.get('last_name')):
+            parts = full_name.strip().split(' ', 1)
+            attrs['first_name'] = parts[0]
+            if len(parts) > 1:
+                attrs['last_name'] = parts[1]
         return attrs
     
     def validate(self, attrs):
-        """
-        Validate and process registration data.
-        
-        Args:
-            attrs (dict): Serializer attributes
-            
-        Returns:
-            dict: Validated and processed attributes
-            
-        Raises:
-            serializers.ValidationError: If validation fails
-        """
         attrs = self._set_username_from_email(attrs)
         attrs = self._parse_full_name(attrs)
+        
+        if User.objects.filter(email=attrs.get('email')).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        
         return attrs
     
     def create(self, validated_data):
-        """
-        Create a new user with validated data.
+        validated_data.pop('full_name', None)
+        validated_data.pop('fullname', None)
         
-        Args:
-            validated_data (dict): Validated registration data
-            
-        Returns:
-            User: Created user instance
-            
-        Raises:
-            ValidationError: If user creation fails
-        """
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', '')
-        )
-        user.set_password(validated_data['password'])
+        password = validated_data.pop('password')
+        user = User.objects.create_user(**validated_data)
+        user.set_password(password)
         user.save()
         return user
+
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True, write_only=True)
+    
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No user found with this email address.")
+        return value
+
+
+UserRegistrationSerializer = RegisterSerializer

@@ -43,9 +43,9 @@ class Task(models.Model):
         Return string representation of the task.
         
         Returns:
-            str: The title of the task.
+            str: The title of the task, or fallback if title is None/empty.
         """
-        return self.title
+        return self.title or f"Task {self.id}"
 
     def is_overdue(self):
         """
@@ -103,7 +103,9 @@ class Comment(models.Model):
         Returns:
             str: A formatted string showing task title and comment author.
         """
-        return f"Comment on {self.task.title} by {self.created_by.username}"
+        task_title = self.task.title if self.task and self.task.title else f"Task {self.task.id if self.task else 'Unknown'}"
+        username = self.created_by.username if self.created_by else "Unknown User"
+        return f"Comment on {task_title} by {username}"
 
     def is_recent(self):
         """
@@ -123,6 +125,8 @@ class Comment(models.Model):
         Returns:
             str: Full name if available, otherwise username.
         """
+        if not self.created_by:
+            return "Unknown User"
         if self.created_by.first_name and self.created_by.last_name:
             return f"{self.created_by.first_name} {self.created_by.last_name}"
         return self.created_by.username

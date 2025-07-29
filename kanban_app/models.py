@@ -35,9 +35,29 @@ class Board(models.Model):
         Return string representation of the board.
         
         Returns:
+            str: The title of the board, or fallback if title is None/empty.
+        """
+        return self.title or f"Board {self.id}"
+
+    @property
+    def name(self):
+        """
+        Alias for title to maintain API compatibility.
+        
+        Returns:
             str: The title of the board.
         """
         return self.title
+
+    @name.setter
+    def name(self, value):
+        """
+        Setter for name property to update title.
+        
+        Args:
+            value (str): New name/title for the board
+        """
+        self.title = value
 
     @property
     def owner_id(self):
@@ -139,7 +159,9 @@ class BoardMembership(models.Model):
         Returns:
             str: Formatted string showing user, board title, and role.
         """
-        return f"{self.user.username} - {self.board.title} ({self.role})"
+        username = self.user.username if self.user else "Unknown User"
+        board_title = self.board.title if self.board and self.board.title else f"Board {self.board.id if self.board else 'Unknown'}"
+        return f"{username} - {board_title} ({self.role})"
 
 
 class Column(models.Model):
@@ -167,4 +189,36 @@ class Column(models.Model):
         Returns:
             str: Formatted string showing board title and column title.
         """
-        return
+        board_title = self.board.title if self.board and self.board.title else f"Board {self.board.id if self.board else 'Unknown'}"
+        column_title = self.title or f"Column {self.id}"
+        return f"{board_title} - {column_title}"
+
+    @property
+    def name(self):
+        """
+        Alias for title to maintain API compatibility.
+        
+        Returns:
+            str: The title of the column.
+        """
+        return self.title
+
+    @property
+    def status(self):
+        """
+        Map column title to status for API compatibility.
+        
+        Returns:
+            str: Status based on column title.
+        """
+        title_lower = self.title.lower() if self.title else ""
+        if 'todo' in title_lower or 'to do' in title_lower or 'to-do' in title_lower:
+            return 'TODO'
+        elif 'progress' in title_lower or 'doing' in title_lower:
+            return 'IN_PROGRESS'
+        elif 'review' in title_lower:
+            return 'REVIEW'
+        elif 'done' in title_lower or 'complete' in title_lower:
+            return 'DONE'
+        else:
+            return 'TODO'  

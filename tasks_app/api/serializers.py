@@ -3,85 +3,78 @@ from django.contrib.auth.models import User
 
 from tasks_app.models import Task, Comment
 from auth_app.api.serializers import UserSerializer
+from kanban_app.models import Column
 
 
 class CommentSerializer(serializers.ModelSerializer):
     """
     Serializer for Comment model with author information.
-    """
-    author = serializers.SerializerMethodField()
     
+    Handles serialization of comment data including author details
+    and provides custom author name formatting.
+    """
+    
+    created_by = UserSerializer(read_only=True)
+    author_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'author', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'author', 'created_at', 'updated_at']
-    
-    def get_author(self, obj):
+        fields = ['id', 'content', 'created_by', 'author_name', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+
+    def get_author_name(self, obj):
         """
-        Get author full name or username for the comment.
+        Get the formatted author name for the comment.
         
         Args:
             obj (Comment): Comment instance
             
         Returns:
-            str: Author's full name or username
+            str: Formatted author name
         """
-        user = obj.created_by
-        fullname = f"{user.first_name} {user.last_name}".strip()
-        return fullname if fullname else user.username
+        return obj.get_author_name()
 
 
 class TaskSerializer(serializers.ModelSerializer):
     """
-    Serializer for Task model with related user information and board details.
+    Serializer for Task model with comprehensive task information.
+    
+    Handles task serialization including assignee, reviewer, board information,
+    and comment count with support for user assignment operations.
     """
+    
     assignee = UserSerializer(read_only=True)
-    reviewer = serializers.SerializerMethodField()
     assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     reviewer_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    comments_count = serializers.SerializerMethodField()
+    created_by = UserSerializer(read_only=True)
     board = serializers.SerializerMethodField()
+    comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         fields = [
-            'id', 'title', 'description', 'status', 'priority',
-            'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
-            'due_date', 'comments_count', 'board', 'created_at', 'updated_at'
+            'id', 'title', 'description', 'priority', 'status', 'due_date',
+            'column', 'assignee', 'assignee_id', 'reviewer_id',
+            'created_by', 'board', 'comments_count', 'created_at', 'updated_at'
         ]
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
 
     def get_board(self, obj):
         """
-        Get the board ID associated with the task.
+        Get board information from the task's column.
         
         Args:
             obj (Task): Task instance
             
         Returns:
-            int or None: Board ID if exists, None otherwise
+            dict or None: Board information with id and name
         """
-        return obj.column.board.id if obj.column and obj.column.board else None
-
-    def get_reviewer(self, obj):
-        """
-        Get reviewer information for the task.
-        
-        Args:
-            obj (Task): Task instance
-            
-        Returns:
-            dict or None: Reviewer details if exists, None otherwise
-        """
-        if not obj.reviewers.exists():
-            return None
-            
-        reviewer = obj.reviewers.first()
-        return {
-            'id': reviewer.id,
-            'fullname': f"{reviewer.first_name} {reviewer.last_name}".strip() or reviewer.username,
-            'email': reviewer.email,
-            'username': reviewer.username
-        }
+        if obj.column and obj.column.board:
+            return {
+                'id': obj.column.board.id,
+                'name': obj.column.board.title
+            }
+        return None
 
     def get_comments_count(self, obj):
         """
@@ -91,132 +84,77 @@ class TaskSerializer(serializers.ModelSerializer):
             obj (Task): Task instance
             
         Returns:
-            int: Number of comments
+            int: Number of comments on the task
         """
         return obj.comments.count()
 
-    def to_representation(self, instance):
-        """
-        Customize the representation to include assignee fullname.
-        
-        Args:
-            instance (Task): Task instance
-            
-        Returns:
-            dict: Serialized data with additional fullname field
-        """
-        data = super().to_representation(instance)
-        
-        if 'assignee' in data and data['assignee']:
-            assignee = data['assignee']
-            if 'fullname' not in assignee:
-                user = instance.assignee
-                assignee['fullname'] = f"{user.first_name} {user.last_name}".strip() or user.username
-        
-        return data
-
-    def _get_board_column(self, board_id):
-        """
-        Get the first column of a board.
-        
-        Args:
-            board_id (int): Board ID
-            
-        Returns:
-            Column: First column of the board
-            
-        Raises:
-            serializers.ValidationError: If board not found or has no columns
-        """
-        from kanban_app.models import Board
-        try:
-            board = Board.objects.get(id=board_id)
-            column = board.columns.first()
-            if not column:
-                raise serializers.ValidationError("Board has no columns")
-            return column
-        except Board.DoesNotExist:
-            raise serializers.ValidationError("Board not found")
-
-    def _assign_reviewer(self, task, reviewer_id):
-        """
-        Assign a reviewer to the task.
-        
-        Args:
-            task (Task): Task instance
-            reviewer_id (int): Reviewer user ID
-        """
-        if reviewer_id:
-            try:
-                reviewer = User.objects.get(id=reviewer_id)
-                task.reviewers.add(reviewer)
-            except User.DoesNotExist:
-                pass
-
     def create(self, validated_data):
         """
-        Create a new task with board assignment.
+        Create a new task with assignee and reviewer assignment.
         
         Args:
             validated_data (dict): Validated task data
             
         Returns:
             Task: Created task instance
-            
-        Raises:
-            serializers.ValidationError: If board ID missing or invalid
         """
-        board_id = self.context['request'].data.get('board')
         assignee_id = validated_data.pop('assignee_id', None)
         reviewer_id = validated_data.pop('reviewer_id', None)
         
-        if not board_id:
-            raise serializers.ValidationError("Board ID is required")
+        validated_data['created_by'] = self.context['request'].user
+        task = Task.objects.create(**validated_data)
         
-        column = self._get_board_column(board_id)
-        
-        task = Task.objects.create(
-            column=column,
-            assignee_id=assignee_id,
-            created_by=self.context['request'].user,
-            **validated_data
-        )
-        
-        self._assign_reviewer(task, reviewer_id)
+        self._assign_task_users(task, assignee_id, reviewer_id)
         return task
 
-    def _update_column_by_status(self, instance, new_status):
+    def _assign_task_users(self, task, assignee_id, reviewer_id):
         """
-        Update task column based on status change.
+        Assign users to the task as assignee and reviewer.
         
         Args:
-            instance (Task): Task instance
-            new_status (str): New status value
+            task (Task): Task instance to assign users to
+            assignee_id (int or None): ID of user to assign as assignee
+            reviewer_id (int or None): ID of user to assign as reviewer
         """
-        if not instance.column:
-            return
-            
-        from kanban_app.models import Column
-        status_to_column = {
-            'to-do': 'To-do',
-            'in-progress': 'In-progress', 
-            'review': 'Review',
-            'done': 'Done'
-        }
-        column_title = status_to_column.get(new_status)
-        if column_title:
-            try:
-                new_column = Column.objects.get(
-                    board=instance.column.board,
-                    title=column_title 
-                )
-                instance.column = new_column
-            except Column.DoesNotExist:
-                pass
+        if assignee_id:
+            self._assign_user_to_task(task, assignee_id, 'assignee')
+        
+        if reviewer_id:
+            self._assign_reviewer_to_task(task, reviewer_id)
+
+    def _assign_user_to_task(self, task, user_id, role):
+        """
+        Assign a user to a task in a specific role.
+        
+        Args:
+            task (Task): Task instance
+            user_id (int): User ID to assign
+            role (str): Role to assign ('assignee')
+        """
+        try:
+            user = User.objects.get(id=user_id)
+            setattr(task, role, user)
+            task.save()
+        except User.DoesNotExist:
+            pass
+
+    def _assign_reviewer_to_task(self, task, reviewer_id):
+        """
+        Assign a reviewer to the task.
+        
+        Args:
+            task (Task): Task instance
+            reviewer_id (int): ID of user to assign as reviewer
+        """
+        try:
+            reviewer = User.objects.get(id=reviewer_id)
+            task.reviewers.add(reviewer)
+        except User.DoesNotExist:
+            pass
 
     def update(self, instance, validated_data):
         """
-        Update an existing task.
+        Update an existing task with new assignee and reviewer data.
         
         Args:
             instance (Task): Task instance to update
@@ -228,118 +166,35 @@ class TaskSerializer(serializers.ModelSerializer):
         assignee_id = validated_data.pop('assignee_id', None)
         reviewer_id = validated_data.pop('reviewer_id', None)
         
-        if assignee_id is not None:
-            instance.assignee_id = assignee_id
-        
-        if reviewer_id is not None:
-            instance.reviewers.clear()
-            self._assign_reviewer(instance, reviewer_id)
-        
-        old_status = instance.status
-        new_status = validated_data.get('status', old_status)
-        
-        if old_status != new_status:
-            self._update_column_by_status(instance, new_status)
+        self._update_task_assignee(instance, assignee_id)
+        self._update_task_reviewer(instance, reviewer_id)
         
         return super().update(instance, validated_data)
 
-
-class TaskUpdateSerializer(serializers.ModelSerializer):
-    """
-    Serializer for updating tasks with column management.
-    """
-    assignee_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    reviewer_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    
-    class Meta:
-        model = Task
-        fields = [
-            'id', 'title', 'description', 'status', 'priority',
-            'assignee_id', 'reviewer_id', 'due_date', 'column'
-        ]
-
-    def _update_assignee(self, instance, assignee_id):
+    def _update_task_assignee(self, instance, assignee_id):
         """
-        Update task assignee.
+        Update the task assignee.
         
         Args:
-            instance (Task): Task instance
-            assignee_id (int or None): Assignee user ID
+            instance (Task): Task instance to update
+            assignee_id (int or None): New assignee ID or None to clear
         """
         if assignee_id is not None:
-            instance.assignee_id = assignee_id
+            if assignee_id:
+                self._assign_user_to_task(instance, assignee_id, 'assignee')
+            else:
+                instance.assignee = None
+                instance.save()
 
-    def _update_reviewer(self, instance, reviewer_id):
+    def _update_task_reviewer(self, instance, reviewer_id):
         """
-        Update task reviewer.
+        Update the task reviewer.
         
         Args:
-            instance (Task): Task instance
-            reviewer_id (int or None): Reviewer user ID
+            instance (Task): Task instance to update
+            reviewer_id (int or None): New reviewer ID or None to clear
         """
         if reviewer_id is not None:
             instance.reviewers.clear()
             if reviewer_id:
-                try:
-                    reviewer = User.objects.get(id=reviewer_id)
-                    instance.reviewers.add(reviewer)
-                except User.DoesNotExist:
-                    pass
-
-    def _update_column_by_status(self, instance, old_status, new_status):
-        """
-        Update column based on status change.
-        
-        Args:
-            instance (Task): Task instance
-            old_status (str): Previous status
-            new_status (str): New status
-        """
-        if old_status == new_status or not instance.column:
-            return
-            
-        from kanban_app.models import Column
-        status_to_column = {
-            'to-do': 'To-do',
-            'in-progress': 'In-progress', 
-            'review': 'Review',
-            'done': 'Done'
-        }
-        column_title = status_to_column.get(new_status)
-        if column_title:
-            try:
-                new_column = Column.objects.get(
-                    board=instance.column.board,
-                    title=column_title 
-                )
-                instance.column = new_column
-            except Column.DoesNotExist:
-                pass
-        
-    def update(self, instance, validated_data):
-        """
-        Update task instance with all provided data.
-        
-        Args:
-            instance (Task): Task instance to update
-            validated_data (dict): Validated update data
-            
-        Returns:
-            Task: Updated task instance
-        """
-        assignee_id = validated_data.pop('assignee_id', None)
-        reviewer_id = validated_data.pop('reviewer_id', None)
-        
-        self._update_assignee(instance, assignee_id)
-        self._update_reviewer(instance, reviewer_id)
-        
-        old_status = instance.status
-        new_status = validated_data.get('status', old_status)
-        
-        self._update_column_by_status(instance, old_status, new_status)
-        
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-                
-        instance.save()
-        return instance
+                self._assign_reviewer_to_task(instance, reviewer_id)

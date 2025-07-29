@@ -37778,3 +37778,90 @@ Task deleted successfully: Test222
 Task update request from user: test@mail.com
 Request data: {'title': 'Updated Task Title', 'description': 'Updated description', 'status': 'in-progress', 'priority': 'high'}
 Task updated successfully: Updated Task Title
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+Registration validation failed: {'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Task creation request from user: testuser
+Request data: {'title': 'Test Task', 'description': 'A test task for API testing', 'board': 5, 'assignee_id': 4, 'priority': 'HIGH', 'status': 'TODO'}
+Task creation failed: {'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')], 'priority': [ErrorDetail(string='"HIGH" is not a valid choice.', code='invalid_choice')]}
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Task creation request from user: testuser
+Request data: {'title': 'Test Task', 'description': 'A test task for API testing', 'board': 6, 'assignee_id': 5, 'priority': 'HIGH', 'status': 'TODO'}
+Task creation failed: {'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')], 'priority': [ErrorDetail(string='"HIGH" is not a valid choice.', code='invalid_choice')]}
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+Registration validation failed: {'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+Registration validation failed: {'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Task creation request from user: testuser
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Task creation request from user: testuser
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Task creation request from user: testuser
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'password': 'testpassword123', 'first_name': 'Test', 'last_name': 'User', 'username': 'testuser'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Task creation request from user: testuser
+Request data: {'title': 'Test Task', 'description': 'A test task for API testing', 'column': 33, 'assignee': 8, 'priority': 'HIGH'}
+Task creation failed: {'priority': [ErrorDetail(string='"HIGH" is not a valid choice.', code='invalid_choice')]}
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+Registration validation failed: {'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+Registration validation failed: {'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+Registration validation failed: {'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com
+Registration request from IP: 127.0.0.1
+Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'password': 'testpassword123', 'password2': 'testpassword123', 'first_name': 'Test', 'last_name': 'User'}
+User registered successfully: test@kanmind.com
+Login request from IP: 127.0.0.1
+Successful login for user: test@kanmind.com

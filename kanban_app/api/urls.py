@@ -1,20 +1,14 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views.board_views import (
-    BoardViewSet
-)
-from .views.column_views import (
-    ColumnListCreateView,
-    ColumnDetailView,
-        EmailCheckView,
-)
-
-router = DefaultRouter()
-router.register(r'boards', BoardViewSet, basename='board')
+from django.urls import path
+from .views.board_views import BoardViewSet
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('email-check/', EmailCheckView.as_view(), name='email-check'),
-    path('<int:board_id>/columns/', ColumnListCreateView.as_view(), name='column-list-create'),
-    path('<int:board_id>/columns/<int:pk>/', ColumnDetailView.as_view(), name='column-detail'),
+    path('boards/', BoardViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='boards-list'),
+    path('boards/<int:pk>/', BoardViewSet.as_view({
+        'get': 'retrieve',
+        'patch': 'partial_update',
+        'delete': 'destroy'
+    }), name='boards-detail'),
 ]

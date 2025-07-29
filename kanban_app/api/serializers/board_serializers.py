@@ -7,11 +7,12 @@ from auth_app.api.serializers import UserSerializer
 
 class BoardListSerializer(serializers.ModelSerializer):
     """
-    Serializer for listing boards with basic information and counts.
+    Serializer for Board list view with summary information.
     
-    Provides read-only fields for member count, ticket count, tasks to-do count,
-    and high priority tasks count.
+    Provides basic board information with computed counts for
+    members, tickets, and task statistics.
     """
+    
     owner = UserSerializer(read_only=True)
     member_count = serializers.ReadOnlyField()
     ticket_count = serializers.ReadOnlyField()
@@ -21,225 +22,86 @@ class BoardListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = [
-            'id', 'title', 'description', 'status', 'owner', 
-            'member_count', 'ticket_count', 'tasks_to_do_count', 
-            'tasks_high_prio_count', 'created_at', 'updated_at'
+            'id', 'name', 'description', 'owner', 'member_count', 
+            'ticket_count', 'tasks_to_do_count', 'tasks_high_prio_count', 'created_at'
         ]
-        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
-
-    def to_internal_value(self, data):
-        """
-        Transform input data before validation.
-        
-        Args:
-            data (dict): Input data to be validated
-            
-        Returns:
-            dict: Transformed data with title mapped to name
-        """
-        if 'title' in data:
-            data['name'] = data.pop('title')
-        return super().to_internal_value(data)
+        read_only_fields = ['id', 'created_at', 'owner']
 
     def to_representation(self, instance):
         """
-        Transform instance data for output.
+        Convert model instance to dictionary representation.
         
         Args:
-            instance (Board): Board instance to serialize
+            instance (Board): Board model instance
             
         Returns:
-            dict: Serialized data with name mapped to title
+            dict: Serialized board data with name field from title
         """
         data = super().to_representation(instance)
-        if 'name' in data:
-            data['title'] = data.pop('name')
+        data['name'] = instance.title
         return data
 
 
-class BoardCreateSerializer(serializers.Serializer):
+class BoardCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating new boards with members and default columns.
+    Serializer for creating new boards.
     
-    Creates a board with the requesting user as admin and optional members as editors.
-    Automatically creates default columns: To-do, In-progress, Review, Done.
+    Handles board creation with optional member assignment
+    and validates required fields.
     """
-    title = serializers.CharField(max_length=255)
-    description = serializers.CharField(required=False, allow_blank=True)
+    
     members = serializers.ListField(
         child=serializers.IntegerField(),
         required=False,
-        allow_empty=True
+        allow_empty=True,
+        write_only=True
     )
+    title = serializers.CharField(max_length=100, required=True)
+    description = serializers.CharField(required=False, allow_blank=True)
 
-    def create(self, validated_data):
-        """
-        Create a new board with members and default columns.
-        
-        Args:
-            validated_data (dict): Validated data containing title, description, and member IDs
-            
-        Returns:
-            Board: Created board instance
-        """
-        board = self._create_board(validated_data)
-        self._create_admin_membership(board)
-        self._add_members(board, validated_data.get('members', []))
-        self._create_default_columns(board)
-        return board
-
-    def _create_board(self, validated_data):
-        """
-        Create the board instance.
-        
-        Args:
-            validated_data (dict): Validated data
-            
-        Returns:
-            Board: Created board instance
-        """
-        return Board.objects.create(
-            title=validated_data.get('title'),
-            description=validated_data.get('description', ''),
-            owner=self.context['request'].user
-        )
-
-    def _create_admin_membership(self, board):
-        """
-        Create admin membership for the board owner.
-        
-        Args:
-            board (Board): Board instance
-        """
-        BoardMembership.objects.create(
-            user=self.context['request'].user,
-            board=board,
-            role='ADMIN'
-        )
-
-    def _add_members(self, board, member_ids):
-        """
-        Add members to the board as editors.
-        
-        Args:
-            board (Board): Board instance
-            member_ids (list): List of user IDs to add as members
-        """
-        for member_id in member_ids:
-            try:
-                user = User.objects.get(id=member_id)
-                if user != self.context['request'].user:
-                    BoardMembership.objects.get_or_create(
-                        user=user,
-                        board=board,
-                        defaults={'role': 'EDITOR'}
-                    )
-            except User.DoesNotExist:
-                continue
-
-    def _create_default_columns(self, board):
-        """
-        Create default columns for the board.
-        
-        Args:
-            board (Board): Board instance
-        """
-        from kanban_app.models import Column
-        default_columns = [
-            {'title': 'To-do', 'position': 0},
-            {'title': 'In-progress', 'position': 1},
-            {'title': 'Review', 'position': 2},
-            {'title': 'Done', 'position': 3}
-        ]
-        
-        for col_data in default_columns:
-            Column.objects.create(
-                board=board,
-                title=col_data['title'],
-                position=col_data['position']
-            )
-
-    def validate_title(self, value):
-        """
-        Validate board title is not empty.
-        
-        Args:
-            value (str): Title value to validate
-            
-        Returns:
-            str: Cleaned title value
-            
-        Raises:
-            ValidationError: If title is empty or only whitespace
-        """
-        if not value or not value.strip():
-            raise serializers.ValidationError("Board title cannot be empty")
-        return value.strip()
+    class Meta:
+        model = Board
+        fields = ['title', 'description', 'members']
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
     """
-    Detailed serializer for board information including members and tasks.
+    Detailed serializer for Board model with complete information.
     
-    Provides comprehensive board data with nested member information,
-    task details, and owner information.
+    Includes owner details, members with roles, columns, and all tasks
+    with comprehensive nested data structures.
     """
+    
     owner = UserSerializer(read_only=True)
     members = serializers.SerializerMethodField()
+    columns = serializers.SerializerMethodField()
     tasks = serializers.SerializerMethodField()
-    owner_id = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Board
         fields = [
-            'id', 'title', 'description', 'status', 'owner', 'owner_id',
-            'members', 'tasks', 'created_at', 'updated_at'
+            'id', 'name', 'description', 'owner', 'members', 'columns', 
+            'tasks', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
-
-    def to_internal_value(self, data):
-        """
-        Transform input data before validation.
-        
-        Args:
-            data (dict): Input data to be validated
-            
-        Returns:
-            dict: Transformed data with title mapped to name
-        """
-        if 'title' in data:
-            data['name'] = data.pop('title')
-        return super().to_internal_value(data)
-
-    def to_representation(self, instance):
-        """
-        Transform instance data for output.
-        
-        Args:
-            instance (Board): Board instance to serialize
-            
-        Returns:
-            dict: Serialized data with name mapped to title
-        """
-        data = super().to_representation(instance)
-        if 'name' in data:
-            data['title'] = data.pop('name')
-        return data
+        read_only_fields = ['id', 'created_at', 'updated_at', 'owner']
 
     def get_members(self, obj):
         """
-        Get board members with their roles.
+        Get formatted member information with roles.
         
         Args:
             obj (Board): Board instance
             
         Returns:
-            list: List of member dictionaries with id, fullname, email, and role
+            list: List of member dictionaries with user info and roles
         """
-        memberships = obj.boardmembership_set.select_related('user').all()
-        return self._format_members(memberships)
+        try:
+            memberships = obj.boardmembership_set.all().select_related('user')
+            return self._format_memberships(memberships)
+        except Exception:
+            return []
 
-    def _format_members(self, memberships):
+    def _format_memberships(self, memberships):
         """
         Format membership data for serialization.
         
@@ -247,14 +109,97 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             memberships (QuerySet): BoardMembership queryset
             
         Returns:
-            list: Formatted member data
+            list: Formatted membership data
         """
         return [{
-            'id': membership.user.id,
-            'fullname': self._get_user_fullname(membership.user),
-            'email': membership.user.email,
+            'id': membership.id,
+            'user': self._format_user_data(membership.user),
             'role': membership.role
         } for membership in memberships]
+
+    def _format_user_data(self, user):
+        """
+        Format user data for membership serialization.
+        
+        Args:
+            user (User): User instance
+            
+        Returns:
+            dict: Formatted user data
+        """
+        fullname = f"{user.first_name} {user.last_name}".strip()
+        return {
+            'id': user.id,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'fullname': fullname or user.username,
+            'username': user.username
+        }
+
+    def get_columns(self, obj):
+        """
+        Get columns for the board with status mapping.
+        
+        Args:
+            obj (Board): Board instance
+            
+        Returns:
+            list: List of column dictionaries with status information
+        """
+        try:
+            columns = obj.columns.all().order_by('position')
+            return self._format_columns(columns)
+        except Exception:
+            return []
+
+    def _format_columns(self, columns):
+        """
+        Format columns data for serialization.
+        
+        Args:
+            columns (QuerySet): Column queryset
+            
+        Returns:
+            list: Formatted column data
+        """
+        return [{
+            'id': column.id,
+            'title': column.title,
+            'name': column.title,
+            'position': column.position,
+            'status': self._get_column_status(column.title)
+        } for column in columns]
+
+    def _get_column_status(self, title):
+        """
+        Map column title to standardized status.
+        
+        Args:
+            title (str): Column title
+            
+        Returns:
+            str: Standardized status string
+        """
+        if not title:
+            return 'TODO'
+        
+        title_lower = title.lower()
+        status_mapping = {
+            'todo': 'TODO',
+            'to do': 'TODO',
+            'to-do': 'TODO',
+            'progress': 'IN_PROGRESS',
+            'doing': 'IN_PROGRESS',
+            'review': 'REVIEW',
+            'done': 'DONE',
+            'complete': 'DONE'
+        }
+        
+        for key, status in status_mapping.items():
+            if key in title_lower:
+                return status
+        return 'TODO'
 
     def get_tasks(self, obj):
         """
@@ -264,15 +209,13 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             obj (Board): Board instance
             
         Returns:
-            list: List of task dictionaries with details
+            list: List of task dictionaries with complete details
         """
         try:
             tasks = []
             for column in obj.columns.all():
                 column_tasks = self._get_column_tasks(column)
-                for task in column_tasks:
-                    task_data = self._format_task_data(task, obj.id)
-                    tasks.append(task_data)
+                tasks.extend(self._format_tasks(column_tasks, obj.id))
             return tasks
         except Exception:
             return []
@@ -291,106 +234,58 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             'assignee', 'created_by'
         ).prefetch_related('reviewers')
 
-    def _format_task_data(self, task, board_id):
+    def _format_tasks(self, tasks, board_id):
         """
-        Format task data for serialization.
+        Format tasks data for serialization.
         
         Args:
-            task (Task): Task instance
+            tasks (QuerySet): Task queryset
             board_id (int): Board ID
             
         Returns:
-            dict: Formatted task data
+            list: Formatted task data
         """
-        task_data = {
+        return [{
             'id': task.id,
             'title': task.title,
             'description': task.description,
-            'status': task.status,
             'priority': task.priority,
-            'due_date': task.due_date.isoformat() if task.due_date else None,
-            'board': board_id,
-            'assignee': self._format_assignee(task.assignee) if task.assignee else None,
-            'reviewer': self._format_reviewer(task),
+            'status': task.status,
+            'due_date': task.due_date,
+            'column_id': task.column.id,
+            'assignee': self._format_user_data(task.assignee) if task.assignee else None,
+            'created_by': self._format_user_data(task.created_by),
+            'board_id': board_id,
             'created_at': task.created_at.isoformat(),
             'updated_at': task.updated_at.isoformat()
-        }
-        return task_data
+        } for task in tasks]
 
-    def _format_assignee(self, assignee):
+    def to_representation(self, instance):
         """
-        Format assignee data.
+        Convert model instance to dictionary representation.
         
         Args:
-            assignee (User): User instance
+            instance (Board): Board model instance
             
         Returns:
-            dict: Formatted assignee data
+            dict: Serialized board data with name field from title
         """
-        return {
-            'id': assignee.id,
-            'fullname': self._get_user_fullname(assignee),
-            'email': assignee.email
-        }
-
-    def _format_reviewer(self, task):
-        """
-        Format reviewer data for task.
-        
-        Args:
-            task (Task): Task instance
-            
-        Returns:
-            dict or None: Formatted reviewer data or None if no reviewer
-        """
-        reviewer = task.reviewers.first()
-        if reviewer:
-            return {
-                'id': reviewer.id,
-                'fullname': self._get_user_fullname(reviewer),
-                'email': reviewer.email
-            }
-        return None
-
-    def _get_user_fullname(self, user):
-        """
-        Get formatted fullname for user.
-        
-        Args:
-            user (User): User instance
-            
-        Returns:
-            str: Full name or username if name is empty
-        """
-        fullname = f"{user.first_name} {user.last_name}".strip()
-        return fullname or user.username
-
-    def validate_title(self, value):
-        """
-        Validate board title is not empty.
-        
-        Args:
-            value (str): Title value to validate
-            
-        Returns:
-            str: Cleaned title value
-            
-        Raises:
-            ValidationError: If title is empty or only whitespace
-        """
-        if not value.strip():
-            raise serializers.ValidationError("Board title cannot be empty")
-        return value.strip()
+        data = super().to_representation(instance)
+        data['name'] = instance.title
+        return data
 
 
 class BoardMembershipSerializer(serializers.ModelSerializer):
     """
-    Serializer for board membership information.
+    Serializer for BoardMembership model.
     
-    Provides user details and role information for board memberships.
+    Handles the relationship between users and boards with role information
+    and provides user details through nested serialization.
     """
+    
     user = UserSerializer(read_only=True)
     
     class Meta:
         model = BoardMembership
-        fields = ['id', 'user', 'role']
+        fields = ['id', 'user', 'role', 'joined_at']
+        read_only_fields = ['id', 'joined_at']
