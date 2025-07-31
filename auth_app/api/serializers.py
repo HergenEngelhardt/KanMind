@@ -1,80 +1,165 @@
+"""
+Serializers for user authentication operations.
+
+This module contains serializers for user registration and login operations
+with proper validation and data transformation.
+"""
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user data representation.
+    
+    Provides basic user information for API responses including
+    name fields and email without sensitive data.
+    """
+    
     fullname = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = User
-        fields = ("id", "username", "email", "first_name", "last_name", "fullname")
-
+        fields = ('id', 'email', 'first_name', 'last_name', 'fullname')
+        read_only_fields = ('id',)
+    
     def get_fullname(self, obj):
-        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
+        """
+        Get user's full name or fallback to username.
+        
+        Args:
+            obj (User): User instance
+            
+        Returns:
+            str: Full name or username if name fields empty
+        """
+        fullname = f"{obj.first_name} {obj.last_name}".strip()
+        return fullname or obj.username
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(
-        write_only=True, 
-        required=True, 
-        validators=[validate_password]
-    )
-    first_name = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
-    full_name = serializers.CharField(required=False, write_only=True)
-    fullname = serializers.CharField(required=False, write_only=True)
+    """
+    Serializer for user registration with password validation.
+    
+    Handles user creation with encrypted password and proper validation
+    of all required fields including email uniqueness.
+    """
+    
+    password = serializers.CharField(write_only=True, validators=[validate_password])
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'first_name', 'last_name', 'full_name', 'fullname', 'username']
-        extra_kwargs = {
-            'username': {'required': False},
-        }
+        fields = ('email', 'username', 'first_name', 'last_name', 'password')
     
-    def _set_username_from_email(self, attrs):
-        if not attrs.get("username"):
-            attrs["username"] = attrs.get("email")
-        return attrs
-    
-    def _parse_full_name(self, attrs):
-        full_name = attrs.get('full_name') or attrs.get('fullname')
-        if full_name and not (attrs.get('first_name') or attrs.get('last_name')):
-            parts = full_name.strip().split(' ', 1)
-            attrs['first_name'] = parts[0]
-            if len(parts) > 1:
-                attrs['last_name'] = parts[1]
-        return attrs
-    
-    def validate(self, attrs):
-        attrs = self._set_username_from_email(attrs)
-        attrs = self._parse_full_name(attrs)
+    def validate_email(self, value):
+        """
+        Validate email uniqueness.
         
-        if User.objects.filter(email=attrs.get('email')).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+        Args:
+            value (str): Email address to validate
+            
+        Returns:
+            str: Validated email address
+            
+        Raises:
+            ValidationError: If email already exists
+        """
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value.lower().strip()
+    
+    def validate_username(self, value):
+        """
+        Validate username uniqueness.
         
-        return attrs
+        Args:
+            value (str): Username to validate
+            
+        Returns:
+            str: Validated username
+            
+        Raises:
+            ValidationError: If username already exists
+        """
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists")
+        return value.strip()
     
     def create(self, validated_data):
-        validated_data.pop('full_name', None)
-        validated_data.pop('fullname', None)
+        """
+        Create user with encrypted password.
         
-        password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        Args:
+            validated_data (dict): Validated user registration data
+            
+        Returns:
+            User: Created user instance with encrypted password
+            
+        Raises:
+            IntegrityError: If username or email already exists
+        """
+        return self._create_user_instance(validated_data)
+    
+    def _create_user_instance(self, data):
+        """
+        Create and return user instance.
+        
+        Args:
+            data (dict): User creation data
+            
+        Returns:
+            User: Created user instance
+        """
+        return User.objects.create_user(
+            username=data['username'],
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            password=data['password']
+        )
 
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, write_only=True)
+    """
+    Serializer for user login credentials validation.
+    
+    Validates email and password format before authentication
+    attempt to ensure proper data structure.
+    """
+    
+    email = serializers.EmailField()
+    password = serializers.CharField()
     
     def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("No user found with this email address.")
+        """
+        Validate email format and presence.
+        
+        Args:
+            value (str): Email address to validate
+            
+        Returns:
+            str: Validated email address
+            
+        Raises:
+            ValidationError: If email format is invalid
+        """
+        return value.lower().strip()
+    
+    def validate_password(self, value):
+        """
+        Validate password presence and basic requirements.
+        
+        Args:
+            value (str): Password to validate
+            
+        Returns:
+            str: Validated password
+            
+        Raises:
+            ValidationError: If password is empty or too short
+        """
+        if len(value) < 3:
+            raise serializers.ValidationError("Password too short")
         return value
-
-
-UserRegistrationSerializer = RegisterSerializer

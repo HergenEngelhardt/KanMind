@@ -7,6 +7,7 @@ urlpatterns = [
     path('tasks/reviewing/', TaskViewSet.as_view({'get': 'reviewing'}), name='tasks-reviewing'),
     path('tasks/', TaskViewSet.as_view({'post': 'create'}), name='tasks-create'),
     path('tasks/<int:pk>/', TaskViewSet.as_view({
+        'get': 'retrieve',
         'patch': 'partial_update',
         'delete': 'destroy'
     }), name='tasks-detail'),

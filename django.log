@@ -37865,3 +37865,7 @@ Registration data: {'email': 'test@kanmind.com', 'username': 'testuser', 'passwo
 User registered successfully: test@kanmind.com
 Login request from IP: 127.0.0.1
 Successful login for user: test@kanmind.com
+Successful login for user: test@example.com
+Validation failed: {'email': [ErrorDetail(string='Email already exists', code='invalid')], 'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Successful login for user: test@example.com
+Successful login for user: test@example.com

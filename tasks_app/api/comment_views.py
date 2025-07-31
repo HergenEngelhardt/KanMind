@@ -14,55 +14,34 @@ logger = logging.getLogger(__name__)
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
-    """List comments for a task or create a new comment."""
+    """
+    List comments for a task or create a new comment.
+    """
     serializer_class = CommentSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """
-        Return comments for the specific task ordered by creation time.
+        Return comments for the specified task.
         
         Returns:
-            QuerySet: Comments for the specified task if user has access, 
-                     empty QuerySet otherwise.
+            QuerySet: Comments for the task if user has access
         """
         task_id = self.kwargs.get('task_id')
-        if not task_id:
-            return Comment.objects.none()
-        
         if not self._user_has_task_access(task_id):
             return Comment.objects.none()
-        
-        return Comment.objects.filter(task_id=task_id).order_by('created_at')
-
-    def _user_has_task_access(self, task_id):
-        """
-        Check if user has access to the task.
-        
-        Args:
-            task_id (int): ID of the task to check access for.
-            
-        Returns:
-            bool: True if user has access, False otherwise.
-        """
-        try:
-            task = Task.objects.get(id=task_id)
-            board = task.column.board
-            return (board.owner == self.request.user or 
-                   board.boardmembership_set.filter(user=self.request.user).exists())
-        except Task.DoesNotExist:
-            return False
+        return Comment.objects.filter(task_id=task_id).order_by('-created_at')
 
     def perform_create(self, serializer):
         """
-        Create comment with task and author.
+        Create comment with current user and task.
         
         Args:
-            serializer (CommentSerializer): Validated serializer instance.
+            serializer: Comment serializer instance
             
         Raises:
-            PermissionDenied: If user doesn't have permission to comment.
+            PermissionDenied: If user cannot comment on task
         """
         task_id = self.kwargs.get('task_id')
         task = get_object_or_404(Task, id=task_id)
@@ -70,34 +49,19 @@ class CommentListCreateView(generics.ListCreateAPIView):
         if not self._user_can_comment_on_task(task):
             raise PermissionDenied("You don't have permission to comment on this task")
         
-        comment = serializer.save(task=task, created_by=self.request.user)
-        logger.info(f"Comment {comment.id} created by {self.request.user} on task '{task.title}'")
-
-    def _user_can_comment_on_task(self, task):
-        """
-        Check if user can comment on the given task.
-        
-        Args:
-            task (Task): Task instance to check permissions for.
-            
-        Returns:
-            bool: True if user can comment, False otherwise.
-        """
-        board = task.column.board
-        return (board.owner == self.request.user or 
-               board.boardmembership_set.filter(user=self.request.user).exists())
+        serializer.save(author=self.request.user, task=task)
 
     def create(self, request, *args, **kwargs):
         """
         Override create to return proper response format.
         
         Args:
-            request (Request): HTTP request object.
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
+            request: HTTP request object
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
             
         Returns:
-            Response: HTTP response with comment data or validation errors.
+            Response: HTTP response with comment data or validation errors
         """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -108,19 +72,67 @@ class CommentListCreateView(generics.ListCreateAPIView):
         logger.error(f"Comment creation failed: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def _user_has_task_access(self, task_id):
+        """
+        Check if user has access to the task.
+        
+        Args:
+            task_id: ID of the task to check access for
+            
+        Returns:
+            bool: True if user has access, False otherwise
+        """
+        try:
+            task = Task.objects.get(id=task_id)
+            board = task.column.board
+            return (board.owner == self.request.user or 
+                   board.boardmembership_set.filter(user=self.request.user).exists())
+        except Task.DoesNotExist:
+            return False
+
+    def _user_can_comment_on_task(self, task):
+        """
+        Check if user can comment on the given task.
+        
+        Args:
+            task: Task instance to check permissions for
+            
+        Returns:
+            bool: True if user can comment, False otherwise
+        """
+        board = task.column.board
+        return (board.owner == self.request.user or 
+               board.boardmembership_set.filter(user=self.request.user).exists())
+
 
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Retrieve, update or delete a comment."""
+    """
+    Retrieve, update or delete a comment.
+    """
     serializer_class = CommentSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """
+        Get comment by task_id and comment_id.
+        
+        Returns:
+            Comment: Comment instance
+            
+        Raises:
+            Http404: If comment not found
+        """
+        task_id = self.kwargs.get('task_id')
+        comment_id = self.kwargs.get('comment_id')
+        return get_object_or_404(Comment, id=comment_id, task_id=task_id)
 
     def get_queryset(self):
         """
         Return comments that user can access.
         
         Returns:
-            QuerySet: Comments the user has access to based on board permissions.
+            QuerySet: Comments the user has access to based on board permissions
         """
         task_id = self.kwargs.get('task_id')
         if not task_id:
@@ -139,15 +151,15 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         Delete comment with proper permissions.
         
         Args:
-            request (Request): HTTP request object.
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
+            request: HTTP request object
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
             
         Returns:
-            Response: HTTP response indicating success or failure.
+            Response: HTTP response indicating success or failure
             
         Raises:
-            Comment.DoesNotExist: If comment is not found.
+            PermissionDenied: If user cannot delete comment
         """
         try:
             instance = self.get_object()
@@ -171,13 +183,13 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         Check if user can delete the comment.
         
         Args:
-            comment (Comment): Comment instance to check permissions for.
-            user (User): User attempting to delete the comment.
+            comment: Comment instance to check permissions for
+            user: User attempting to delete the comment
             
         Returns:
-            bool: True if user can delete, False otherwise.
+            bool: True if user can delete, False otherwise
         """
-        if comment.created_by == user:
+        if comment.author == user:
             return True
         
         board_owner = comment.task.column.board.owner
@@ -188,11 +200,11 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         Perform the actual comment deletion and logging.
         
         Args:
-            instance (Comment): Comment instance to delete.
-            user (User): User performing the deletion.
+            instance: Comment instance to delete
+            user: User performing the deletion
             
         Returns:
-            Response: HTTP response indicating successful deletion.
+            Response: HTTP response indicating successful deletion
         """
         comment_id = instance.id
         task_title = instance.task.title

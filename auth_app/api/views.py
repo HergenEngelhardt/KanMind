@@ -1,9 +1,15 @@
+"""
+Authentication views for user registration, login and email validation.
+
+This module provides API endpoints for user authentication operations
+including registration, login, and email existence checking.
+"""
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 import logging
@@ -17,124 +23,221 @@ logger = logging.getLogger(__name__)
 @permission_classes([AllowAny])
 def registration_view(request):
     """
-    Register a new user account and return authentication token.
+    Handle user registration with validation and token creation.
     
     Args:
-        request: HTTP request containing user registration data
+        request (Request): HTTP request with registration data
         
     Returns:
-        Response: User data with authentication token or validation errors
+        Response: User data with authentication token or error details
+        
+    Raises:
+        ValidationError: If registration data is invalid
+        IntegrityError: If user already exists
     """
-    logger.info(f"Registration request from IP: {request.META.get('REMOTE_ADDR')}")
-    logger.info(f"Registration data: {request.data}")
-    
-    serializer = RegisterSerializer(data=request.data)
-    if serializer.is_valid():
-        try:
-            user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
-            logger.info(f"User registered successfully: {user.email}")
-            
-            return Response({
-                'token': token.key,
-                'user': {
-                    'id': user.id,
-                    'email': user.email,
-                    'username': user.username,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                }
-            }, status=status.HTTP_201_CREATED)
-        except IntegrityError as e:
-            logger.error(f"Registration failed - IntegrityError: {str(e)}")
-            return Response({
-                'error': 'A user with this email or username already exists.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        logger.error(f"Registration validation failed: {serializer.errors}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return _process_registration(request.data)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
     """
-    Authenticate user and return authentication token.
+    Handle user login authentication with credential validation.
     
     Args:
-        request: HTTP request containing login credentials
+        request (Request): HTTP request with login credentials
         
     Returns:
-        Response: Authentication token and user data or error message
-    """
-    logger.info(f"Login request from IP: {request.META.get('REMOTE_ADDR')}")
-    
-    serializer = UserLoginSerializer(data=request.data)
-    if serializer.is_valid():
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
+        Response: User data with authentication token or error details
         
-        try:
-            user = User.objects.get(email=email)
-            authenticated_user = authenticate(username=user.username, password=password)
-            
-            if authenticated_user:
-                token, created = Token.objects.get_or_create(user=authenticated_user)
-                logger.info(f"Successful login for user: {email}")
-                
-                return Response({
-                    'token': token.key,
-                    'user': {
-                        'id': authenticated_user.id,
-                        'email': authenticated_user.email,
-                        'username': authenticated_user.username,
-                        'first_name': authenticated_user.first_name,
-                        'last_name': authenticated_user.last_name,
-                    }
-                }, status=status.HTTP_200_OK)
-            else:
-                logger.warning(f"Failed login attempt for user: {email}")
-                return Response({
-                    'error': 'Invalid credentials'
-                }, status=status.HTTP_401_UNAUTHORIZED)
-        except User.DoesNotExist:
-            logger.warning(f"Login attempt for non-existent user: {email}")
-            return Response({
-                'error': 'Invalid credentials'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-    else:
-        logger.error(f"Login validation failed: {serializer.errors}")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    Raises:
+        ValidationError: If credentials format is invalid
+        AuthenticationError: If credentials are incorrect
+    """
+    return _process_login(request.data)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def email_check(request):
     """
-    Check if user exists by email and return user information.
+    Check if user exists by email address.
     
     Args:
-        request: HTTP request with email parameter
+        request (Request): HTTP request with email query parameter
         
     Returns:
-        Response: User information or error message
+        Response: User data if found or error message
+        
+    Raises:
+        ValidationError: If email parameter is missing
+        DoesNotExist: If user with email not found
     """
-    email = request.GET.get('email')
+    return _check_email_existence(request.query_params.get('email'))
+
+
+def _process_registration(data):
+    """
+    Process user registration with validation.
+    
+    Args:
+        data (dict): Registration form data
+        
+    Returns:
+        Response: Success response with token or validation errors
+    """
+    serializer = RegisterSerializer(data=data)
+    if not serializer.is_valid():
+        return _validation_error(serializer.errors)
+    
+    try:
+        user = serializer.save()
+        return _create_auth_response(user, status.HTTP_201_CREATED)
+    except IntegrityError:
+        return _user_exists_error()
+
+
+def _process_login(data):
+    """
+    Process user login with credential validation.
+    
+    Args:
+        data (dict): Login credentials data
+        
+    Returns:
+        Response: Success response with token or authentication error
+    """
+    serializer = UserLoginSerializer(data=data)
+    if not serializer.is_valid():
+        return _validation_error(serializer.errors)
+    
+    return _authenticate_user(
+        serializer.validated_data['email'],
+        serializer.validated_data['password']
+    )
+
+
+def _authenticate_user(email, password):
+    """
+    Authenticate user with email and password.
+    
+    Args:
+        email (str): User email address
+        password (str): User password
+        
+    Returns:
+        Response: Authentication response with token or error
+    """
+    try:
+        user = User.objects.get(email=email)
+        if user.check_password(password):
+            logger.info(f"Successful login for user: {email}")
+            return _create_auth_response(user, status.HTTP_200_OK)
+        return _invalid_credentials_error()
+    except User.DoesNotExist:
+        return _invalid_credentials_error()
+
+
+def _check_email_existence(email):
+    """
+    Check if user with given email exists.
+    
+    Args:
+        email (str): Email address to check
+        
+    Returns:
+        Response: User data if found or error response
+    """
     if not email:
         return Response(
-            {'error': 'Email parameter is required'}, 
+            {"error": "Email parameter is required"}, 
             status=status.HTTP_400_BAD_REQUEST
         )
     
     try:
         user = User.objects.get(email=email)
-        return Response({
-            'id': user.id,
-            'email': user.email,
-            'fullname': f"{user.first_name} {user.last_name}".strip() or user.username
-        }, status=status.HTTP_200_OK)
+        return _user_found_response(user)
     except User.DoesNotExist:
         return Response(
-            {'error': 'User not found'}, 
+            {"error": "User not found"}, 
             status=status.HTTP_404_NOT_FOUND
         )
+
+
+def _create_auth_response(user, response_status):
+    """
+    Create authentication response with user data and token.
+    
+    Args:
+        user (User): Authenticated user instance
+        response_status (int): HTTP status code for response
+        
+    Returns:
+        Response: JSON response with user data and authentication token
+    """
+    token, created = Token.objects.get_or_create(user=user)
+    return Response({
+        'id': user.id,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'token': token.key
+    }, status=response_status)
+
+
+def _user_exists_error():
+    """
+    Create error response for existing user registration attempt.
+    
+    Returns:
+        Response: HTTP 400 response with user exists error message
+    """
+    return Response({
+        'error': 'A user with this email or username already exists.'
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+def _invalid_credentials_error():
+    """
+    Create error response for invalid login credentials.
+    
+    Returns:
+        Response: HTTP 401 response with invalid credentials error
+    """
+    return Response({
+        'error': 'Invalid credentials'
+    }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+def _validation_error(errors):
+    """
+    Create error response for validation failures.
+    
+    Args:
+        errors (dict): Serializer validation error details
+        
+    Returns:
+        Response: HTTP 400 response with validation error details
+    """
+    logger.error(f"Validation failed: {errors}")
+    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def _user_found_response(user):
+    """
+    Create success response with user information.
+    
+    Args:
+        user (User): User instance to return data for
+        
+    Returns:
+        Response: HTTP 200 response with user data
+    """
+    fullname = f"{user.first_name} {user.last_name}".strip()
+    return Response({
+        'id': user.id,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'fullname': fullname or user.username
+    }, status=status.HTTP_200_OK)
