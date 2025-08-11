@@ -3,6 +3,7 @@ API views for Kanban boards.
 """
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from kanban_app.models import Board, BoardMembership
 from kanban_app.api.serializers.board_serializers import BoardSerializer, BoardDetailSerializer
 import logging
@@ -25,7 +26,7 @@ class BoardViewSet(viewsets.ModelViewSet):
         Returns:
             Serializer: BoardDetailSerializer for retrieve, BoardSerializer otherwise
         """
-        if self.action == 'retrieve':
+        if self.action in ['retrieve', 'create', 'update', 'partial_update']:
             return BoardDetailSerializer
         return BoardSerializer
     
@@ -45,6 +46,8 @@ class BoardViewSet(viewsets.ModelViewSet):
         
         Args:
             request (Request): HTTP request with board data
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
             
         Returns:
             Response: Created board data or error
@@ -57,15 +60,28 @@ class BoardViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        board = serializer.save(owner=request.user)
-        
-        self._add_creator_as_admin(board, request.user)
+        board = self._create_board(serializer, request.user)
         
         logger.info("Board created successfully")
         return Response(
             BoardDetailSerializer(board).data, 
             status=status.HTTP_201_CREATED
         )
+    
+    def _create_board(self, serializer, user):
+        """
+        Create board and add creator as admin.
+        
+        Args:
+            serializer (BoardSerializer): Validated serializer
+            user (User): User creating the board
+            
+        Returns:
+            Board: Created board
+        """
+        board = serializer.save(owner=user)
+        self._add_creator_as_admin(board, user)
+        return board
     
     def _convert_title_to_name(self, data):
         """
@@ -76,6 +92,7 @@ class BoardViewSet(viewsets.ModelViewSet):
         """
         if 'title' in data and 'name' not in data:
             data['name'] = data['title']
+            logger.info(f"Converted 'title' to 'name': {data['title']}")
     
     def _add_creator_as_admin(self, board, user):
         """
@@ -90,3 +107,4 @@ class BoardViewSet(viewsets.ModelViewSet):
             user=user,
             role='ADMIN'
         )
+        logger.info(f"Added {user.email} as ADMIN member to board {board.name}")

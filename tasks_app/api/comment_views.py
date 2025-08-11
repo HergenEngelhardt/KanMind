@@ -4,10 +4,13 @@ API views for task comments.
 Provides views for listing, creating and deleting comments.
 """
 from rest_framework import generics, permissions, status
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.response import Response
 from tasks_app.models import Task, Comment
 from tasks_app.api.serializers import CommentSerializer
-from django.shortcuts import get_object_or_404
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TaskCommentListCreateView(generics.ListCreateAPIView):
@@ -25,8 +28,12 @@ class TaskCommentListCreateView(generics.ListCreateAPIView):
         
         Returns:
             QuerySet: Filtered Comment queryset for the task
+            
+        Raises:
+            NotFound: If task doesn't exist
         """
-        task_id = self.kwargs['task_id']
+        task_id = self.kwargs.get('task_id')
+        self._get_task(task_id)  # Validate task exists
         return Comment.objects.filter(task_id=task_id).order_by('-created_at')
     
     def perform_create(self, serializer):
@@ -37,13 +44,33 @@ class TaskCommentListCreateView(generics.ListCreateAPIView):
             serializer (CommentSerializer): Serializer with validated data
             
         Raises:
+            NotFound: If task doesn't exist
             PermissionDenied: If user doesn't have access to the task
         """
-        task_id = self.kwargs['task_id']
-        task = get_object_or_404(Task, pk=task_id)
+        task_id = self.kwargs.get('task_id')
+        task = self._get_task(task_id)
         
         self._check_task_access(task)
-        serializer.save(task=task, user=self.request.user)
+        serializer.save(task=task, created_by=self.request.user)
+        logger.info(f"Comment created for task {task_id}")
+    
+    def _get_task(self, task_id):
+        """
+        Get task by ID.
+        
+        Args:
+            task_id (int): Task ID to find
+            
+        Returns:
+            Task: Task object
+            
+        Raises:
+            NotFound: If task doesn't exist
+        """
+        try:
+            return Task.objects.get(id=task_id)
+        except Task.DoesNotExist:
+            raise NotFound(f"Task with id {task_id} not found")
     
     def _check_task_access(self, task):
         """
@@ -60,10 +87,7 @@ class TaskCommentListCreateView(generics.ListCreateAPIView):
         ).exists()
         
         if not has_access:
-            return Response(
-                {"error": "You do not have access to this task"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+            raise PermissionDenied("You do not have access to this task")
 
 
 class TaskCommentDeleteView(generics.DestroyAPIView):
@@ -72,7 +96,7 @@ class TaskCommentDeleteView(generics.DestroyAPIView):
     
     Provides endpoint to delete a specific comment if user is the author.
     """
-    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self):
@@ -83,11 +107,35 @@ class TaskCommentDeleteView(generics.DestroyAPIView):
             Comment: The requested comment object
             
         Raises:
+            NotFound: If comment doesn't exist
             PermissionDenied: If user doesn't own the comment
         """
-        comment = super().get_object()
+        task_id = self.kwargs.get('task_id')
+        comment_id = self.kwargs.get('pk')
+        
+        comment = self._get_comment(task_id, comment_id)
         self._check_comment_ownership(comment)
+        
         return comment
+    
+    def _get_comment(self, task_id, comment_id):
+        """
+        Get comment by task ID and comment ID.
+        
+        Args:
+            task_id (int): Task ID
+            comment_id (int): Comment ID
+            
+        Returns:
+            Comment: Comment object
+            
+        Raises:
+            NotFound: If comment doesn't exist
+        """
+        try:
+            return Comment.objects.get(task_id=task_id, id=comment_id)
+        except Comment.DoesNotExist:
+            raise NotFound("Comment not found")
     
     def _check_comment_ownership(self, comment):
         """
@@ -99,8 +147,23 @@ class TaskCommentDeleteView(generics.DestroyAPIView):
         Raises:
             PermissionDenied: If user doesn't own the comment
         """
-        if comment.user != self.request.user:
-            return Response(
-                {"error": "You cannot delete this comment"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if comment.created_by != self.request.user:
+            raise PermissionDenied("You cannot delete this comment")
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete the comment.
+        
+        Args:
+            request: HTTP request
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
+            
+        Returns:
+            Response: Empty response with 204 status
+        """
+        comment = self.get_object()
+        comment.delete()
+        
+        logger.info(f"Comment {kwargs.get('pk')} deleted from task {kwargs.get('task_id')}")
+        return Response(status=status.HTTP_204_NO_CONTENT)

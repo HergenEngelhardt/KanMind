@@ -5,8 +5,11 @@ Provides endpoints for managing tasks in the KanMind application.
 """
 from rest_framework import viewsets, generics, permissions, status
 from rest_framework.response import Response
-from tasks_app.models import Task, Comment
-from tasks_app.api.serializers import TaskSerializer, CommentSerializer  
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
+from tasks_app.models import Task
+from tasks_app.api.serializers import TaskSerializer
+from kanban_app.models import Column
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,49 +36,93 @@ class TaskViewSet(viewsets.ModelViewSet):
             column__board__members=user
         ).distinct()
     
-    def perform_create(self, serializer):
+    def create(self, request):
         """
-        Set the creator when creating a task.
+        Create a new task.
         
         Args:
-            serializer (TaskSerializer): Serializer with validated data
-        """
-        serializer.save(created_by=self.request.user)
-    
-    def partial_update(self, request, *args, **kwargs):
-        """
-        Update task fields with PATCH request.
-        
-        Args:
-            request (Request): HTTP request with updated fields
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
+            request (Request): HTTP request with task data
             
         Returns:
-            Response: Updated task data
+            Response: Created task data
             
         Raises:
             ValidationError: If task data is invalid
         """
-        instance = self.get_object()
-        serializer = self.get_serializer(
-            instance, 
-            data=request.data, 
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        self._validate_required_fields(request.data)
         
-        return Response(serializer.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        task = self._save_task(serializer, request.user)
+        logger.info(f"Task created: {task.title}")
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    def perform_update(self, serializer):
+    def _validate_required_fields(self, data):
         """
-        Save the updated task instance.
+        Validate required fields for task creation.
         
         Args:
-            serializer (TaskSerializer): Serializer with validated data
+            data (dict): Task data to validate
+            
+        Raises:
+            ValidationError: If required fields are missing
         """
-        serializer.save()
+        if not data.get('column'):
+            raise ValidationError({"column": "Column field is required"})
+        
+        if not data.get('title'):
+            raise ValidationError({"title": "Title field is required"})
+    
+    def _save_task(self, serializer, user):
+        """
+        Save task with the current user as creator.
+        
+        Args:
+            serializer (TaskSerializer): Validated serializer
+            user (User): User creating the task
+            
+        Returns:
+            Task: Created task
+        """
+        return serializer.save(created_by=user)
+    
+    @action(detail=False, methods=['get'])
+    def assigned_to_me(self, request):
+        """
+        List tasks assigned to current user.
+        
+        Args:
+            request: HTTP request
+            
+        Returns:
+            Response: List of assigned tasks
+        """
+        tasks = Task.objects.filter(
+            assignee=request.user
+        ).distinct()
+        
+        serializer = self.get_serializer(tasks, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def reviewing(self, request):
+        """
+        List tasks user is reviewing.
+        
+        Args:
+            request: HTTP request
+            
+        Returns:
+            Response: List of tasks to review
+        """
+        tasks = Task.objects.filter(
+            reviewers=request.user
+        ).distinct()
+        
+        serializer = self.get_serializer(tasks, many=True)
+        return Response(serializer.data)
 
 
 class TaskAssignedListView(generics.ListAPIView):
@@ -94,7 +141,7 @@ class TaskAssignedListView(generics.ListAPIView):
         Returns:
             QuerySet: Filtered Task queryset assigned to the user
         """
-        return Task.objects.filter(assigned_to=self.request.user)
+        return Task.objects.filter(assignee=self.request.user)
 
 
 class TaskReviewingListView(generics.ListAPIView):
