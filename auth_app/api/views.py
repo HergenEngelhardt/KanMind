@@ -14,9 +14,6 @@ from rest_framework.exceptions import ValidationError, AuthenticationFailed
 from .serializers import RegisterSerializer, LoginSerializer
 import logging
 
-logger = logging.getLogger(__name__)
-
-
 class RegistrationView(APIView):
     """
     View for user registration.
@@ -73,7 +70,6 @@ class RegistrationView(APIView):
         user = serializer.save()
         token_data = self._create_token_response(user)
         
-        logger.info(f"User registered successfully: {user.username}")
         return Response(token_data, status=status.HTTP_201_CREATED)
     
     def _create_token_response(self, user):
@@ -131,7 +127,6 @@ class LoginView(APIView):
             
         token_data = self._create_token_response(user)
         
-        logger.info(f"User logged in successfully: {email}")
         return Response(token_data, status=status.HTTP_200_OK)
     
     def _get_user_by_email(self, email):

@@ -9,7 +9,6 @@ from kanban_app.api.serializers.column_serializers import ColumnSerializer
 from django.shortcuts import get_object_or_404
 import logging
 
-logger = logging.getLogger(__name__)
 
 
 class ColumnListCreateView(generics.ListCreateAPIView):
@@ -53,7 +52,6 @@ class ColumnListCreateView(generics.ListCreateAPIView):
         position = self._get_next_position(board)
         
         serializer.save(board=board, position=position)
-        logger.info(f"Column created for board {board.id}")
     
     def _get_board(self, board_id):
         """

@@ -7,8 +7,6 @@ import logging
 
 from kanban_app.models import Column
 
-logger = logging.getLogger(__name__)
-
 
 class ColumnSerializer(serializers.ModelSerializer):
     """

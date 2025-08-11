@@ -9,7 +9,6 @@ from django.contrib.auth.models import User
 from kanban_app.models import Column
 import logging
 
-logger = logging.getLogger(__name__)
 
 
 class UserSerializer(serializers.ModelSerializer):

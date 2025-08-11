@@ -10,8 +10,6 @@ from tasks_app.models import Task, Comment
 from tasks_app.api.serializers import CommentSerializer
 import logging
 
-logger = logging.getLogger(__name__)
-
 
 class TaskCommentListCreateView(generics.ListCreateAPIView):
     """
@@ -52,7 +50,6 @@ class TaskCommentListCreateView(generics.ListCreateAPIView):
         
         self._check_task_access(task)
         serializer.save(task=task, created_by=self.request.user)
-        logger.info(f"Comment created for task {task_id}")
     
     def _get_task(self, task_id):
         """
@@ -168,5 +165,4 @@ class TaskCommentDeleteView(generics.DestroyAPIView):
         
         comment.delete()
         
-        logger.info(f"Comment {comment_id} deleted from task {task_id}")
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -8,7 +8,6 @@ from kanban_app.models import Board, BoardMembership
 from kanban_app.api.serializers.board_serializers import BoardSerializer, BoardDetailSerializer
 import logging
 
-logger = logging.getLogger(__name__)
 
 
 class BoardViewSet(viewsets.ModelViewSet):
@@ -62,7 +61,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         board = self._create_board(serializer, request.user)
         
-        logger.info("Board created successfully")
         return Response(
             BoardDetailSerializer(board).data, 
             status=status.HTTP_201_CREATED
@@ -92,7 +90,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         """
         if 'title' in data and 'name' not in data:
             data['name'] = data['title']
-            logger.info(f"Converted 'title' to 'name': {data['title']}")
     
     def _add_creator_as_admin(self, board, user):
         """
@@ -107,4 +104,3 @@ class BoardViewSet(viewsets.ModelViewSet):
             user=user,
             role='ADMIN'
         )
-        logger.info(f"Added {user.email} as ADMIN member to board {board.name}")

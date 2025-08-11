@@ -13,7 +13,6 @@ from tasks_app.api.serializers import TaskSerializer
 from kanban_app.models import Column
 import logging
 
-logger = logging.getLogger(__name__)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -52,19 +51,14 @@ class TaskViewSet(viewsets.ModelViewSet):
         """
         try:
             data = self.prepare_request_data(request)
-            logger.info(f"Prepared task data: {data}")
             
             serializer = self.get_serializer(data=data)
             if not serializer.is_valid():
-                logger.error(f"Validation errors: {serializer.errors}")
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-            task = serializer.save(created_by=request.user)
-            logger.info(f"Task created: {task.id}")
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            logger.error(f"Task creation failed: {str(e)}")
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
@@ -200,7 +194,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         task_id = instance.id
         
         self.perform_destroy(instance)
-        logger.info(f"Task {task_id} deleted by user {request.user.username}")
         
         return Response(status=status.HTTP_204_NO_CONTENT)
     
