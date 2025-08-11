@@ -31,7 +31,7 @@ class TaskCommentListCreateView(generics.ListCreateAPIView):
             NotFound: If task doesn't exist
         """
         task_id = self.kwargs.get('task_id')
-        self._get_task(task_id)  # Validate task exists
+        self._get_task(task_id) 
         return Comment.objects.filter(task_id=task_id).order_by('-created_at')
     
     def perform_create(self, serializer):

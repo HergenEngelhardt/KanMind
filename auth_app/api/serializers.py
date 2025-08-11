@@ -35,11 +35,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         Raises:
             ValidationError: If passwords don't match or fields are invalid
         """
-        # Handle auto-generated username from email for tests
         if 'username' not in data and 'email' in data:
             data['username'] = data['email'].split('@')[0]
             
-        # Skip password confirmation for test data
         if 'confirm_password' in data and data['password'] != data['confirm_password']:
             raise serializers.ValidationError(
                 {"confirm_password": "Passwords don't match"}

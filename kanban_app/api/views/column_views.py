@@ -31,7 +31,7 @@ class ColumnListCreateView(generics.ListCreateAPIView):
             NotFound: If board doesn't exist
         """
         board_id = self.kwargs.get('board_id')
-        self._get_board(board_id)  # Validate board exists
+        self._get_board(board_id) 
         return Column.objects.filter(board_id=board_id).order_by('position')
     
     def perform_create(self, serializer):
