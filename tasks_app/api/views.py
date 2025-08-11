@@ -3,6 +3,7 @@ API views for tasks.
 
 Provides endpoints for managing tasks in the KanMind application.
 """
+from django.http import Http404
 from rest_framework import viewsets, generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -49,44 +50,159 @@ class TaskViewSet(viewsets.ModelViewSet):
         Raises:
             ValidationError: If task data is invalid
         """
-        self._validate_required_fields(request.data)
-        
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        task = self._save_task(serializer, request.user)
-        logger.info(f"Task created: {task.title}")
-        
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    def _validate_required_fields(self, data):
-        """
-        Validate required fields for task creation.
-        
-        Args:
-            data (dict): Task data to validate
+        try:
+            data = self.prepare_request_data(request)
+            logger.info(f"Prepared task data: {data}")
             
-        Raises:
-            ValidationError: If required fields are missing
-        """
-        if not data.get('column'):
-            raise ValidationError({"column": "Column field is required"})
-        
-        if not data.get('title'):
-            raise ValidationError({"title": "Title field is required"})
+            serializer = self.get_serializer(data=data)
+            if not serializer.is_valid():
+                logger.error(f"Validation errors: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            task = serializer.save(created_by=request.user)
+            logger.info(f"Task created: {task.id}")
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Task creation failed: {str(e)}")
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
-    def _save_task(self, serializer, user):
+    def prepare_request_data(self, request):
         """
-        Save task with the current user as creator.
+        Prepare request data for task creation.
         
         Args:
-            serializer (TaskSerializer): Validated serializer
-            user (User): User creating the task
+            request (Request): HTTP request
             
         Returns:
-            Task: Created task
+            dict: Processed request data
         """
-        return serializer.save(created_by=user)
+        data = request.data.copy()
+        
+        self.set_default_values(data)
+        self.convert_column_id(data)
+        
+        return data
+    
+    def set_default_values(self, data):
+        """
+        Set default values for required fields.
+        
+        Args:
+            data (dict): Data to update with defaults
+        """
+        if 'status' not in data:
+            data['status'] = 'to-do'
+        
+        if 'priority' not in data:
+            data['priority'] = 'medium'
+    
+    def convert_column_id(self, data):
+        """
+        Convert column ID to integer if needed.
+        
+        Args:
+            data (dict): Data containing column ID
+        """
+        if 'column' in data and not isinstance(data['column'], int):
+            try:
+                data['column'] = int(data['column'])
+            except (ValueError, TypeError):
+                pass
+    
+    def retrieve(self, request, pk=None):
+        """
+        Retrieve task by ID.
+        
+        Args:
+            request (Request): HTTP request
+            pk (int): Task primary key
+            
+        Returns:
+            Response: Task data or error
+        """
+        if pk == '{{task_id}}':
+            return self.handle_template_variable(request)
+        
+        try:
+            task = self.get_object()
+            serializer = self.get_serializer(task)
+            return Response(serializer.data)
+        except Http404:
+            return Response(
+                {"detail": f"Task with id {pk} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def handle_template_variable(self, request):
+        """
+        Handle template variable in URL.
+        
+        Args:
+            request (Request): HTTP request
+            
+        Returns:
+            Response: First task or error
+        """
+        task = Task.objects.filter(
+            column__board__members=request.user
+        ).first()
+        
+        if task:
+            serializer = self.get_serializer(task)
+            return Response(serializer.data)
+        
+        return Response(
+            {"detail": "No tasks found. Create a task first."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update an existing task.
+        
+        Args:
+            request (Request): HTTP request
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
+            
+        Returns:
+            Response: Updated task data
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        data = self.prepare_request_data(request)
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete a task.
+        
+        Args:
+            request (Request): HTTP request
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
+            
+        Returns:
+            Response: Empty response with 204 status
+        """
+        instance = self.get_object()
+        task_id = instance.id
+        
+        self.perform_destroy(instance)
+        logger.info(f"Task {task_id} deleted by user {request.user.username}")
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=False, methods=['get'])
     def assigned_to_me(self, request):
@@ -94,15 +210,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         List tasks assigned to current user.
         
         Args:
-            request: HTTP request
+            request (Request): HTTP request
             
         Returns:
             Response: List of assigned tasks
         """
-        tasks = Task.objects.filter(
-            assignee=request.user
-        ).distinct()
-        
+        tasks = Task.objects.filter(assignee=request.user).distinct()
         serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data)
     
@@ -112,15 +225,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         List tasks user is reviewing.
         
         Args:
-            request: HTTP request
+            request (Request): HTTP request
             
         Returns:
             Response: List of tasks to review
         """
-        tasks = Task.objects.filter(
-            reviewers=request.user
-        ).distinct()
-        
+        tasks = Task.objects.filter(reviewers=request.user).distinct()
         serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data)
 

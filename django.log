@@ -37901,3 +37901,35 @@ User logged in successfully: user1754922400342@example.com
 Added user1754922400342@example.com as ADMIN member to board 
 Board created successfully
 Column created for board 29
+User registered successfully: user1754923746884
+User logged in successfully: user1754923746884@example.com
+Added user1754923746884@example.com as ADMIN member to board 
+Board created successfully
+Column created for board 30
+User registered successfully: user1754924142221
+User logged in successfully: user1754924142221@example.com
+Added user1754924142221@example.com as ADMIN member to board 
+Board created successfully
+Column created for board 31
+Task creation failed: {'priority': [ErrorDetail(string='"MEDIUM" is not a valid choice.', code='invalid_choice')], 'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')]}
+User registered successfully: user1754924430850
+User logged in successfully: user1754924430850@example.com
+Added user1754924430850@example.com as ADMIN member to board 
+Board created successfully
+Column created for board 32
+Task creation failed: {'priority': [ErrorDetail(string='"MEDIUM" is not a valid choice.', code='invalid_choice')], 'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')]}
+User registered successfully: user1754924657805
+User logged in successfully: user1754924657805@example.com
+Added user1754924657805@example.com as ADMIN member to board 
+Board created successfully
+Column created for board 33
+Task creation data: {'title': 'Test Task 1754924659846', 'description': 'Test task description', 'column': 89, 'priority': 'MEDIUM', 'status': 'TODO', 'due_date': '2025-08-12'}
+Serializer validation errors: {'priority': [ErrorDetail(string='"MEDIUM" is not a valid choice.', code='invalid_choice')], 'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')]}
+Task creation failed: {'priority': [ErrorDetail(string='"MEDIUM" is not a valid choice.', code='invalid_choice')], 'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')]}
+User registered successfully: user1754924981580
+User logged in successfully: user1754924981580@example.com
+Added user1754924981580@example.com as ADMIN member to board 
+Board created successfully
+Column created for board 34
+Prepared task data: {'title': 'Test Task 1754924983541', 'description': 'Test task description', 'column': 90, 'priority': 'MEDIUM', 'status': 'TODO', 'due_date': '2025-08-12'}
+Validation errors: {'priority': [ErrorDetail(string='"MEDIUM" is not a valid choice.', code='invalid_choice')], 'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')]}

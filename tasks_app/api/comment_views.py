@@ -155,7 +155,7 @@ class TaskCommentDeleteView(generics.DestroyAPIView):
         Delete the comment.
         
         Args:
-            request: HTTP request
+            request (Request): HTTP request
             *args: Variable length argument list
             **kwargs: Arbitrary keyword arguments
             
@@ -163,7 +163,10 @@ class TaskCommentDeleteView(generics.DestroyAPIView):
             Response: Empty response with 204 status
         """
         comment = self.get_object()
+        comment_id = self.kwargs.get('pk')
+        task_id = self.kwargs.get('task_id')
+        
         comment.delete()
         
-        logger.info(f"Comment {kwargs.get('pk')} deleted from task {kwargs.get('task_id')}")
+        logger.info(f"Comment {comment_id} deleted from task {task_id}")
         return Response(status=status.HTTP_204_NO_CONTENT)

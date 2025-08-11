@@ -6,6 +6,10 @@ Provides serialization and deserialization for Task and Comment models.
 from rest_framework import serializers
 from tasks_app.models import Task, Comment  
 from django.contrib.auth.models import User
+from kanban_app.models import Column
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -59,11 +63,120 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = (
-            'id', 'column', 'title', 'description', 'assigned_to',
+            'id', 'column', 'title', 'description', 'assigned_to', 'assignee',
             'reviewers', 'created_by', 'created_at', 'updated_at',
             'priority', 'status', 'due_date'
         )
         read_only_fields = ('created_by', 'created_at', 'updated_at')
+    
+    def validate(self, attrs):
+        """
+        Validate task data as a whole.
+        
+        Args:
+            attrs (dict): The attribute dictionary to validate
+            
+        Returns:
+            dict: The validated attributes
+            
+        Raises:
+            ValidationError: If validation fails
+        """
+        self.validate_required_fields(attrs)
+        self.validate_column_field(attrs)
+        self.validate_priority_field(attrs)
+        self.validate_status_field(attrs)
+        
+        return attrs
+    
+    def validate_required_fields(self, attrs):
+        """
+        Validate required fields are present.
+        
+        Args:
+            attrs (dict): Attributes to validate
+            
+        Raises:
+            ValidationError: If required fields missing
+        """
+        errors = {}
+        
+        if 'title' not in attrs:
+            errors['title'] = "Title field is required"
+            
+        if 'column' not in attrs:
+            errors['column'] = "Column field is required"
+            
+        if errors:
+            raise serializers.ValidationError(errors)
+    
+    def validate_column_field(self, attrs):
+        """
+        Validate column field exists and is valid.
+        
+        Args:
+            attrs (dict): Attribute dictionary to validate
+            
+        Raises:
+            ValidationError: If column is invalid
+        """
+        if 'column' not in attrs:
+            return
+            
+        column_data = attrs['column']
+        
+        try:
+            if isinstance(column_data, Column):
+                return
+            
+            column_id = int(column_data)
+            attrs['column'] = Column.objects.get(id=column_id)
+        except (ValueError, TypeError):
+            raise serializers.ValidationError({
+                'column': 'Column ID must be a number'
+            })
+        except Column.DoesNotExist:
+            raise serializers.ValidationError({
+                'column': f'Column with id {column_data} does not exist'
+            })
+    
+    def validate_priority_field(self, attrs):
+        """
+        Validate priority field if present.
+        
+        Args:
+            attrs (dict): Attribute dictionary to validate
+            
+        Raises:
+            ValidationError: If priority is invalid
+        """
+        if 'priority' not in attrs:
+            return
+            
+        valid_priorities = ['low', 'medium', 'high']
+        if attrs['priority'] not in valid_priorities:
+            raise serializers.ValidationError({
+                'priority': f'Priority must be one of: {", ".join(valid_priorities)}'
+            })
+    
+    def validate_status_field(self, attrs):
+        """
+        Validate status field if present.
+        
+        Args:
+            attrs (dict): Attribute dictionary to validate
+            
+        Raises:
+            ValidationError: If status is invalid
+        """
+        if 'status' not in attrs:
+            return
+            
+        valid_statuses = ['to-do', 'in-progress', 'review', 'done']
+        if attrs['status'] not in valid_statuses:
+            raise serializers.ValidationError({
+                'status': f'Status must be one of: {", ".join(valid_statuses)}'
+            })
     
     def create(self, validated_data):
         """
@@ -74,11 +187,16 @@ class TaskSerializer(serializers.ModelSerializer):
             
         Returns:
             Task: Created task instance
-            
-        Raises:
-            ValidationError: If data is invalid
         """
-        return self._process_task_data(validated_data, is_new=True)
+        reviewers_data = self.initial_data.get('reviewers', [])
+        assignee_id = self.initial_data.get('assignee')
+        
+        task = Task.objects.create(**validated_data)
+        
+        self.process_assignee(task, assignee_id)
+        self.process_reviewers(task, reviewers_data)
+        
+        return task
     
     def update(self, instance, validated_data):
         """
@@ -90,29 +208,56 @@ class TaskSerializer(serializers.ModelSerializer):
             
         Returns:
             Task: Updated task instance
-            
-        Raises:
-            ValidationError: If data is invalid
         """
-        return self._process_task_data(validated_data, instance=instance)
+        reviewers_data = self.initial_data.get('reviewers', [])
+        assignee_id = self.initial_data.get('assignee')
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        
+        self.process_assignee(instance, assignee_id)
+        self.process_reviewers(instance, reviewers_data)
+        
+        return instance
     
-    def _process_task_data(self, validated_data, instance=None, is_new=False):
+    def process_assignee(self, task, assignee_id):
         """
-        Process task data for create or update operations.
+        Process assignee field.
         
         Args:
-            validated_data (dict): Validated task data
-            instance (Task, optional): Existing task for update. Defaults to None.
-            is_new (bool, optional): Whether this is a new task. Defaults to False.
-            
-        Returns:
-            Task: Created or updated task instance
+            task (Task): Task to update
+            assignee_id: ID of assignee user
         """
-        assignee_id = self.initial_data.get('assigned_to')
+        if not assignee_id:
+            return
+            
+        try:
+            assignee_id = int(assignee_id)
+            user = User.objects.get(id=assignee_id)
+            task.assignee = user
+            task.save()
+        except (ValueError, TypeError, User.DoesNotExist):
+            pass
+    
+    def process_reviewers(self, task, reviewer_ids):
+        """
+        Process reviewers field.
         
-        if assignee_id:
-            validated_data['assignee_id'] = assignee_id
+        Args:
+            task (Task): Task to update
+            reviewer_ids: List of reviewer user IDs
+        """
+        if not reviewer_ids or not isinstance(reviewer_ids, list):
+            return
+            
+        task.reviewers.clear()
         
-        if is_new:
-            return super().create(validated_data)
-        return super().update(instance, validated_data)
+        for reviewer_id in reviewer_ids:
+            try:
+                reviewer_id = int(reviewer_id)
+                user = User.objects.get(id=reviewer_id)
+                task.reviewers.add(user)
+            except (ValueError, TypeError, User.DoesNotExist):
+                continue
