@@ -1,7 +1,7 @@
 """
-User serializers module for the Kanban API.
+User serializer module for the Kanban API.
 
-This module contains serializers for user-related operations in the Kanban application.
+This module contains serializers for user-related operations.
 """
 
 from rest_framework import serializers
@@ -10,32 +10,28 @@ from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     """
-    Serializer for User model with additional fullname field.
+    Serializer for user representation.
     
-    Provides serialization for Django's built-in User model with an additional
-    computed fullname field that combines first_name and last_name.
+    Provides basic user information with a computed full name.
+    
+    Args:
+        serializers.ModelSerializer: DRF base serializer class
     """
-    
     fullname = serializers.SerializerMethodField()
-
+    
     class Meta:
-        """
-        Meta configuration for UserSerializer.
-        
-        Defines the model, fields, and read-only fields for the serializer.
-        """
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'fullname']
-        read_only_fields = ['id']
-
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'fullname')
+    
     def get_fullname(self, obj):
         """
-        Generate a fullname from first_name and last_name.
+        Compute the full name of the user.
         
         Args:
-            obj (User): The User instance to get the fullname for.
+            obj (User): User object
             
         Returns:
-            str: The user's full name if available, otherwise the username.
+            str: Full name or username if no name is set
         """
-        return f"{obj.first_name} {obj.last_name}".strip() or obj.username
+        name = f"{obj.first_name} {obj.last_name}".strip()
+        return name or obj.username

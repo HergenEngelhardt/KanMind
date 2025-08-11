@@ -1,165 +1,87 @@
 """
-Serializers for user authentication operations.
+Serializers for authentication endpoints.
 
-This module contains serializers for user registration and login operations
-with proper validation and data transformation.
+Provides serializers for user registration and login.
 """
-
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from django.contrib.auth.password_validation import validate_password
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user data representation.
-    
-    Provides basic user information for API responses including
-    name fields and email without sensitive data.
-    """
-    
-    fullname = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'fullname')
-        read_only_fields = ('id',)
-    
-    def get_fullname(self, obj):
-        """
-        Get user's full name or fallback to username.
-        
-        Args:
-            obj (User): User instance
-            
-        Returns:
-            str: Full name or username if name fields empty
-        """
-        fullname = f"{obj.first_name} {obj.last_name}".strip()
-        return fullname or obj.username
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
-    Serializer for user registration with password validation.
+    Serializer for user registration.
     
-    Handles user creation with encrypted password and proper validation
-    of all required fields including email uniqueness.
+    Handles validation and creation of new user accounts.
     """
-    
-    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
     
     class Meta:
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        fields = ('username', 'email', 'password', 'confirm_password', 
+                  'first_name', 'last_name')
     
-    def validate_email(self, value):
+    def validate(self, data):
         """
-        Validate email uniqueness.
+        Validate registration data.
         
         Args:
-            value (str): Email address to validate
+            data (dict): Registration data to validate
             
         Returns:
-            str: Validated email address
+            dict: Validated data
             
         Raises:
-            ValidationError: If email already exists
+            ValidationError: If passwords don't match or email/username exist
         """
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already exists")
-        return value.lower().strip()
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError(
+                {"confirm_password": "Passwords don't match"}
+            )
+        
+        self._validate_username_email(data)
+            
+        return data
     
-    def validate_username(self, value):
+    def _validate_username_email(self, data):
         """
-        Validate username uniqueness.
+        Validate username and email uniqueness.
         
         Args:
-            value (str): Username to validate
-            
-        Returns:
-            str: Validated username
+            data (dict): Data containing username and email
             
         Raises:
-            ValidationError: If username already exists
+            ValidationError: If username or email already exists
         """
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Username already exists")
-        return value.strip()
+        if User.objects.filter(username=data['username']).exists():
+            raise serializers.ValidationError(
+                {"username": "Username already exists"}
+            )
+            
+        if User.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError(
+                {"email": "Email already exists"}
+            )
     
     def create(self, validated_data):
         """
-        Create user with encrypted password.
+        Create a new user.
         
         Args:
-            validated_data (dict): Validated user registration data
+            validated_data (dict): Validated registration data
             
         Returns:
-            User: Created user instance with encrypted password
-            
-        Raises:
-            IntegrityError: If username or email already exists
+            User: Created user object
         """
-        return self._create_user_instance(validated_data)
-    
-    def _create_user_instance(self, data):
-        """
-        Create and return user instance.
-        
-        Args:
-            data (dict): User creation data
-            
-        Returns:
-            User: Created user instance
-        """
-        return User.objects.create_user(
-            username=data['username'],
-            email=data['email'],
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            password=data['password']
-        )
+        validated_data.pop('confirm_password')
+        return User.objects.create_user(**validated_data)
 
 
-class UserLoginSerializer(serializers.Serializer):
+class LoginSerializer(serializers.Serializer):
     """
-    Serializer for user login credentials validation.
+    Serializer for user login.
     
-    Validates email and password format before authentication
-    attempt to ensure proper data structure.
+    Validates login credentials.
     """
-    
-    email = serializers.EmailField()
+    username = serializers.CharField()
     password = serializers.CharField()
-    
-    def validate_email(self, value):
-        """
-        Validate email format and presence.
-        
-        Args:
-            value (str): Email address to validate
-            
-        Returns:
-            str: Validated email address
-            
-        Raises:
-            ValidationError: If email format is invalid
-        """
-        return value.lower().strip()
-    
-    def validate_password(self, value):
-        """
-        Validate password presence and basic requirements.
-        
-        Args:
-            value (str): Password to validate
-            
-        Returns:
-            str: Validated password
-            
-        Raises:
-            ValidationError: If password is empty or too short
-        """
-        if len(value) < 3:
-            raise serializers.ValidationError("Password too short")
-        return value

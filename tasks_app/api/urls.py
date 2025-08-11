@@ -1,16 +1,39 @@
+"""
+URL configuration for task API endpoints.
+
+Defines URL patterns for task-related operations.
+"""
 from django.urls import path
-from .views import TaskViewSet
-from .comment_views import CommentListCreateView, CommentDetailView
+from .views import (
+    TaskViewSet, 
+    TaskAssignedListView,
+    TaskReviewingListView
+)
+from .comment_views import (
+    TaskCommentListCreateView,
+    TaskCommentDeleteView
+)
 
 urlpatterns = [
-    path('tasks/assigned-to-me/', TaskViewSet.as_view({'get': 'assigned_to_me'}), name='tasks-assigned-to-me'),
-    path('tasks/reviewing/', TaskViewSet.as_view({'get': 'reviewing'}), name='tasks-reviewing'),
-    path('tasks/', TaskViewSet.as_view({'post': 'create'}), name='tasks-create'),
+    path('tasks/assigned-to-me/', 
+         TaskAssignedListView.as_view(), 
+         name='tasks-assigned'),
+    path('tasks/reviewing/', 
+         TaskReviewingListView.as_view(), 
+         name='tasks-reviewing'),
+    path('tasks/', TaskViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='tasks-list'),
     path('tasks/<int:pk>/', TaskViewSet.as_view({
         'get': 'retrieve',
         'patch': 'partial_update',
         'delete': 'destroy'
-    }), name='tasks-detail'),
-    path('tasks/<int:task_id>/comments/', CommentListCreateView.as_view(), name='task-comments'),
-    path('tasks/<int:task_id>/comments/<int:comment_id>/', CommentDetailView.as_view(), name='task-comment-detail'),
+    }), name='task-detail'),
+    path('tasks/<int:task_id>/comments/', 
+         TaskCommentListCreateView.as_view(), 
+         name='task-comments'),
+    path('tasks/<int:task_id>/comments/<int:pk>/', 
+         TaskCommentDeleteView.as_view(), 
+         name='task-comment-delete'),
 ]

@@ -37869,3 +37869,20 @@ Successful login for user: test@example.com
 Validation failed: {'email': [ErrorDetail(string='Email already exists', code='invalid')], 'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
 Successful login for user: test@example.com
 Successful login for user: test@example.com
+Successful login for user: testuser@example.com
+Validation failed: {'email': [ErrorDetail(string='Email already exists', code='invalid')], 'username': [ErrorDetail(string='A user with that username already exists.', code='unique')]}
+Successful login for user: testuser@example.com
+Successful login for user: testuser@example.com
+Validation failed: {'email': [ErrorDetail(string='This field is required.', code='required')]}
+User registered successfully: user1754900891482
+User logged in successfully: user1754900891482
+User registered successfully: user1754901569145
+User logged in successfully: user1754901569145
+User registered successfully: user1754916796895
+User logged in successfully: user1754916796895
+User registered successfully: user1754916973223
+User logged in successfully: user1754916973223
+User registered successfully: user1754917259
+Board created successfully
+User registered successfully: user1754917951
+Board created successfully

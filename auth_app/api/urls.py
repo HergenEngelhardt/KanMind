@@ -1,15 +1,26 @@
 """
 URL configuration for authentication API endpoints.
 
-This module defines URL patterns for user authentication related views
-including login, registration, and email validation.
+Defines URL patterns for authentication operations.
 """
-
 from django.urls import path
-from .views import registration_view, login_view, email_check
+from rest_framework.permissions import AllowAny
+from .views import RegistrationView, LoginView, EmailCheckView
+
+class PublicRegistrationView(RegistrationView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+class PublicLoginView(LoginView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+class PublicEmailCheckView(EmailCheckView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
 urlpatterns = [
-    path('registration/', registration_view, name='api-registration'),
-    path('login/', login_view, name='api-login'),
-    path('email-check/', email_check, name='api-email-check'),
+    path('registration/', PublicRegistrationView.as_view(), name='registration'),
+    path('login/', PublicLoginView.as_view(), name='login'),
+    path('email-check/', PublicEmailCheckView.as_view(), name='email-check'),
 ]

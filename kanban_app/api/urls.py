@@ -1,5 +1,9 @@
+"""
+URL configuration for board API endpoints.
+"""
 from django.urls import path
 from .views.board_views import BoardViewSet
+from .views.column_views import ColumnListCreateView, ColumnDetailView
 
 urlpatterns = [
     path('boards/', BoardViewSet.as_view({
@@ -11,4 +15,10 @@ urlpatterns = [
         'patch': 'partial_update',
         'delete': 'destroy'
     }), name='boards-detail'),
+    path('boards/<int:board_id>/columns/', 
+         ColumnListCreateView.as_view(), 
+         name='board-columns-list'),
+    path('columns/<int:pk>/', 
+         ColumnDetailView.as_view(), 
+         name='column-detail'),
 ]

@@ -1,38 +1,9 @@
 """
-Main serializers module for the Kanban API.
+Import serializer classes for the Kanban app.
 
-This module provides a centralized import point for all serializers
-used in the Kanban application, including board, user, and column serializers.
+Makes all serializer classes available for import usage.
 """
 
-from .board_serializers import *
-from .user_serializers import *
-from .column_serializers import *
-
-from .board_serializers import (
-    BoardListSerializer,
-    BoardDetailSerializer, 
-    BoardCreateSerializer,
-    BoardUpdateSerializer,
-    BoardMembershipSerializer
-)
+from .board_serializers import BoardSerializer, BoardDetailSerializer, BoardMembershipSerializer
 from .user_serializers import UserSerializer
-from .column_serializers import (
-    ColumnSerializer,
-    ColumnCreateSerializer,
-    ColumnUpdateSerializer,
-    ColumnSimpleSerializer
-)
-
-__all__ = [
-    'BoardListSerializer',
-    'BoardDetailSerializer', 
-    'BoardCreateSerializer',
-    'BoardUpdateSerializer',
-    'BoardMembershipSerializer',
-    'UserSerializer',
-    'ColumnSerializer',
-    'ColumnCreateSerializer',
-    'ColumnUpdateSerializer',
-    'ColumnSimpleSerializer'
-]
+from .column_serializers import ColumnSerializer

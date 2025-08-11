@@ -1,89 +1,116 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+"""
+API views for tasks.
 
-from ..models import Task
-from .serializers import TaskSerializer
-from kanban_app.models import Column
+Provides endpoints for managing tasks in the KanMind application.
+"""
+from rest_framework import viewsets, generics, permissions, status
+from rest_framework.response import Response
+from tasks_app.models import Task, Comment
+from tasks_app.api.serializers import TaskSerializer, CommentSerializer  
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for managing Task CRUD operations.
+    ViewSet for managing tasks.
     
-    Provides complete task management functionality including creation,
-    retrieval, updating, and deletion with user-specific filtering.
+    Provides endpoints for creating, retrieving, updating and deleting tasks.
     """
-    
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
-
+    permission_classes = [permissions.IsAuthenticated]
+    
     def get_queryset(self):
         """
-        Get the queryset of all tasks with related data.
+        Return tasks accessible to current user.
         
         Returns:
-            QuerySet: All tasks with prefetched assignee, column, board, and reviewers
+            QuerySet: Filtered Task queryset for the current user
         """
-        return Task.objects.all().select_related(
-            'assignee', 'column__board'
-        ).prefetch_related('reviewers')
-
-    @action(detail=False, methods=['get'])
-    def assigned_to_me(self, request):
+        user = self.request.user
+        return Task.objects.filter(
+            column__board__members=user
+        ).distinct()
+    
+    def perform_create(self, serializer):
         """
-        Get tasks assigned to the current user.
+        Set the creator when creating a task.
         
         Args:
-            request: HTTP request object
+            serializer (TaskSerializer): Serializer with validated data
+        """
+        serializer.save(created_by=self.request.user)
+    
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Update task fields with PATCH request.
+        
+        Args:
+            request (Request): HTTP request with updated fields
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
             
         Returns:
-            Response: Serialized list of tasks assigned to current user
+            Response: Updated task data
+            
+        Raises:
+            ValidationError: If task data is invalid
         """
-        tasks = self._get_user_assigned_tasks(request.user)
-        serializer = self.get_serializer(tasks, many=True)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, 
+            data=request.data, 
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
         return Response(serializer.data)
-
-    def _get_user_assigned_tasks(self, user):
+    
+    def perform_update(self, serializer):
         """
-        Retrieve tasks assigned to a specific user.
+        Save the updated task instance.
         
         Args:
-            user (User): User to filter tasks by
-            
-        Returns:
-            QuerySet: Tasks assigned to the user with related data
+            serializer (TaskSerializer): Serializer with validated data
         """
-        return Task.objects.filter(assignee=user).select_related(
-            'column__board', 'created_by', 'assignee'
-        ).prefetch_related('reviewers')
+        serializer.save()
 
-    @action(detail=False, methods=['get'])
-    def reviewing(self, request):
-        """
-        Get tasks being reviewed by the current user.
-        
-        Args:
-            request: HTTP request object
-            
-        Returns:
-            Response: Serialized list of tasks being reviewed by current user
-        """
-        tasks = self._get_user_reviewing_tasks(request.user)
-        serializer = self.get_serializer(tasks, many=True)
-        return Response(serializer.data)
 
-    def _get_user_reviewing_tasks(self, user):
+class TaskAssignedListView(generics.ListAPIView):
+    """
+    API view for listing tasks assigned to the current user.
+    
+    Provides a read-only endpoint for tasks assigned to the authenticated user.
+    """
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
         """
-        Retrieve tasks being reviewed by a specific user.
+        Return tasks assigned to current user.
         
-        Args:
-            user (User): User to filter tasks by
-            
         Returns:
-            QuerySet: Tasks being reviewed by the user with related data
+            QuerySet: Filtered Task queryset assigned to the user
         """
-        return Task.objects.filter(reviewers=user).select_related(
-            'column__board', 'created_by', 'assignee'
-        ).prefetch_related('reviewers')
+        return Task.objects.filter(assigned_to=self.request.user)
+
+
+class TaskReviewingListView(generics.ListAPIView):
+    """
+    API view for listing tasks where current user is a reviewer.
+    
+    Provides a read-only endpoint for tasks the authenticated user is reviewing.
+    """
+    serializer_class = TaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        Return tasks where current user is a reviewer.
+        
+        Returns:
+            QuerySet: Filtered Task queryset for review tasks
+        """
+        return Task.objects.filter(reviewers=self.request.user)
