@@ -9,7 +9,6 @@ from rest_framework import status, permissions
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, get_user_model
 from .serializers import UserSerializer, RegistrationSerializer, LoginSerializer
-import uuid
 
 User = get_user_model()
 

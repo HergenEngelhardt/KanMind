@@ -30,7 +30,7 @@ class TaskSerializer(serializers.ModelSerializer):
     Used for list views and creation of tasks.
     """
     board = serializers.PrimaryKeyRelatedField(
-        queryset=Board.objects.all(),
+        queryset=Board.objects.all(), 
         write_only=True,
         required=False
     )
@@ -59,7 +59,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
             'due_date', 'comments_count'
         ]
-        read_only_fields = ['id', 'column']
+        read_only_fields = ['id']
     
     def get_comments_count(self, obj):
         """
@@ -72,6 +72,28 @@ class TaskSerializer(serializers.ModelSerializer):
             int: The number of comments.
         """
         return obj.comments.count()
+    
+    def validate(self, data):
+        """
+        Validate the task data.
+        
+        Args:
+            data (dict): The data to validate.
+            
+        Returns:
+            dict: The validated data.
+            
+        Raises:
+            ValidationError: If the data is invalid.
+        """
+        if hasattr(self.context.get('view', None), 'kwargs') and 'board_id' in self.context['view'].kwargs:
+            board_id = self.context['view'].kwargs['board_id']
+            try:
+                data['board'] = Board.objects.get(pk=board_id)
+            except Board.DoesNotExist:
+                raise serializers.ValidationError({"board": "Board nicht gefunden"})
+                
+        return data
     
     def validate_status(self, value):
         """
@@ -110,25 +132,6 @@ class TaskSerializer(serializers.ModelSerializer):
         if value and value not in valid_priorities:
             raise serializers.ValidationError(
                 f"Invalid priority. Must be one of: {', '.join(valid_priorities)}"
-            )
-        return value
-    
-    def validate_column(self, value):
-        """
-        Validate that the column isn't changed to a different board during updates.
-        
-        Args:
-            value: The column value from the request.
-            
-        Returns:
-            Column: The validated column.
-            
-        Raises:
-            ValidationError: If attempting to change to a column from a different board.
-        """
-        if self.instance and self.instance.column.board.id != value.board.id:
-            raise serializers.ValidationError(
-                "Cannot change task to a column from a different board"
             )
         return value
 

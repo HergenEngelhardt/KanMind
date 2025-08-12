@@ -191,3 +191,132 @@ class CommentDetailView(APIView):
         permission = IsBoardMember()
         if not permission.has_object_permission(request, self, board):
             self.permission_denied(request)
+
+
+class BoardCommentListCreateView(APIView):
+    """
+    List and create comments for a specific task within a board context.
+    
+    Requires the user to be a member of the board that the task belongs to.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsBoardMember]
+    
+    def get(self, request, board_id, task_id):
+        """
+        Retrieve all comments for a specific task.
+        
+        Args:
+            request (Request): The HTTP request object.
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            
+        Returns:
+            Response: A response containing a list of comments.
+        """
+        board, task = self._get_board_and_task(board_id, task_id)
+        self.check_object_permissions(request, board)
+        
+        comments = Comment.objects.filter(task=task).order_by('created_at')
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request, board_id, task_id):
+        """
+        Create a new comment for a specific task.
+        
+        Args:
+            request (Request): The HTTP request object.
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            
+        Returns:
+            Response: A response containing the created comment data.
+            
+        Raises:
+            ValidationError: If the request data is invalid.
+        """
+        board, task = self._get_board_and_task(board_id, task_id)
+        self.check_object_permissions(request, board)
+        
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(task=task, author=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def _get_board_and_task(self, board_id, task_id):
+        """
+        Retrieve the board and task based on the provided IDs.
+        
+        Args:
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            
+        Returns:
+            tuple: A tuple containing (board, task).
+            
+        Raises:
+            Http404: If the board or task doesn't exist or if the task doesn't belong to the board.
+        """
+        board = get_object_or_404(Board, pk=board_id)
+        columns = board.columns.values_list('id', flat=True)
+        task = get_object_or_404(Task, pk=task_id, column__in=columns)
+        return board, task
+
+
+class BoardCommentDetailView(APIView):
+    """
+    Delete a specific comment within a board context.
+    
+    Only the author of the comment can delete it.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsBoardMember]
+    
+    def delete(self, request, board_id, task_id, pk):
+        """
+        Delete a specific comment.
+        
+        Args:
+            request (Request): The HTTP request object.
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            pk (int): The ID of the comment.
+            
+        Returns:
+            Response: An empty response with 204 status code.
+            
+        Raises:
+            PermissionDenied: If the user is not the author of the comment.
+        """
+        board, task, comment = self._get_objects(board_id, task_id, pk)
+        self.check_object_permissions(request, board)
+        
+        if comment.author != request.user:
+            return Response(
+                {"detail": "You can only delete your own comments"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def _get_objects(self, board_id, task_id, pk):
+        """
+        Retrieve the board, task and comment based on the provided IDs.
+        
+        Args:
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            pk (int): The ID of the comment.
+            
+        Returns:
+            tuple: A tuple containing (board, task, comment).
+            
+        Raises:
+            Http404: If any object doesn't exist or if relationships are incorrect.
+        """
+        board = get_object_or_404(Board, pk=board_id)
+        columns = board.columns.values_list('id', flat=True)
+        task = get_object_or_404(Task, pk=task_id, column__in=columns)
+        comment = get_object_or_404(Comment, pk=pk, task=task)
+        return board, task, comment

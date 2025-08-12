@@ -14,12 +14,11 @@ from .serializers import TaskSerializer
 from .permissions import IsBoardMember
 from django.shortcuts import get_object_or_404
 
-
 class AssignedTasksView(APIView):
     """
     List all tasks assigned to the current user.
     
-    Returns tasks from all boards where the user is assigned as the task assignee.
+    Returns tasks from all boards where the user is assigned.
     """
     permission_classes = [IsAuthenticated]
     
@@ -89,19 +88,25 @@ class TaskCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        board = self._get_board_or_404(board_id)
-        self._check_board_membership(request, board)
-        
-        column = self._get_or_create_column(board)
-        
-        data = request.data.copy()
-        serializer = TaskSerializer(data=data, context={'request': request})
-        
-        if serializer.is_valid():
-            task = serializer.save(created_by=request.user, column=column)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            board = self._get_board_or_404(board_id)
+            self._check_board_membership(request, board)
+            
+            column = self._get_or_create_column(board)
+            
+            data = request.data.copy()
+            serializer = TaskSerializer(data=data, context={'request': request})
+            
+            if serializer.is_valid():
+                task = serializer.save(created_by=request.user, column=column)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Board.DoesNotExist:
+            return Response(
+                {"detail": f"Board with id {board_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     def _get_board_or_404(self, board_id):
         """
@@ -135,22 +140,23 @@ class TaskCreateView(APIView):
     
     def _get_or_create_column(self, board):
         """
-        Get the first column of the board or create one if none exists.
+        Get or create a default column for a board.
         
         Args:
-            board (Board): The board object.
+            board (Board): The board to get a column for.
             
         Returns:
-            Column: The first column of the board.
+            Column: A column object.
         """
-        column = board.columns.first()
-        if not column:
-            column = Column.objects.create(
-                board=board,
-                title="To Do",
-                position=0
-            )
-        return column
+        columns = board.columns.all()
+        if columns.exists():
+            return columns.first()
+        
+        return Column.objects.create(
+            board=board,
+            title="To Do",
+            position=0
+        )
 
 
 class TaskDetailView(APIView):
@@ -193,20 +199,26 @@ class TaskDetailView(APIView):
         Raises:
             ValidationError: If the request data is invalid.
         """
-        task = self._get_task_or_404(pk)
-        board = task.column.board
-        self._check_board_membership(request, board)
-        
-        data = request.data.copy()
-        if 'board' in data:
-            data.pop('board')  
-        
-        serializer = TaskSerializer(task, data=data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            task = self._get_task_or_404(pk)
+            board = task.column.board
+            self._check_board_membership(request, board)
+            
+            data = request.data.copy()
+            if 'board' in data:
+                data.pop('board')  
+            
+            serializer = TaskSerializer(task, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Task.DoesNotExist:
+            return Response(
+                {"detail": f"Task with id {pk} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     def delete(self, request, pk):
         """
@@ -279,7 +291,7 @@ class TaskDetailView(APIView):
 
 class BoardTaskListView(APIView):
     """
-    List tasks for a specific board.
+    List and create tasks for a specific board.
     
     Requires the user to be a member of the board.
     """
@@ -296,12 +308,18 @@ class BoardTaskListView(APIView):
         Returns:
             Response: A response containing a list of tasks.
         """
-        board = self._get_board_or_404(board_id)
-        self.check_object_permissions(request, board)
-        
-        tasks = self._get_tasks_for_board(board)
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data)
+        try:
+            board = self._get_board_or_404(board_id)
+            self.check_object_permissions(request, board)
+            
+            tasks = self._get_tasks_for_board(board)
+            serializer = TaskSerializer(tasks, many=True)
+            return Response(serializer.data)
+        except Board.DoesNotExist:
+            return Response(
+                {"detail": f"Board with id {board_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     def post(self, request, board_id):
         """
@@ -317,19 +335,24 @@ class BoardTaskListView(APIView):
         Raises:
             ValidationError: If the request data is invalid.
         """
-        board = self._get_board_or_404(board_id)
-        self.check_object_permissions(request, board)
-        
-        column = self._get_or_create_column(board)
-        data = request.data.copy()
-        data['board'] = board_id
-        
-        serializer = TaskSerializer(data=data, context={'request': request})
-        if serializer.is_valid():
-            task = serializer.save(created_by=request.user, column=column)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            board = self._get_board_or_404(board_id)
+            self.check_object_permissions(request, board)
             
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            column = self._get_or_create_column(board)
+            
+            data = self._prepare_task_data(request.data, column.id, board_id)
+            serializer = TaskSerializer(data=data, context={'request': request})
+            
+            if serializer.is_valid():
+                task = serializer.save(created_by=request.user, column=column)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Board.DoesNotExist:
+            return Response(
+                {"detail": f"Board with id {board_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     def _get_board_or_404(self, board_id):
         """
@@ -361,22 +384,40 @@ class BoardTaskListView(APIView):
     
     def _get_or_create_column(self, board):
         """
-        Get the first column of the board or create one if none exists.
+        Get or create a default column for a board.
         
         Args:
-            board (Board): The board object.
+            board (Board): The board to get a column for.
             
         Returns:
-            Column: The first column of the board.
+            Column: A column object.
         """
-        column = board.columns.first()
-        if not column:
-            column = Column.objects.create(
-                board=board,
-                title="To Do",
-                position=0
-            )
-        return column
+        columns = board.columns.all()
+        if columns.exists():
+            return columns.first()
+        
+        return Column.objects.create(
+            board=board,
+            title="To Do",
+            position=0
+        )
+    
+    def _prepare_task_data(self, data, column_id, board_id):
+        """
+        Prepare task data for serialization.
+        
+        Args:
+            data (dict): The request data.
+            column_id (int): The ID of the column.
+            board_id (int): The ID of the board.
+            
+        Returns:
+            dict: The prepared task data.
+        """
+        task_data = data.copy() if isinstance(data, dict) else {}
+        task_data['column'] = column_id
+        task_data['board'] = board_id
+        return task_data
 
 
 class BoardTaskDetailView(APIView):
@@ -399,11 +440,22 @@ class BoardTaskDetailView(APIView):
         Returns:
             Response: A response containing the task data.
         """
-        board, task = self._get_board_and_task(board_id, pk)
-        self.check_object_permissions(request, board)
-        
-        serializer = TaskSerializer(task)
-        return Response(serializer.data)
+        try:
+            board, task = self._get_board_and_task(board_id, pk)
+            self.check_object_permissions(request, board)
+            
+            serializer = TaskSerializer(task)
+            return Response(serializer.data)
+        except Board.DoesNotExist:
+            return Response(
+                {"detail": f"Board with id {board_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Task.DoesNotExist:
+            return Response(
+                {"detail": f"Task with id {pk} does not exist or doesn't belong to this board"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     def patch(self, request, board_id, pk):
         """
@@ -420,19 +472,46 @@ class BoardTaskDetailView(APIView):
         Raises:
             ValidationError: If the request data is invalid.
         """
-        board, task = self._get_board_and_task(board_id, pk)
-        self.check_object_permissions(request, board)
-        
-        data = request.data.copy()
-        if 'board' in data:
-            data.pop('board')  
-        
-        serializer = TaskSerializer(task, data=data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            if pk == 'null' or pk is None:
+                return Response(
+                    {"detail": "Invalid task ID: must be a number"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            board, task = self._get_board_and_task(board_id, pk)
+            self.check_object_permissions(request, board)
+            
+            if self._column_change_is_invalid(request.data, board):
+                return Response(
+                    {"detail": "Column does not belong to this board"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            data = request.data.copy()
+            if 'board' in data:
+                data.pop('board')  
+                
+            serializer = TaskSerializer(task, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return Response(
+                {"detail": "Invalid task ID format"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Board.DoesNotExist:
+            return Response(
+                {"detail": f"Board with id {board_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Task.DoesNotExist:
+            return Response(
+                {"detail": f"Task with id {pk} does not exist or doesn't belong to this board"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     def delete(self, request, board_id, pk):
         """
@@ -446,25 +525,36 @@ class BoardTaskDetailView(APIView):
         Returns:
             Response: An empty response with 204 status code.
         """
-        board, task = self._get_board_and_task(board_id, pk)
-        self.check_object_permissions(request, board)
-        
-        if not self._can_delete_task(request.user, task, board):
+        try:
+            board, task = self._get_board_and_task(board_id, pk)
+            self.check_object_permissions(request, board)
+            
+            if not self._can_delete_task(request.user, task, board):
+                return Response(
+                    {"detail": "Only task creator or board owner can delete tasks"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            task.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Board.DoesNotExist:
             return Response(
-                {"detail": "Only task creator or board owner can delete tasks"},
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": f"Board with id {board_id} does not exist"},
+                status=status.HTTP_404_NOT_FOUND
             )
-        
-        task.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        except Task.DoesNotExist:
+            return Response(
+                {"detail": f"Task with id {pk} does not exist or doesn't belong to this board"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
-    def _get_board_and_task(self, board_id, task_id):
+    def _get_board_and_task(self, board_id, pk):
         """
         Retrieve a board and task based on their IDs.
         
         Args:
             board_id (int): The ID of the board.
-            task_id (int): The ID of the task.
+            pk (int): The ID of the task.
             
         Returns:
             tuple: A tuple containing (board, task).
@@ -474,8 +564,24 @@ class BoardTaskDetailView(APIView):
         """
         board = get_object_or_404(Board, pk=board_id)
         columns = board.columns.values_list('id', flat=True)
-        task = get_object_or_404(Task, pk=task_id, column__in=columns)
+        task = get_object_or_404(Task, pk=pk, column__in=columns)
         return board, task
+    
+    def _column_change_is_invalid(self, data, board):
+        """
+        Check if a column change is invalid.
+        
+        Args:
+            data (dict): The request data.
+            board (Board): The board object.
+            
+        Returns:
+            bool: True if the column change is invalid, False otherwise.
+        """
+        if 'column' not in data:
+            return False
+            
+        return not board.columns.filter(id=data['column']).exists()
     
     def _can_delete_task(self, user, task, board):
         """
