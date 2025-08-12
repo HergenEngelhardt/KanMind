@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from tasks_app.models import Task
 from kanban_app.models import Board, Column
 from .serializers import TaskSerializer
@@ -24,13 +25,13 @@ class AssignedTasksView(APIView):
     
     def get(self, request):
         """
-        Retrieve all tasks assigned to the current user.
+        Retrieve all tasks assigned to the authenticated user.
         
         Args:
-            request (Request): The HTTP request object.
+            request (Request): The HTTP request object
             
         Returns:
-            Response: A response containing a list of tasks.
+            Response: List of tasks where the user is the assignee
         """
         tasks = Task.objects.filter(assignee=request.user)
         serializer = TaskSerializer(tasks, many=True)
@@ -47,15 +48,15 @@ class ReviewingTasksView(APIView):
     
     def get(self, request):
         """
-        Retrieve all tasks where the current user is a reviewer.
+        Retrieve all tasks where the authenticated user is a reviewer.
         
         Args:
-            request (Request): The HTTP request object.
+            request (Request): The HTTP request object
             
         Returns:
-            Response: A response containing a list of tasks.
+            Response: List of tasks where the user is a reviewer
         """
-        tasks = Task.objects.filter(reviewers=request.user)
+        tasks = Task.objects.filter(reviewer=request.user)
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
 
@@ -70,93 +71,78 @@ class TaskCreateView(APIView):
     
     def post(self, request):
         """
-        Create a new task with board ID provided in the request data.
+        Create a new task for a board.
         
         Args:
-            request (Request): The HTTP request object.
+            request (Request): HTTP request with task data
             
         Returns:
-            Response: A response containing the created task data.
+            Response: Created task data or error messages
             
         Raises:
-            ValidationError: If the request data is invalid.
+            Http404: If board not found
         """
         board_id = request.data.get('board')
-        if not board_id:
-            return Response(
-                {"detail": "Board ID is required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        board = self._get_board_or_404(board_id)
         
-        try:
-            board = self._get_board_or_404(board_id)
-            self._check_board_membership(request, board)
-            
-            column = self._get_or_create_column(board)
-            
-            data = request.data.copy()
-            serializer = TaskSerializer(data=data, context={'request': request})
-            
-            if serializer.is_valid():
-                task = serializer.save(created_by=request.user, column=column)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Board.DoesNotExist:
-            return Response(
-                {"detail": f"Board with id {board_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        self._check_board_membership(request, board)
+        
+        column = self._get_or_create_column(board)
+        
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(created_by=request.user, column=column)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def _get_board_or_404(self, board_id):
         """
-        Get a board by ID or return 404.
+        Get board by ID or raise 404.
         
         Args:
-            board_id (int): The board ID.
+            board_id (int): The board ID
             
         Returns:
-            Board: The board object.
+            Board: The board instance
             
         Raises:
-            Http404: If the board doesn't exist.
+            Http404: If board not found
         """
-        return get_object_or_404(Board, pk=board_id)
+        return get_object_or_404(Board, id=board_id)
     
     def _check_board_membership(self, request, board):
         """
-        Check if the user is a member of the board.
+        Check if user is a member of the board.
         
         Args:
-            request (Request): The HTTP request.
-            board (Board): The board to check.
+            request (Request): The HTTP request
+            board (Board): The board to check
             
         Raises:
-            PermissionDenied: If the user is not a board member.
+            PermissionDenied: If user is not a board member
         """
-        permission = IsBoardMember()
-        if not permission.has_object_permission(request, self, board):
-            self.permission_denied(request)
+        if not (board.owner == request.user or board.members.filter(
+                id=request.user.id).exists()):
+            raise PermissionDenied("You are not a member of this board")
     
     def _get_or_create_column(self, board):
         """
-        Get or create a default column for a board.
+        Get first column or create default column.
         
         Args:
-            board (Board): The board to get a column for.
+            board (Board): The board to get/create column for
             
         Returns:
-            Column: A column object.
+            Column: A column instance
         """
-        columns = board.columns.all()
-        if columns.exists():
-            return columns.first()
-        
-        return Column.objects.create(
-            board=board,
-            title="To Do",
-            position=0
-        )
+        column = Column.objects.filter(board=board).first()
+        if not column:
+            column = Column.objects.create(
+                board=board,
+                title="To Do",
+                position=0
+            )
+        return column
 
 
 class TaskDetailView(APIView):
@@ -169,18 +155,20 @@ class TaskDetailView(APIView):
     
     def get(self, request, pk):
         """
-        Retrieve a specific task.
+        Retrieve details of a specific task.
         
         Args:
-            request (Request): The HTTP request object.
-            pk (int): The ID of the task.
+            request (Request): The HTTP request
+            pk (int): The task ID
             
         Returns:
-            Response: A response containing the task data.
+            Response: Task data or error
+            
+        Raises:
+            Http404: If task not found
         """
         task = self._get_task_or_404(pk)
-        board = task.column.board
-        self._check_board_membership(request, board)
+        self._check_board_membership(request, task.column.board)
         
         serializer = TaskSerializer(task)
         return Response(serializer.data)
@@ -190,108 +178,84 @@ class TaskDetailView(APIView):
         Update a specific task.
         
         Args:
-            request (Request): The HTTP request object.
-            pk (int): The ID of the task.
+            request (Request): The HTTP request with update data
+            pk (int): The task ID
             
         Returns:
-            Response: A response containing the updated task data.
+            Response: Updated task data or error
             
         Raises:
-            ValidationError: If the request data is invalid.
+            Http404: If task not found
         """
-        try:
-            task = self._get_task_or_404(pk)
-            board = task.column.board
-            self._check_board_membership(request, board)
-            
-            data = request.data.copy()
-            if 'board' in data:
-                data.pop('board')  
-            
-            serializer = TaskSerializer(task, data=data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Task.DoesNotExist:
-            return Response(
-                {"detail": f"Task with id {pk} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        task = self._get_task_or_404(pk)
+        self._check_board_membership(request, task.column.board)
+        
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, pk):
         """
         Delete a specific task.
         
         Args:
-            request (Request): The HTTP request object.
-            pk (int): The ID of the task.
+            request (Request): The HTTP request
+            pk (int): The task ID
             
         Returns:
-            Response: An empty response with 204 status code.
+            Response: Empty response on success
+            
+        Raises:
+            Http404: If task not found
+            PermissionDenied: If user doesn't have delete permission
         """
         task = self._get_task_or_404(pk)
         board = task.column.board
+        
         self._check_board_membership(request, board)
         
-        if not self._can_delete_task(request.user, task, board):
-            return Response(
-                {"detail": "Only task creator or board owner can delete tasks"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if board.owner == request.user or task.created_by == request.user:
+            task.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         
-        task.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        raise PermissionDenied("You don't have permission to delete this task")
     
     def _get_task_or_404(self, task_id):
         """
-        Get a task by ID or return 404.
+        Get task by ID or raise 404.
         
         Args:
-            task_id (int): The task ID.
+            task_id (int): The task ID
             
         Returns:
-            Task: The task object.
+            Task: The task instance
             
         Raises:
-            Http404: If the task doesn't exist.
+            Http404: If task not found
         """
-        return get_object_or_404(Task, pk=task_id)
+        return get_object_or_404(Task, id=task_id)
     
     def _check_board_membership(self, request, board):
         """
-        Check if the user is a member of the board.
+        Check if user is a member of the board.
         
         Args:
-            request (Request): The HTTP request.
-            board (Board): The board to check.
+            request (Request): The HTTP request
+            board (Board): The board to check
             
         Raises:
-            PermissionDenied: If the user is not a board member.
+            PermissionDenied: If user is not a board member
         """
-        permission = IsBoardMember()
-        if not permission.has_object_permission(request, self, board):
-            self.permission_denied(request)
-    
-    def _can_delete_task(self, user, task, board):
-        """
-        Check if the user can delete the task.
-        
-        Args:
-            user (User): The user attempting to delete the task.
-            task (Task): The task to be deleted.
-            board (Board): The board containing the task.
-            
-        Returns:
-            bool: True if the user can delete the task, False otherwise.
-        """
-        return task.created_by == user or board.owner == user
+        if not (board.owner == request.user or board.members.filter(
+                id=request.user.id).exists()):
+            raise PermissionDenied("You are not a member of this board")
 
 
 class BoardTaskListView(APIView):
     """
-    List and create tasks for a specific board.
+    List all tasks for a specific board.
     
     Requires the user to be a member of the board.
     """
@@ -299,300 +263,107 @@ class BoardTaskListView(APIView):
     
     def get(self, request, board_id):
         """
-        Retrieve all tasks for the specified board.
+        Retrieve all tasks for a specific board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
+            request (Request): The HTTP request
+            board_id (int): The board ID
             
         Returns:
-            Response: A response containing a list of tasks.
-        """
-        try:
-            board = self._get_board_or_404(board_id)
-            self.check_object_permissions(request, board)
-            
-            tasks = self._get_tasks_for_board(board)
-            serializer = TaskSerializer(tasks, many=True)
-            return Response(serializer.data)
-        except Board.DoesNotExist:
-            return Response(
-                {"detail": f"Board with id {board_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-    
-    def post(self, request, board_id):
-        """
-        Create a new task in the specified board.
-        
-        Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            
-        Returns:
-            Response: A response containing the created task data.
+            Response: List of tasks for the board
             
         Raises:
-            ValidationError: If the request data is invalid.
+            Http404: If board not found
         """
-        try:
-            board = self._get_board_or_404(board_id)
-            self.check_object_permissions(request, board)
-            
-            column = self._get_or_create_column(board)
-            
-            data = self._prepare_task_data(request.data, column.id, board_id)
-            serializer = TaskSerializer(data=data, context={'request': request})
-            
-            if serializer.is_valid():
-                task = serializer.save(created_by=request.user, column=column)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Board.DoesNotExist:
-            return Response(
-                {"detail": f"Board with id {board_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-    
-    def _get_board_or_404(self, board_id):
-        """
-        Get a board by ID or return 404.
+        board = get_object_or_404(Board, id=board_id)
+        self.check_object_permissions(request, board)
         
-        Args:
-            board_id (int): The board ID.
-            
-        Returns:
-            Board: The board object.
-            
-        Raises:
-            Http404: If the board doesn't exist.
-        """
-        return get_object_or_404(Board, pk=board_id)
-    
-    def _get_tasks_for_board(self, board):
-        """
-        Get all tasks associated with a board.
+        columns = Column.objects.filter(board=board)
+        tasks = Task.objects.filter(column__in=columns)
         
-        Args:
-            board (Board): The board object.
-            
-        Returns:
-            QuerySet: The tasks associated with the board.
-        """
-        columns = board.columns.all()
-        return Task.objects.filter(column__in=columns)
-    
-    def _get_or_create_column(self, board):
-        """
-        Get or create a default column for a board.
-        
-        Args:
-            board (Board): The board to get a column for.
-            
-        Returns:
-            Column: A column object.
-        """
-        columns = board.columns.all()
-        if columns.exists():
-            return columns.first()
-        
-        return Column.objects.create(
-            board=board,
-            title="To Do",
-            position=0
-        )
-    
-    def _prepare_task_data(self, data, column_id, board_id):
-        """
-        Prepare task data for serialization.
-        
-        Args:
-            data (dict): The request data.
-            column_id (int): The ID of the column.
-            board_id (int): The ID of the board.
-            
-        Returns:
-            dict: The prepared task data.
-        """
-        task_data = data.copy() if isinstance(data, dict) else {}
-        task_data['column'] = column_id
-        task_data['board'] = board_id
-        return task_data
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
 
 
 class BoardTaskDetailView(APIView):
     """
     Retrieve, update or delete a task within a board context.
     
-    Requires the user to be a member of the board that the task belongs to.
+    Requires the user to be a member of the board.
     """
     permission_classes = [IsAuthenticated, IsBoardMember]
     
     def get(self, request, board_id, pk):
         """
-        Retrieve a specific task in a board.
+        Retrieve details of a specific task within a board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            pk (int): The ID of the task.
+            request (Request): The HTTP request
+            board_id (int): The board ID
+            pk (int): The task ID
             
         Returns:
-            Response: A response containing the task data.
-        """
-        try:
-            board, task = self._get_board_and_task(board_id, pk)
-            self.check_object_permissions(request, board)
+            Response: Task data or error
             
-            serializer = TaskSerializer(task)
-            return Response(serializer.data)
-        except Board.DoesNotExist:
-            return Response(
-                {"detail": f"Board with id {board_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Task.DoesNotExist:
-            return Response(
-                {"detail": f"Task with id {pk} does not exist or doesn't belong to this board"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        Raises:
+            Http404: If task or board not found
+        """
+        board = get_object_or_404(Board, id=board_id)
+        self.check_object_permissions(request, board)
+        
+        task = get_object_or_404(Task, id=pk, column__board=board)
+        serializer = TaskSerializer(task)
+        return Response(serializer.data)
     
     def patch(self, request, board_id, pk):
         """
-        Update a specific task in a board.
+        Update a specific task within a board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            pk (int): The ID of the task.
+            request (Request): The HTTP request with update data
+            board_id (int): The board ID
+            pk (int): The task ID
             
         Returns:
-            Response: A response containing the updated task data.
+            Response: Updated task data or error
             
         Raises:
-            ValidationError: If the request data is invalid.
+            Http404: If task or board not found
         """
-        try:
-            if pk == 'null' or pk is None:
-                return Response(
-                    {"detail": "Invalid task ID: must be a number"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-                
-            board, task = self._get_board_and_task(board_id, pk)
-            self.check_object_permissions(request, board)
-            
-            if self._column_change_is_invalid(request.data, board):
-                return Response(
-                    {"detail": "Column does not belong to this board"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            data = request.data.copy()
-            if 'board' in data:
-                data.pop('board')  
-                
-            serializer = TaskSerializer(task, data=data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ValueError:
-            return Response(
-                {"detail": "Invalid task ID format"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Board.DoesNotExist:
-            return Response(
-                {"detail": f"Board with id {board_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Task.DoesNotExist:
-            return Response(
-                {"detail": f"Task with id {pk} does not exist or doesn't belong to this board"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        board = get_object_or_404(Board, id=board_id)
+        self.check_object_permissions(request, board)
+        
+        task = get_object_or_404(Task, id=pk, column__board=board)
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, board_id, pk):
         """
-        Delete a specific task in a board.
+        Delete a specific task within a board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            pk (int): The ID of the task.
+            request (Request): The HTTP request
+            board_id (int): The board ID
+            pk (int): The task ID
             
         Returns:
-            Response: An empty response with 204 status code.
-        """
-        try:
-            board, task = self._get_board_and_task(board_id, pk)
-            self.check_object_permissions(request, board)
-            
-            if not self._can_delete_task(request.user, task, board):
-                return Response(
-                    {"detail": "Only task creator or board owner can delete tasks"},
-                    status=status.HTTP_403_FORBIDDEN
-                )
-            
-            task.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Board.DoesNotExist:
-            return Response(
-                {"detail": f"Board with id {board_id} does not exist"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Task.DoesNotExist:
-            return Response(
-                {"detail": f"Task with id {pk} does not exist or doesn't belong to this board"},
-                status=status.HTTP_404_NOT_FOUND
-            )
-    
-    def _get_board_and_task(self, board_id, pk):
-        """
-        Retrieve a board and task based on their IDs.
-        
-        Args:
-            board_id (int): The ID of the board.
-            pk (int): The ID of the task.
-            
-        Returns:
-            tuple: A tuple containing (board, task).
+            Response: Empty response on success
             
         Raises:
-            Http404: If the board or task doesn't exist or if the task doesn't belong to the board.
+            Http404: If task or board not found
+            PermissionDenied: If user doesn't have delete permission
         """
-        board = get_object_or_404(Board, pk=board_id)
-        columns = board.columns.values_list('id', flat=True)
-        task = get_object_or_404(Task, pk=pk, column__in=columns)
-        return board, task
-    
-    def _column_change_is_invalid(self, data, board):
-        """
-        Check if a column change is invalid.
+        board = get_object_or_404(Board, id=board_id)
+        self.check_object_permissions(request, board)
         
-        Args:
-            data (dict): The request data.
-            board (Board): The board object.
-            
-        Returns:
-            bool: True if the column change is invalid, False otherwise.
-        """
-        if 'column' not in data:
-            return False
-            
-        return not board.columns.filter(id=data['column']).exists()
-    
-    def _can_delete_task(self, user, task, board):
-        """
-        Check if the user can delete the task.
+        task = get_object_or_404(Task, id=pk, column__board=board)
         
-        Args:
-            user (User): The user attempting to delete the task.
-            task (Task): The task to be deleted.
-            board (Board): The board containing the task.
-            
-        Returns:
-            bool: True if the user can delete the task, False otherwise.
-        """
-        return task.created_by == user or board.owner == user
+        if board.owner == request.user or task.created_by == request.user:
+            task.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        raise PermissionDenied("You don't have permission to delete this task")

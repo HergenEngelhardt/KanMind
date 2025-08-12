@@ -6,6 +6,7 @@ This module contains views for listing, creating, and deleting comments.
 from rest_framework import permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 
 from kanban_app.models import Board
@@ -24,18 +25,21 @@ class CommentListCreateView(APIView):
     
     def get(self, request, task_id):
         """
-        Retrieve all comments for a specific task.
+        List all comments for a specific task.
         
         Args:
-            request (Request): The HTTP request object.
-            task_id (int): The ID of the task.
+            request (Request): The HTTP request
+            task_id (int): The task ID
             
         Returns:
-            Response: A response containing a list of comments.
+            Response: List of comments for the task
+            
+        Raises:
+            Http404: If task not found
+            PermissionDenied: If user doesn't have access
         """
         task = self._get_task_or_404(task_id)
-        board = task.column.board
-        self._check_board_membership(request, board)
+        self._check_board_membership(request, task.column.board)
         
         comments = self._get_comments_for_task(task)
         serializer = CommentSerializer(comments, many=True)
@@ -43,21 +47,21 @@ class CommentListCreateView(APIView):
 
     def post(self, request, task_id):
         """
-        Create a new comment for a specific task.
+        Create a new comment for a task.
         
         Args:
-            request (Request): The HTTP request object.
-            task_id (int): The ID of the task.
+            request (Request): The HTTP request with comment data
+            task_id (int): The task ID
             
         Returns:
-            Response: A response containing the created comment data.
+            Response: Created comment data or error
             
         Raises:
-            ValidationError: If the request data is invalid.
+            Http404: If task not found
+            PermissionDenied: If user doesn't have access
         """
         task = self._get_task_or_404(task_id)
-        board = task.column.board
-        self._check_board_membership(request, board)
+        self._check_board_membership(request, task.column.board)
         
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
@@ -67,43 +71,43 @@ class CommentListCreateView(APIView):
     
     def _get_task_or_404(self, task_id):
         """
-        Get a task by ID or return 404.
+        Get task by ID or raise 404.
         
         Args:
-            task_id (int): The task ID.
+            task_id (int): The task ID
             
         Returns:
-            Task: The task object.
+            Task: The task instance
             
         Raises:
-            Http404: If the task doesn't exist.
+            Http404: If task not found
         """
-        return get_object_or_404(Task, pk=task_id)
+        return get_object_or_404(Task, id=task_id)
     
     def _check_board_membership(self, request, board):
         """
-        Check if the user is a member of the board.
+        Check if user is a member of the board.
         
         Args:
-            request (Request): The HTTP request.
-            board (Board): The board to check.
+            request (Request): The HTTP request
+            board (Board): The board to check
             
         Raises:
-            PermissionDenied: If the user is not a board member.
+            PermissionDenied: If user is not a board member
         """
-        permission = IsBoardMember()
-        if not permission.has_object_permission(request, self, board):
-            self.permission_denied(request)
+        if not (board.owner == request.user or board.members.filter(
+                id=request.user.id).exists()):
+            raise PermissionDenied("You are not a member of this board")
     
     def _get_comments_for_task(self, task):
         """
-        Get comments for a task ordered by creation time.
+        Get all comments for a task.
         
         Args:
-            task (Task): The task to get comments for.
+            task (Task): The task to get comments for
             
         Returns:
-            QuerySet: The comments for the task.
+            QuerySet: Comments for the task
         """
         return Comment.objects.filter(task=task).order_by('created_at')
 
@@ -121,26 +125,25 @@ class CommentDetailView(APIView):
         Delete a specific comment.
         
         Args:
-            request (Request): The HTTP request object.
-            task_id (int): The ID of the task.
-            pk (int): The ID of the comment.
+            request (Request): The HTTP request
+            task_id (int): The task ID
+            pk (int): The comment ID
             
         Returns:
-            Response: An empty response with 204 status code.
+            Response: Empty response on success
             
         Raises:
-            PermissionDenied: If the user is not the author of the comment.
+            Http404: If task or comment not found
+            PermissionDenied: If user doesn't have delete permission
         """
         task = self._get_task_or_404(task_id)
-        board = task.column.board
-        self._check_board_membership(request, board)
+        self._check_board_membership(request, task.column.board)
         
         comment = self._get_comment_or_404(task, pk)
         
         if comment.created_by != request.user:
-            return Response(
-                {"detail": "You can only delete your own comments"}, 
-                status=status.HTTP_403_FORBIDDEN
+            raise PermissionDenied(
+                "You can only delete your own comments"
             )
         
         comment.delete()
@@ -148,49 +151,49 @@ class CommentDetailView(APIView):
     
     def _get_task_or_404(self, task_id):
         """
-        Get a task by ID or return 404.
+        Get task by ID or raise 404.
         
         Args:
-            task_id (int): The task ID.
+            task_id (int): The task ID
             
         Returns:
-            Task: The task object.
+            Task: The task instance
             
         Raises:
-            Http404: If the task doesn't exist.
+            Http404: If task not found
         """
-        return get_object_or_404(Task, pk=task_id)
+        return get_object_or_404(Task, id=task_id)
     
     def _get_comment_or_404(self, task, comment_id):
         """
-        Get a comment for a specific task by ID or return 404.
+        Get comment by ID and task or raise 404.
         
         Args:
-            task (Task): The task object.
-            comment_id (int): The comment ID.
+            task (Task): The task instance
+            comment_id (int): The comment ID
             
         Returns:
-            Comment: The comment object.
+            Comment: The comment instance
             
         Raises:
-            Http404: If the comment doesn't exist or doesn't belong to the task.
+            Http404: If comment not found
         """
-        return get_object_or_404(Comment, pk=comment_id, task=task)
+        return get_object_or_404(Comment, id=comment_id, task=task)
     
     def _check_board_membership(self, request, board):
         """
-        Check if the user is a member of the board.
+        Check if user is a member of the board.
         
         Args:
-            request (Request): The HTTP request.
-            board (Board): The board to check.
+            request (Request): The HTTP request
+            board (Board): The board to check
             
         Raises:
-            PermissionDenied: If the user is not a board member.
+            PermissionDenied: If user is not a board member
         """
-        permission = IsBoardMember()
-        if not permission.has_object_permission(request, self, board):
-            self.permission_denied(request)
+        if not (board.owner == request.user or board.members.filter(
+                id=request.user.id).exists()):
+            raise PermissionDenied("You are not a member of this board")
 
 
 class BoardCommentListCreateView(APIView):
@@ -203,15 +206,18 @@ class BoardCommentListCreateView(APIView):
     
     def get(self, request, board_id, task_id):
         """
-        Retrieve all comments for a specific task.
+        List all comments for a task within a board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            task_id (int): The ID of the task.
+            request (Request): The HTTP request
+            board_id (int): The board ID
+            task_id (int): The task ID
             
         Returns:
-            Response: A response containing a list of comments.
+            Response: List of comments for the task
+            
+        Raises:
+            Http404: If task or board not found
         """
         board, task = self._get_board_and_task(board_id, task_id)
         self.check_object_permissions(request, board)
@@ -222,18 +228,18 @@ class BoardCommentListCreateView(APIView):
     
     def post(self, request, board_id, task_id):
         """
-        Create a new comment for a specific task.
+        Create a new comment for a task within a board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            task_id (int): The ID of the task.
+            request (Request): The HTTP request with comment data
+            board_id (int): The board ID
+            task_id (int): The task ID
             
         Returns:
-            Response: A response containing the created comment data.
+            Response: Created comment data or error
             
         Raises:
-            ValidationError: If the request data is invalid.
+            Http404: If task or board not found
         """
         board, task = self._get_board_and_task(board_id, task_id)
         self.check_object_permissions(request, board)
@@ -246,21 +252,20 @@ class BoardCommentListCreateView(APIView):
     
     def _get_board_and_task(self, board_id, task_id):
         """
-        Retrieve the board and task based on the provided IDs.
+        Get board and task by their IDs or raise 404.
         
         Args:
-            board_id (int): The ID of the board.
-            task_id (int): The ID of the task.
+            board_id (int): The board ID
+            task_id (int): The task ID
             
         Returns:
-            tuple: A tuple containing (board, task).
+            tuple: (Board, Task) instances
             
         Raises:
-            Http404: If the board or task doesn't exist or if the task doesn't belong to the board.
+            Http404: If board or task not found
         """
-        board = get_object_or_404(Board, pk=board_id)
-        columns = board.columns.values_list('id', flat=True)
-        task = get_object_or_404(Task, pk=task_id, column__in=columns)
+        board = get_object_or_404(Board, id=board_id)
+        task = get_object_or_404(Task, id=task_id, column__board=board)
         return board, task
 
 
@@ -274,49 +279,31 @@ class BoardCommentDetailView(APIView):
     
     def delete(self, request, board_id, task_id, pk):
         """
-        Delete a specific comment.
+        Delete a specific comment within a board.
         
         Args:
-            request (Request): The HTTP request object.
-            board_id (int): The ID of the board.
-            task_id (int): The ID of the task.
-            pk (int): The ID of the comment.
+            request (Request): The HTTP request
+            board_id (int): The board ID
+            task_id (int): The task ID
+            pk (int): The comment ID
             
         Returns:
-            Response: An empty response with 204 status code.
+            Response: Empty response on success
             
         Raises:
-            PermissionDenied: If the user is not the author of the comment.
+            Http404: If board, task, or comment not found
+            PermissionDenied: If user doesn't have delete permission
         """
-        board, task, comment = self._get_objects(board_id, task_id, pk)
+        board = get_object_or_404(Board, id=board_id)
         self.check_object_permissions(request, board)
         
+        task = get_object_or_404(Task, id=task_id, column__board=board)
+        comment = get_object_or_404(Comment, id=pk, task=task)
+        
         if comment.created_by != request.user:
-            return Response(
-                {"detail": "You can only delete your own comments"}, 
-                status=status.HTTP_403_FORBIDDEN
+            raise PermissionDenied(
+                "You can only delete your own comments"
             )
         
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    def _get_objects(self, board_id, task_id, pk):
-        """
-        Retrieve the board, task and comment based on the provided IDs.
-        
-        Args:
-            board_id (int): The ID of the board.
-            task_id (int): The ID of the task.
-            pk (int): The ID of the comment.
-            
-        Returns:
-            tuple: A tuple containing (board, task, comment).
-            
-        Raises:
-            Http404: If any object doesn't exist or if relationships are incorrect.
-        """
-        board = get_object_or_404(Board, pk=board_id)
-        columns = board.columns.values_list('id', flat=True)
-        task = get_object_or_404(Task, pk=task_id, column__in=columns)
-        comment = get_object_or_404(Comment, pk=pk, task=task)
-        return board, task, comment

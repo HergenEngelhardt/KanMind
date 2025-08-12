@@ -25,16 +25,13 @@ def show_urls():
     """Print all registered URLs to console."""
     print("\n=== REGISTERED URLS ===\n")
     
-    # Set up Django environment
     import os
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
     import django
     django.setup()
     
-    # Get URL resolver
     resolver = get_resolver()
     
-    # Extract and print URLs
     for pattern in resolver.url_patterns:
         if hasattr(pattern, 'url_patterns'):
             for p in pattern.url_patterns:
