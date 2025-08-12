@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 class BoardListCreateView(APIView):
     """
     View for listing and creating boards.
+    
+    Handles GET requests to list user's boards and POST requests to create new boards.
     """
     permission_classes = [IsAuthenticated]
     
@@ -33,8 +35,7 @@ class BoardListCreateView(APIView):
         Returns:
             Response: JSON list of boards
         """
-        user_boards = Board.objects.filter(boardmembership__user=request.user).distinct()
-        
+        user_boards = self._get_user_boards(request.user)
         serializer = BoardListSerializer(user_boards, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -55,16 +56,37 @@ class BoardListCreateView(APIView):
         member_ids = request.data.get('members', [])
         
         if not title:
-            return Response(
-                {'error': 'Title is required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return self._title_required_error()
         
         board = self._create_board(request.user, title)
         self._add_members(board, member_ids, request.user.id)
         
         response_data = self._prepare_response_data(board, request.user.id)
         return Response(response_data, status=status.HTTP_201_CREATED)
+    
+    def _get_user_boards(self, user):
+        """
+        Get boards where user is member or owner.
+        
+        Args:
+            user (User): User to get boards for
+            
+        Returns:
+            QuerySet: User's boards
+        """
+        return Board.objects.filter(boardmembership__user=user).distinct()
+    
+    def _title_required_error(self):
+        """
+        Create response for missing title error.
+        
+        Returns:
+            Response: Error response
+        """
+        return Response(
+            {'error': 'Title is required'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
     def _create_board(self, user, title):
         """

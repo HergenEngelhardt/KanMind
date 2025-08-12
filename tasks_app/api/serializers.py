@@ -142,7 +142,7 @@ class CommentSerializer(serializers.ModelSerializer):
     
     Used for listing and creating comments.
     """
-    author = serializers.CharField(source='author.get_full_name', read_only=True)
+    author = serializers.CharField(source='created_by.get_full_name', read_only=True)
     
     class Meta:
         model = Comment

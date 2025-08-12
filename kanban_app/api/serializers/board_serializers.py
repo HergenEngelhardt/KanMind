@@ -15,16 +15,20 @@ class BoardListSerializer(serializers.ModelSerializer):
     """
     Serializer for listing boards.
     
-    Provides basic information about boards.
+    Provides information about boards according to API spec.
     """
-    owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
+    owner_id = serializers.IntegerField(source='owner.id', read_only=True)
     member_count = serializers.SerializerMethodField()
     ticket_count = serializers.SerializerMethodField()
+    tasks_to_do_count = serializers.SerializerMethodField()
+    tasks_high_prio_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Board
-        fields = ['id', 'title', 'owner', 'owner_name', 'member_count', 'ticket_count']
-        read_only_fields = ['id', 'owner', 'owner_name', 'member_count', 'ticket_count']
+        fields = ['id', 'title', 'member_count', 'ticket_count', 
+                  'tasks_to_do_count', 'tasks_high_prio_count', 'owner_id']
+        read_only_fields = ['id', 'owner_id', 'member_count', 'ticket_count',
+                           'tasks_to_do_count', 'tasks_high_prio_count']
     
     def get_member_count(self, obj):
         """
@@ -51,6 +55,32 @@ class BoardListSerializer(serializers.ModelSerializer):
         columns = obj.columns.all()
         task_count = Task.objects.filter(column__in=columns).count()
         return task_count
+    
+    def get_tasks_to_do_count(self, obj):
+        """
+        Get the number of tasks in 'to-do' status.
+        
+        Args:
+            obj (Board): The board instance.
+            
+        Returns:
+            int: The number of 'to-do' tasks.
+        """
+        columns = obj.columns.all()
+        return Task.objects.filter(column__in=columns, status='to-do').count()
+    
+    def get_tasks_high_prio_count(self, obj):
+        """
+        Get the number of tasks with 'high' priority.
+        
+        Args:
+            obj (Board): The board instance.
+            
+        Returns:
+            int: The number of high priority tasks.
+        """
+        columns = obj.columns.all()
+        return Task.objects.filter(column__in=columns, priority='high').count()
 
 
 class BoardCreateSerializer(serializers.ModelSerializer):
@@ -99,9 +129,6 @@ class BoardCreateSerializer(serializers.ModelSerializer):
         Args:
             board (Board): The board to add members to.
             member_ids (list): List of user IDs to add as members.
-            
-        Returns:
-            None
         """
         for user_id in member_ids:
             try:
@@ -165,18 +192,45 @@ class BoardUpdateSerializer(serializers.ModelSerializer):
         Args:
             board (Board): The board to update members for.
             member_ids (list): List of user IDs to set as members.
-            
-        Returns:
-            None
+        """
+        self._remove_existing_members(board)
+        existing_members = self._get_existing_member_ids(board)
+        self._add_new_members(board, member_ids, existing_members)
+    
+    def _remove_existing_members(self, board):
+        """
+        Remove existing board members except owner.
+        
+        Args:
+            board (Board): The board to remove members from.
         """
         BoardMembership.objects.filter(board=board).exclude(
             user=board.owner
         ).delete()
+    
+    def _get_existing_member_ids(self, board):
+        """
+        Get IDs of existing board members.
         
-        existing_members = set(BoardMembership.objects.filter(
+        Args:
+            board (Board): The board to get member IDs for.
+            
+        Returns:
+            set: Set of user IDs.
+        """
+        return set(BoardMembership.objects.filter(
             board=board
         ).values_list('user_id', flat=True))
+    
+    def _add_new_members(self, board, member_ids, existing_members):
+        """
+        Add new members to the board.
         
+        Args:
+            board (Board): The board to add members to.
+            member_ids (list): List of user IDs to add.
+            existing_members (set): Set of existing member IDs.
+        """
         for user_id in member_ids:
             if user_id not in existing_members:
                 try:

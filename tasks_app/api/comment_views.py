@@ -40,7 +40,7 @@ class CommentListCreateView(APIView):
         comments = self._get_comments_for_task(task)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, task_id):
         """
         Create a new comment for a specific task.
@@ -61,7 +61,7 @@ class CommentListCreateView(APIView):
         
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(task=task, author=request.user)
+            serializer.save(task=task, created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -137,7 +137,7 @@ class CommentDetailView(APIView):
         
         comment = self._get_comment_or_404(task, pk)
         
-        if comment.author != request.user:
+        if comment.created_by != request.user:
             return Response(
                 {"detail": "You can only delete your own comments"}, 
                 status=status.HTTP_403_FORBIDDEN
@@ -240,7 +240,7 @@ class BoardCommentListCreateView(APIView):
         
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(task=task, author=request.user)
+            serializer.save(task=task, created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -291,7 +291,7 @@ class BoardCommentDetailView(APIView):
         board, task, comment = self._get_objects(board_id, task_id, pk)
         self.check_object_permissions(request, board)
         
-        if comment.author != request.user:
+        if comment.created_by != request.user:
             return Response(
                 {"detail": "You can only delete your own comments"}, 
                 status=status.HTTP_403_FORBIDDEN

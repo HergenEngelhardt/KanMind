@@ -37,16 +37,27 @@ class RegistrationView(APIView):
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
-            
-            return Response({
-                'token': token.key,
-                'user_id': user.id,
-                'fullname': user.get_full_name(),
-                'email': user.email
-            }, status=status.HTTP_201_CREATED)
+            return self._create_token_response(user)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def _create_token_response(self, user):
+        """
+        Generate token and create success response for a user.
+        
+        Args:
+            user (User): The user object to create a token for.
+            
+        Returns:
+            Response: Success response with token and user data.
+        """
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+            'fullname': user.get_full_name(),
+            'email': user.email
+        }, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -72,26 +83,46 @@ class LoginView(APIView):
         """
         serializer = LoginSerializer(data=request.data)
         
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            password = serializer.validated_data['password']
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-            user = authenticate(request, username=email, password=password)
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
+        user = authenticate(request, username=email, password=password)
+        
+        if not user:
+            return self._invalid_credentials_response()
+        
+        return self._create_token_response(user)
+    
+    def _invalid_credentials_response(self):
+        """
+        Create response for invalid login credentials.
+        
+        Returns:
+            Response: Error response for invalid credentials.
+        """
+        return Response({
+            'detail': 'Invalid credentials'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    
+    def _create_token_response(self, user):
+        """
+        Generate token and create success response for a user.
+        
+        Args:
+            user (User): The user object to create a token for.
             
-            if user:
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({
-                    'token': token.key,
-                    'user_id': user.id,
-                    'fullname': user.get_full_name(),
-                    'email': user.email
-                }, status=status.HTTP_200_OK)
-            
-            return Response({
-                'detail': 'Invalid credentials'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-            
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        Returns:
+            Response: Success response with token and user data.
+        """
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+            'fullname': user.get_full_name(),
+            'email': user.email
+        }, status=status.HTTP_200_OK)
 
 
 class GuestLoginView(APIView):
@@ -120,14 +151,7 @@ class GuestLoginView(APIView):
         except User.DoesNotExist:
             user = self._create_guest_user(guest_email, guest_password)
         
-        token, created = Token.objects.get_or_create(user=user)
-        
-        return Response({
-            'token': token.key,
-            'user_id': user.id,
-            'fullname': user.get_full_name(),
-            'email': user.email
-        }, status=status.HTTP_200_OK)
+        return self._create_token_response(user)
     
     def _create_guest_user(self, email, password):
         """
@@ -147,3 +171,21 @@ class GuestLoginView(APIView):
             first_name="Guest",
             last_name="Guest"
         )
+    
+    def _create_token_response(self, user):
+        """
+        Generate token and create success response for a guest user.
+        
+        Args:
+            user (User): The guest user object.
+            
+        Returns:
+            Response: Success response with token and user data.
+        """
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+            'fullname': user.get_full_name(),
+            'email': user.email
+        }, status=status.HTTP_200_OK)
