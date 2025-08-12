@@ -6,6 +6,7 @@ This module contains serializers for Task and Comment models.
 from rest_framework import serializers
 from tasks_app.models import Task, Comment
 from django.contrib.auth import get_user_model
+from kanban_app.models import Board, Column
 
 User = get_user_model()
 
@@ -28,6 +29,11 @@ class TaskSerializer(serializers.ModelSerializer):
     
     Used for list views and creation of tasks.
     """
+    board = serializers.PrimaryKeyRelatedField(
+        queryset=Board.objects.all(),
+        write_only=True,
+        required=False
+    )
     assignee = UserSerializer(read_only=True)
     reviewer = UserSerializer(read_only=True)
     assignee_id = serializers.PrimaryKeyRelatedField(
@@ -49,10 +55,11 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
-            'id', 'column', 'title', 'description', 'status', 'priority',
+            'id', 'board', 'column', 'title', 'description', 'status', 'priority',
             'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
             'due_date', 'comments_count'
         ]
+        read_only_fields = ['id', 'column']
     
     def get_comments_count(self, obj):
         """

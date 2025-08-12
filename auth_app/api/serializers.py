@@ -20,8 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'fullname']
-        read_only_fields = ['id', 'email']
+        fields = ['id', 'email', 'fullname']
+        read_only_fields = ['id']
     
     def get_fullname(self, obj):
         """
@@ -42,12 +42,14 @@ class RegistrationSerializer(serializers.ModelSerializer):
     
     Handles validation and creation of new user accounts.
     """
+    fullname = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True,
         required=True,
         style={'input_type': 'password'}
     )
-    password_confirm = serializers.CharField(
+    repeated_password = serializers.CharField(
         write_only=True,
         required=True,
         style={'input_type': 'password'}
@@ -55,7 +57,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'password', 'password_confirm']
+        fields = ['email', 'fullname', 'password', 'repeated_password']
     
     def validate(self, data):
         """
@@ -70,8 +72,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
         Raises:
             ValidationError: If passwords don't match.
         """
-        if data['password'] != data['password_confirm']:
-            raise serializers.ValidationError({"password_confirm": "Passwords don't match"})
+        if data['password'] != data['repeated_password']:
+            raise serializers.ValidationError({"repeated_password": "Passwords don't match"})
         
         validate_password(data['password'])
         
@@ -87,12 +89,19 @@ class RegistrationSerializer(serializers.ModelSerializer):
         Returns:
             User: The created user instance.
         """
-        validated_data.pop('password_confirm')
+        fullname = validated_data.pop('fullname')
+        validated_data.pop('repeated_password')
+        
+        name_parts = fullname.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
         
         password = validated_data.pop('password')
         
         user = User.objects.create_user(
             username=validated_data['email'],
+            first_name=first_name,
+            last_name=last_name,
             **validated_data
         )
         
