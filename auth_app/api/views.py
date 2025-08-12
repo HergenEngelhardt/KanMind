@@ -1,182 +1,150 @@
 """
-Views for user authentication including registration, login, and guest access.
+Authentication views for the KanMind API.
+
+This module contains views for user registration, login, and guest access.
 """
-
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework.decorators import api_view, permission_classes
-from .serializers import RegistrationSerializer
-import logging
+from .serializers import UserSerializer, RegistrationSerializer, LoginSerializer
+import uuid
 
-logger = logging.getLogger(__name__)
+User = get_user_model()
+
 
 class RegistrationView(APIView):
     """
-    View for registering new users.
+    View for user registration functionality.
+    
+    Handles new user creation with validation of required fields.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
     
     def post(self, request):
         """
-        Creates a new user and returns token with user info.
+        Create a new user account and generate an auth token.
         
         Args:
-            request: HTTP request object with registration data
+            request (Request): The HTTP request with user registration data.
             
         Returns:
-            Response: JSON with token and user data or errors
+            Response: User data with authentication token or validation errors.
+            
+        Raises:
+            ValidationError: If provided data is invalid.
         """
         serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
-            return self._create_success_response(user, token)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def _create_success_response(self, user, token):
-        """
-        Creates success response with user data and token.
-        
-        Args:
-            user: User object
-            token: Auth token
             
-        Returns:
-            Response: Success response with status 201
-        """
-        return Response({
-            'token': token.key,
-            'fullname': f"{user.first_name} {user.last_name}".strip(),
-            'email': user.email,
-            'user_id': user.id
-        }, status=status.HTTP_201_CREATED)
+            return Response({
+                'token': token.key,
+                'user_id': user.id,
+                'fullname': user.get_full_name(),
+                'email': user.email
+            }, status=status.HTTP_201_CREATED)
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
     """
-    View for user authentication and token generation.
+    View for user login functionality.
+    
+    Authenticates existing users and provides authentication token.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
     
     def post(self, request):
         """
-        Authenticates a user and returns token with user info.
+        Authenticate a user and generate an auth token.
         
         Args:
-            request: HTTP request with login credentials
+            request (Request): The HTTP request with login credentials.
             
         Returns:
-            Response: JSON with token and user data or errors
+            Response: User data with authentication token or error message.
+            
+        Raises:
+            ValidationError: If provided credentials are invalid.
         """
-        email = request.data.get('email')
-        password = request.data.get('password')
+        serializer = LoginSerializer(data=request.data)
         
-        if not self._validate_credentials(email, password):
-            return Response(
-                {'error': 'Please provide both email and password'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        user = self._authenticate_user(email, password)
-        if not user:
-            return Response(
-                {'error': 'Invalid credentials'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        token, _ = Token.objects.get_or_create(user=user)
-        return self._create_success_response(user, token)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+            
+            user = authenticate(request, username=email, password=password)
+            
+            if user:
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'user_id': user.id,
+                    'fullname': user.get_full_name(),
+                    'email': user.email
+                }, status=status.HTTP_200_OK)
+            
+            return Response({
+                'detail': 'Invalid credentials'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GuestLoginView(APIView):
+    """
+    View for guest login functionality.
     
-    def _validate_credentials(self, email, password):
-        """
-        Validates that both email and password are provided.
-        
-        Args:
-            email: User email
-            password: User password
-            
-        Returns:
-            bool: True if both are provided
-        """
-        return email is not None and password is not None
+    Creates a temporary guest session or returns an existing guest account.
+    """
+    permission_classes = [permissions.AllowAny]
     
-    def _authenticate_user(self, email, password):
+    def post(self, request):
         """
-        Authenticates user with provided credentials.
+        Create or retrieve a guest account and generate an auth token.
         
         Args:
-            email: User email
-            password: User password
+            request (Request): The HTTP request.
             
         Returns:
-            User: Authenticated user or None
+            Response: User data with authentication token.
         """
-        return authenticate(username=email, email=email, password=password)
-    
-    def _create_success_response(self, user, token):
-        """
-        Creates success response with user data and token.
+        guest_email = "kevin@kovacsi.de"
+        guest_password = "asdasdasd"
         
-        Args:
-            user: User object
-            token: Auth token
-            
-        Returns:
-            Response: Success response with status 200
-        """
+        try:
+            user = User.objects.get(email=guest_email)
+        except User.DoesNotExist:
+            user = self._create_guest_user(guest_email, guest_password)
+        
+        token, created = Token.objects.get_or_create(user=user)
+        
         return Response({
             'token': token.key,
-            'fullname': f"{user.first_name} {user.last_name}".strip(),
-            'email': user.email,
-            'user_id': user.id
+            'user_id': user.id,
+            'fullname': user.get_full_name(),
+            'email': user.email
         }, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def guest_login_view(request):
-    """
-    Authenticate with pre-defined guest credentials.
     
-    Args:
-        request (Request): HTTP request
+    def _create_guest_user(self, email, password):
+        """
+        Create a new guest user.
         
-    Returns:
-        Response: Authentication token and guest user information
-        
-    Raises:
-        AuthenticationFailed: If guest account is unavailable
-    """
-    # Fest definierte Gastanmeldedaten
-    email = "kevin@kovacsi.de"
-    password = "asdasdasd"
-    
-    user = authenticate(username=email, email=email, password=password)
-    
-    if not user:
-        # Überprüfen, ob der Gastbenutzer existiert
-        User = get_user_model()
-        try:
-            user = User.objects.get(email=email)
-            return Response(
-                {'error': 'Guest account exists but password is incorrect'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except User.DoesNotExist:
-            return Response(
-                {'error': 'Guest account not found'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-    
-    token, _ = Token.objects.get_or_create(user=user)
-    
-    return Response({
-        'token': token.key,
-        'fullname': f"{user.first_name} {user.last_name}".strip(),
-        'email': user.email,
-        'user_id': user.id
-    }, status=status.HTTP_200_OK)
+        Args:
+            email (str): The email for the guest user.
+            password (str): The password for the guest user.
+            
+        Returns:
+            User: The created guest user.
+        """
+        return User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name="Guest",
+            last_name="Guest"
+        )

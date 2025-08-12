@@ -1,3 +1,8 @@
+"""
+Board serializers for the KanMind API.
+
+This module contains serializers for Board model.
+"""
 from rest_framework import serializers
 from kanban_app.models import Board, BoardMembership
 from django.contrib.auth import get_user_model
@@ -5,187 +10,181 @@ from tasks_app.models import Task
 
 User = get_user_model()
 
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user data in board responses.
-    
-    This serializer returns basic user information for board members.
-    """
-    fullname = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = User
-        fields = ['id', 'email', 'fullname']
-        
-    def get_fullname(self, obj):
-        """
-        Format user's full name.
-        
-        Args:
-            obj (User): User instance
-            
-        Returns:
-            str: User's full name
-        """
-        return f"{obj.first_name} {obj.last_name}".strip()
 
 class BoardListSerializer(serializers.ModelSerializer):
     """
-    Serializer for board list representation.
+    Serializer for listing boards.
+    
+    Provides basic information about boards.
     """
+    owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
     member_count = serializers.SerializerMethodField()
     ticket_count = serializers.SerializerMethodField()
-    tasks_to_do_count = serializers.SerializerMethodField()
-    tasks_high_prio_count = serializers.SerializerMethodField()
-    owner_id = serializers.SerializerMethodField()
-    title = serializers.CharField(source='name')
     
     class Meta:
         model = Board
-        fields = ['id', 'title', 'member_count', 'ticket_count', 'tasks_to_do_count', 
-                 'tasks_high_prio_count', 'owner_id']
+        fields = ['id', 'title', 'owner', 'owner_name', 'member_count', 'ticket_count']
+        read_only_fields = ['id', 'owner', 'owner_name', 'member_count', 'ticket_count']
     
     def get_member_count(self, obj):
         """
-        Returns count of board members.
+        Get the number of board members.
         
         Args:
-            obj (Board): Board instance
+            obj (Board): The board instance.
             
         Returns:
-            int: Number of members
+            int: The number of members.
         """
-        return obj.members.count()
+        return BoardMembership.objects.filter(board=obj).count()
     
     def get_ticket_count(self, obj):
         """
-        Returns count of tasks in board.
+        Get the number of tasks for the board.
         
         Args:
-            obj (Board): Board instance
+            obj (Board): The board instance.
             
         Returns:
-            int: Number of tasks
+            int: The number of tasks.
         """
-        return Task.objects.filter(board=obj).count()
-    
-    def get_tasks_to_do_count(self, obj):
-        """
-        Returns count of to-do tasks in board.
-        
-        Args:
-            obj (Board): Board instance
-            
-        Returns:
-            int: Number of to-do tasks
-        """
-        return Task.objects.filter(board=obj, status='to-do').count()
-    
-    def get_tasks_high_prio_count(self, obj):
-        """
-        Returns count of high priority tasks in board.
-        
-        Args:
-            obj (Board): Board instance
-            
-        Returns:
-            int: Number of high priority tasks
-        """
-        return Task.objects.filter(board=obj, priority='high').count()
-    
-    def get_owner_id(self, obj):
-        """
-        Returns owner's ID.
-        
-        Args:
-            obj (Board): Board instance
-            
-        Returns:
-            int: Owner's user ID
-        """
-        return obj.owner.id
+        columns = obj.columns.all()
+        task_count = Task.objects.filter(column__in=columns).count()
+        return task_count
 
-class BoardUpdateSerializer(serializers.ModelSerializer):
+
+class BoardCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for updating a board.
+    Serializer for creating boards.
     
-    This serializer handles board updates and returns the correct format.
+    Handles board creation with members.
     """
-    members = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=User.objects.all(),
-        required=False
+    title = serializers.CharField(required=True)
+    members = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True
     )
-    owner_data = serializers.SerializerMethodField()
-    members_data = serializers.SerializerMethodField()
-    title = serializers.CharField(source='name')
     
     class Meta:
         model = Board
-        fields = ['id', 'title', 'members', 'owner_data', 'members_data']
+        fields = ['id', 'title', 'members', 'description']
+        read_only_fields = ['id']
     
-    def get_owner_data(self, obj):
+    def create(self, validated_data):
         """
-        Return serialized owner information.
+        Create a new board and add members.
         
         Args:
-            obj (Board): Board instance
+            validated_data (dict): The validated data.
             
         Returns:
-            dict: Owner data
+            Board: The created board.
         """
-        return UserSerializer(obj.owner).data
+        members_data = validated_data.pop('members', [])
+        
+        if 'title' in validated_data:
+            validated_data['name'] = validated_data.pop('title')
+            
+        board = Board.objects.create(**validated_data)
+        
+        self._add_members_to_board(board, members_data)
+        
+        return board
     
-    def get_members_data(self, obj):
+    def _add_members_to_board(self, board, member_ids):
         """
-        Return serialized members information.
+        Add members to the board.
         
         Args:
-            obj (Board): Board instance
+            board (Board): The board to add members to.
+            member_ids (list): List of user IDs to add as members.
             
         Returns:
-            list: List of member data dictionaries
+            None
         """
-        return UserSerializer(obj.members.all(), many=True).data
+        for user_id in member_ids:
+            try:
+                user = User.objects.get(id=user_id)
+                BoardMembership.objects.create(
+                    board=board,
+                    user=user,
+                    role='MEMBER'
+                )
+            except User.DoesNotExist:
+                pass
+
+
+class BoardUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating boards.
+    
+    Handles board updates with members management.
+    """
+    title = serializers.CharField(required=False)
+    members = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True
+    )
+    
+    class Meta:
+        model = Board
+        fields = ['title', 'members', 'description']
     
     def update(self, instance, validated_data):
         """
-        Update the board instance with validated data.
+        Update a board with the validated data.
         
         Args:
-            instance (Board): Board instance to update
-            validated_data (dict): Validated data
+            instance (Board): The board instance.
+            validated_data (dict): The validated data.
             
         Returns:
-            Board: Updated board instance
+            Board: The updated board.
         """
-        members = validated_data.pop('members', None)
+        members_data = validated_data.pop('members', None)
         
-        if 'name' in validated_data:
-            instance.name = validated_data.pop('name')
-            instance.save()
+        if 'title' in validated_data:
+            validated_data['name'] = validated_data.pop('title')
+            
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+            
+        instance.save()
         
-        if members is not None:
-            self._update_members(instance, members)
-        
+        if members_data is not None:
+            self._update_board_members(instance, members_data)
+            
         return instance
     
-    def _update_members(self, board, members):
+    def _update_board_members(self, board, member_ids):
         """
-        Update board members.
+        Update the members of a board.
         
         Args:
-            board (Board): Board instance
-            members (list): List of User objects
+            board (Board): The board to update members for.
+            member_ids (list): List of user IDs to set as members.
+            
+        Returns:
+            None
         """
         BoardMembership.objects.filter(board=board).exclude(
             user=board.owner
         ).delete()
         
-        for member in members:
-            if member != board.owner:
-                BoardMembership.objects.get_or_create(
-                    board=board, 
-                    user=member,
-                    defaults={'role': 'MEMBER'}
-                )
+        existing_members = set(BoardMembership.objects.filter(
+            board=board
+        ).values_list('user_id', flat=True))
+        
+        for user_id in member_ids:
+            if user_id not in existing_members:
+                try:
+                    user = User.objects.get(id=user_id)
+                    BoardMembership.objects.create(
+                        board=board,
+                        user=user,
+                        role='MEMBER'
+                    )
+                except User.DoesNotExist:
+                    pass

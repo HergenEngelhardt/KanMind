@@ -1,74 +1,116 @@
+"""
+Authentication serializers for KanMind API.
+
+This module contains serializers for user authentication, registration, and login.
+"""
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 
 User = get_user_model()
 
-class RegistrationSerializer(serializers.ModelSerializer):
+
+class UserSerializer(serializers.ModelSerializer):
     """
-    Serializer for user registration with password confirmation.
+    Serializer for User model.
     
-    Args:
-        fullname: User's full name as a single string
-        email: User's email address
-        password: User's password
-        repeated_password: Password confirmation
+    Used for representing user data in responses.
     """
-    fullname = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
-    repeated_password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    fullname = serializers.SerializerMethodField()
     
-    def validate_email(self, value):
-        """
-        Check that the email is not already in use.
-        """
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Ein Benutzer mit dieser E-Mail existiert bereits.")
-        return value
-        
     class Meta:
         model = User
-        fields = ['email', 'fullname', 'password', 'repeated_password']
-        
-    def validate(self, attrs):
+        fields = ['id', 'email', 'first_name', 'last_name', 'fullname']
+        read_only_fields = ['id', 'email']
+    
+    def get_fullname(self, obj):
         """
-        Validates that passwords match.
+        Get the full name of the user.
         
         Args:
-            attrs: Serializer attributes
+            obj (User): The user instance.
             
         Returns:
-            dict: Validated attributes
+            str: The user's full name.
+        """
+        return obj.get_full_name()
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+    
+    Handles validation and creation of new user accounts.
+    """
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    password_confirm = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name', 'password', 'password_confirm']
+    
+    def validate(self, data):
+        """
+        Validate user registration data.
+        
+        Args:
+            data (dict): The data to validate.
+            
+        Returns:
+            dict: The validated data.
             
         Raises:
-            ValidationError: If passwords don't match
+            ValidationError: If passwords don't match.
         """
-        if attrs['password'] != attrs['repeated_password']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-        return attrs
+        if data['password'] != data['password_confirm']:
+            raise serializers.ValidationError({"password_confirm": "Passwords don't match"})
+        
+        validate_password(data['password'])
+        
+        return data
     
     def create(self, validated_data):
         """
-        Creates a new user with validated data.
+        Create a new user with the validated data.
         
         Args:
-            validated_data: Validated form data
+            validated_data (dict): The validated user data.
             
         Returns:
-            User: New user instance
+            User: The created user instance.
         """
-        validated_data.pop('repeated_password')
-        fullname = validated_data.pop('fullname')
+        validated_data.pop('password_confirm')
         
-        name_parts = fullname.split(' ', 1)
-        first_name = name_parts[0]
-        last_name = name_parts[1] if len(name_parts) > 1 else ''
+        password = validated_data.pop('password')
         
-        return User.objects.create_user(
+        user = User.objects.create_user(
             username=validated_data['email'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=first_name,
-            last_name=last_name
+            **validated_data
         )
+        
+        user.set_password(password)
+        user.save()
+        
+        return user
+
+
+class LoginSerializer(serializers.Serializer):
+    """
+    Serializer for user login.
+    
+    Validates login credentials.
+    """
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(
+        required=True,
+        style={'input_type': 'password'},
+        write_only=True
+    )

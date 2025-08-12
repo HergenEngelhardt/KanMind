@@ -1,164 +1,155 @@
-"""Views for managing task comments.
-
-This module contains all views related to comment creation, retrieval,
-and deletion on tasks.
 """
+API views for task comments.
 
+This module contains views for listing, creating, and deleting comments.
+"""
+from rest_framework import permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from tasks_app.models import Task, Comment
-from kanban_app.models import BoardMembership
-from .serializers import CommentSerializer
 from django.shortcuts import get_object_or_404
+
+from kanban_app.models import Board
+from tasks_app.models import Task, Comment
+from .serializers import CommentSerializer
+from .permissions import IsBoardMember
+
 
 class CommentListCreateView(APIView):
     """
-    View for listing and creating comments on tasks.
+    List and create comments for a specific task.
+    
+    Requires the user to be a member of the board that the task belongs to.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsBoardMember]
+    
+    def get_board_and_task(self, board_id, task_id):
+        """
+        Retrieve the board and task based on the provided IDs.
+        
+        Args:
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            
+        Returns:
+            tuple: A tuple containing (board, task).
+            
+        Raises:
+            Http404: If the board or task doesn't exist or if the task doesn't belong to the board.
+        """
+        board = get_object_or_404(Board, pk=board_id)
+        columns = board.columns.values_list('id', flat=True)
+        task = get_object_or_404(Task, pk=task_id, column__in=columns)
+        return board, task
     
     def get(self, request, board_id, task_id):
         """
-        Lists all comments for a task.
+        Retrieve all comments for a specific task.
         
         Args:
-            request (Request): HTTP request
-            board_id (int): ID of board
-            task_id (int): ID of task
+            request (Request): The HTTP request object.
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
             
         Returns:
-            Response: List of comments
-            
-        Raises:
-            Http404: If task not found
+            Response: A response containing a list of comments.
         """
-        task = self._get_task_if_authorized(board_id, task_id, request.user)
-        if isinstance(task, Response):
-            return task
-            
-        comments = Comment.objects.filter(task=task)
+        board, task = self.get_board_and_task(board_id, task_id)
+        self.check_object_permissions(request, board)
+        
+        comments = self._get_comments_for_task(task)
         serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
+    
+    def _get_comments_for_task(self, task):
+        """
+        Get comments for a task ordered by creation time.
+        
+        Args:
+            task (Task): The task to get comments for.
+            
+        Returns:
+            QuerySet: The comments for the task.
+        """
+        return Comment.objects.filter(task=task).order_by('created_at')
     
     def post(self, request, board_id, task_id):
         """
-        Creates a new comment on a task.
+        Create a new comment for a specific task.
         
         Args:
-            request (Request): HTTP request with comment data
-            board_id (int): ID of board
-            task_id (int): ID of task
+            request (Request): The HTTP request object.
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
             
         Returns:
-            Response: Created comment data
+            Response: A response containing the created comment data.
             
         Raises:
-            Http404: If task not found
+            ValidationError: If the request data is invalid.
         """
-        task = self._get_task_if_authorized(board_id, task_id, request.user)
-        if isinstance(task, Response):
-            return task
-            
+        board, task = self.get_board_and_task(board_id, task_id)
+        self.check_object_permissions(request, board)
+        
         serializer = CommentSerializer(data=request.data)
-        
         if serializer.is_valid():
-            comment = serializer.save(task=task, author=request.user)
+            serializer.save(task=task, author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def _get_task_if_authorized(self, board_id, task_id, user):
-        """
-        Retrieves task if user is authorized.
-        
-        Args:
-            board_id (int): Board ID
-            task_id (int): Task ID
-            user (User): User requesting access
-            
-        Returns:
-            Task or Response: Task if authorized, error Response if not
-            
-        Raises:
-            Http404: If task not found
-        """
-        task = get_object_or_404(Task, id=task_id, board_id=board_id)
-        board = task.board
-        
-        if board.owner != user and not BoardMembership.objects.filter(
-                board=board, user=user
-            ).exists():
-            return Response(
-                {'error': 'No permission to access this task'}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        return task
 
 
-class CommentDeleteView(APIView):
+class CommentDetailView(APIView):
     """
-    View for deleting comments.
-    """
-    permission_classes = [IsAuthenticated]
+    Delete a specific comment.
     
-    def delete(self, request, board_id, task_id, comment_id):
+    Only the author of the comment can delete it.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsBoardMember]
+    
+    def get_objects(self, board_id, task_id, pk):
         """
-        Deletes a comment if user is the author.
+        Retrieve the board, task and comment based on the provided IDs.
         
         Args:
-            request (Request): HTTP request
-            board_id (int): ID of board
-            task_id (int): ID of task
-            comment_id (int): ID of comment to delete
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            pk (int): The ID of the comment.
             
         Returns:
-            Response: Empty success response or error
+            tuple: A tuple containing (board, task, comment).
             
         Raises:
-            Http404: If comment not found
+            Http404: If any object doesn't exist or if relationships are incorrect.
         """
-        task = self._get_task_if_authorized(board_id, task_id, request.user)
-        if isinstance(task, Response):
-            return task
+        board = get_object_or_404(Board, pk=board_id)
+        columns = board.columns.values_list('id', flat=True)
+        task = get_object_or_404(Task, pk=task_id, column__in=columns)
+        comment = get_object_or_404(Comment, pk=pk, task=task)
+        return board, task, comment
+    
+    def delete(self, request, board_id, task_id, pk):
+        """
+        Delete a specific comment.
+        
+        Args:
+            request (Request): The HTTP request object.
+            board_id (int): The ID of the board.
+            task_id (int): The ID of the task.
+            pk (int): The ID of the comment.
             
-        comment = get_object_or_404(Comment, id=comment_id, task=task)
+        Returns:
+            Response: An empty response with 204 status code.
+            
+        Raises:
+            PermissionDenied: If the user is not the author of the comment.
+        """
+        board, task, comment = self.get_objects(board_id, task_id, pk)
+        self.check_object_permissions(request, board)
         
         if comment.author != request.user:
             return Response(
-                {'error': 'You can only delete your own comments'}, 
+                {"detail": "You can only delete your own comments"}, 
                 status=status.HTTP_403_FORBIDDEN
             )
-            
+        
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    def _get_task_if_authorized(self, board_id, task_id, user):
-        """
-        Retrieves task if user is authorized.
-        
-        Args:
-            board_id (int): Board ID
-            task_id (int): Task ID
-            user (User): User requesting access
-            
-        Returns:
-            Task or Response: Task if authorized, error Response if not
-            
-        Raises:
-            Http404: If task not found
-        """
-        task = get_object_or_404(Task, id=task_id, board_id=board_id)
-        board = task.board
-        
-        if board.owner != user and not BoardMembership.objects.filter(
-                board=board, user=user
-            ).exists():
-            return Response(
-                {'error': 'No permission to access this task'}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        return task
