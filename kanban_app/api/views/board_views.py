@@ -1,106 +1,127 @@
 """
-API views for Kanban boards.
+Views for listing and creating boards.
+
+This module contains the BoardListCreateView for retrieving all boards
+a user has access to and for creating new boards.
 """
-from rest_framework import viewsets, permissions, status
+
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from kanban_app.models import Board, BoardMembership
-from kanban_app.api.serializers.board_serializers import BoardSerializer, BoardDetailSerializer
+from kanban_app.api.serializers.board_serializers import BoardListSerializer
+from django.contrib.auth import get_user_model
 import logging
 
+User = get_user_model()
+logger = logging.getLogger(__name__)
 
-
-class BoardViewSet(viewsets.ModelViewSet):
+class BoardListCreateView(APIView):
     """
-    ViewSet for managing Kanban boards.
-    
-    Provides endpoints for creating, retrieving, updating and deleting boards.
+    View for listing and creating boards.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
-    def get_serializer_class(self):
+    def get(self, request):
         """
-        Return the appropriate serializer class based on action.
+        Lists all boards where user is member or owner.
         
+        Args:
+            request (Request): HTTP request
+            
         Returns:
-            Serializer: BoardDetailSerializer for retrieve, BoardSerializer otherwise
+            Response: JSON list of boards
         """
-        if self.action in ['retrieve', 'create', 'update', 'partial_update']:
-            return BoardDetailSerializer
-        return BoardSerializer
-    
-    def get_queryset(self):
-        """
-        Return boards accessible to current user.
+        user_boards = Board.objects.filter(boardmembership__user=request.user).distinct()
         
-        Returns:
-            QuerySet: Filtered Board queryset for the current user
-        """
-        user = self.request.user
-        return Board.objects.filter(members=user)
+        serializer = BoardListSerializer(user_boards, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def create(self, request, *args, **kwargs):
+    def post(self, request):
         """
-        Create a new board.
+        Creates new board with the user as admin.
         
         Args:
             request (Request): HTTP request with board data
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
             
         Returns:
-            Response: Created board data or error
+            Response: JSON with created board data
             
         Raises:
-            ValidationError: If board data is invalid
+            ValidationError: If title is missing
         """
-        data = request.data.copy()
-        self._convert_title_to_name(data)
+        title = request.data.get('title')
+        member_ids = request.data.get('members', [])
         
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        board = self._create_board(serializer, request.user)
+        if not title:
+            return Response(
+                {'error': 'Title is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        return Response(
-            BoardDetailSerializer(board).data, 
-            status=status.HTTP_201_CREATED
-        )
+        board = self._create_board(request.user, title)
+        self._add_members(board, member_ids, request.user.id)
+        
+        response_data = self._prepare_response_data(board, request.user.id)
+        return Response(response_data, status=status.HTTP_201_CREATED)
     
-    def _create_board(self, serializer, user):
+    def _create_board(self, user, title):
         """
-        Create board and add creator as admin.
+        Creates a new board.
         
         Args:
-            serializer (BoardSerializer): Validated serializer
             user (User): User creating the board
+            title (str): Board title
             
         Returns:
-            Board: Created board
+            Board: New board instance
         """
-        board = serializer.save(owner=user)
-        self._add_creator_as_admin(board, user)
+        logger.info(f"Board creation request from user: {user}")
+        board = Board.objects.create(name=title, owner=user)
+        
+        BoardMembership.objects.create(
+            board=board, user=user, role='ADMIN'
+        )
+        
         return board
     
-    def _convert_title_to_name(self, data):
+    def _add_members(self, board, member_ids, owner_id):
         """
-        Convert title field to name field for backward compatibility.
+        Adds members to board.
         
         Args:
-            data (dict): Request data dictionary
+            board (Board): Board instance
+            member_ids (list): List of user IDs to add
+            owner_id (int): ID of board owner
         """
-        if 'title' in data and 'name' not in data:
-            data['name'] = data['title']
+        for member_id in member_ids:
+            if member_id != owner_id:
+                try:
+                    user = User.objects.get(id=member_id)
+                    BoardMembership.objects.create(
+                        board=board, user=user, role='MEMBER'
+                    )
+                except User.DoesNotExist:
+                    pass
     
-    def _add_creator_as_admin(self, board, user):
+    def _prepare_response_data(self, board, owner_id):
         """
-        Add the creator as admin member to the board.
+        Prepares response data for board creation.
         
         Args:
-            board (Board): Board object
-            user (User): User who created the board
+            board (Board): Board instance
+            owner_id (int): ID of board owner
+            
+        Returns:
+            dict: Response data
         """
-        BoardMembership.objects.create(
-            board=board,
-            user=user,
-            role='ADMIN'
-        )
+        return {
+            'id': board.id,
+            'title': board.name,
+            'member_count': board.members.count(),
+            'ticket_count': 0,
+            'tasks_to_do_count': 0,
+            'tasks_high_prio_count': 0,
+            'owner_id': owner_id
+        }

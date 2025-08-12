@@ -56,35 +56,19 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Environment Configuration
-
-Create a `.env` file in the root directory (copy from `.env.example`):
-
-```bash
-cp .env.example .env
-```
-
-Edit the `.env` file with your settings:
-```env
-SECRET_KEY=your-unique-secret-key-here
-DEBUG=True
-GUEST_EMAIL=your-guest-email@example.com
-GUEST_PASSWORD=your-guest-password
-```
-
-### 5. Database setup
+### 4. Database setup
 
 ```bash
 python manage.py migrate
 ```
 
-### 6. Create a superuser
+### 5. Create a superuser
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 7. (Optional) Load sample data
+### 6. (Optional) Load sample data
 
 ```bash
 python manage.py loaddata fixtures/sample_data.json

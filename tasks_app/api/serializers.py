@@ -1,262 +1,364 @@
-"""
-Serializers for tasks and comments in the tasks_app.
-
-Provides serialization and deserialization for Task and Comment models.
-"""
 from rest_framework import serializers
-from tasks_app.models import Task, Comment  
-from django.contrib.auth.models import User
-from kanban_app.models import Column
-import logging
+from tasks_app.models import Task, Comment
+from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from kanban_app.models import BoardMembership
+from django.shortcuts import get_object_or_404
 
 
-
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user representation within tasks.
-    """
-    fullname = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'fullname')
-    
-    def get_fullname(self, obj):
-        """
-        Compute the full name of the user.
-        
-        Args:
-            obj (User): User object to get name from
-            
-        Returns:
-            str: Full name or username if no name is set
-        """
-        name = f"{obj.first_name} {obj.last_name}".strip()
-        return name or obj.username
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for task comments.
-    
-    Handles serialization and deserialization of Comment model instances.
-    """
-    user = UserSerializer(read_only=True, source='created_by')
-    
-    class Meta:
-        model = Comment
-        fields = ('id', 'task', 'user', 'content', 'created_at')
-        read_only_fields = ('task', 'created_at')
-
+User = get_user_model()
 
 class TaskSerializer(serializers.ModelSerializer):
     """
-    Serializer for tasks.
-    
-    Handles serialization and deserialization of Task model instances.
+    Serializer for task model.
     """
-    assigned_to = UserSerializer(read_only=True, source='assignee')
-    reviewers = UserSerializer(many=True, read_only=True)
-    created_by = UserSerializer(read_only=True)
+    assignee_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
+    reviewer_id = serializers.IntegerField(required=False, allow_null=True, write_only=True)
+    assignee = serializers.SerializerMethodField(read_only=True)
+    reviewer = serializers.SerializerMethodField(read_only=True)
+    comments_count = serializers.SerializerMethodField(read_only=True)
+    board = serializers.PrimaryKeyRelatedField(read_only=True, source='column.board')
     
     class Meta:
         model = Task
-        fields = (
-            'id', 'column', 'title', 'description', 'assigned_to', 'assignee',
-            'reviewers', 'created_by', 'created_at', 'updated_at',
-            'priority', 'status', 'due_date'
-        )
-        read_only_fields = ('created_by', 'created_at', 'updated_at')
+        fields = ['id', 'board', 'title', 'description', 'status', 'priority', 
+                 'assignee_id', 'assignee', 'reviewer_id', 'reviewer', 
+                 'due_date', 'comments_count']
+    
+    def get_assignee(self, obj):
+        """
+        Gets assignee user data.
+        
+        Args:
+            obj: Task instance
+            
+        Returns:
+            dict: User data or None
+        """
+        if obj.assignee:
+            return self._format_user_data(obj.assignee)
+        return None
+    
+    def get_reviewer(self, obj):
+        """
+        Gets first reviewer user data.
+        
+        Args:
+            obj: Task instance
+            
+        Returns:
+            dict: User data or None
+        """
+        if obj.reviewers.exists():
+            reviewer = obj.reviewers.first()
+            return self._format_user_data(reviewer)
+        return None
+    
+    def get_comments_count(self, obj):
+        """
+        Gets count of comments on task.
+        
+        Args:
+            obj: Task instance
+            
+        Returns:
+            int: Comment count
+        """
+        return obj.comments.count()
+    
+    def _format_user_data(self, user):
+        """
+        Formats user data for serialization.
+        
+        Args:
+            user: User instance
+            
+        Returns:
+            dict: Formatted user data
+        """
+        return {
+            'id': user.id,
+            'email': user.email,
+            'fullname': f"{user.first_name} {user.last_name}".strip()
+        }
     
     def validate(self, attrs):
         """
-        Validate task data as a whole.
+        Validates task status and priority.
         
         Args:
-            attrs (dict): The attribute dictionary to validate
+            attrs: Serializer attributes
             
         Returns:
-            dict: The validated attributes
+            dict: Validated attributes
             
         Raises:
-            ValidationError: If validation fails
+            ValidationError: If status or priority is invalid
         """
-        self.validate_required_fields(attrs)
-        self.validate_column_field(attrs)
-        self.validate_priority_field(attrs)
-        self.validate_status_field(attrs)
-        
+        self._validate_status(attrs)
+        self._validate_priority(attrs)
         return attrs
     
-    def validate_required_fields(self, attrs):
+    def _validate_status(self, attrs):
         """
-        Validate required fields are present.
+        Validates task status.
         
         Args:
-            attrs (dict): Attributes to validate
-            
-        Raises:
-            ValidationError: If required fields missing
-        """
-        errors = {}
-        
-        if 'title' not in attrs:
-            errors['title'] = "Title field is required"
-            
-        if 'column' not in attrs:
-            errors['column'] = "Column field is required"
-            
-        if errors:
-            raise serializers.ValidationError(errors)
-    
-    def validate_column_field(self, attrs):
-        """
-        Validate column field exists and is valid.
-        
-        Args:
-            attrs (dict): Attribute dictionary to validate
-            
-        Raises:
-            ValidationError: If column is invalid
-        """
-        if 'column' not in attrs:
-            return
-            
-        column_data = attrs['column']
-        
-        try:
-            if isinstance(column_data, Column):
-                return
-            
-            column_id = int(column_data)
-            attrs['column'] = Column.objects.get(id=column_id)
-        except (ValueError, TypeError):
-            raise serializers.ValidationError({
-                'column': 'Column ID must be a number'
-            })
-        except Column.DoesNotExist:
-            raise serializers.ValidationError({
-                'column': f'Column with id {column_data} does not exist'
-            })
-    
-    def validate_priority_field(self, attrs):
-        """
-        Validate priority field if present.
-        
-        Args:
-            attrs (dict): Attribute dictionary to validate
-            
-        Raises:
-            ValidationError: If priority is invalid
-        """
-        if 'priority' not in attrs:
-            return
-            
-        valid_priorities = ['low', 'medium', 'high']
-        if attrs['priority'] not in valid_priorities:
-            raise serializers.ValidationError({
-                'priority': f'Priority must be one of: {", ".join(valid_priorities)}'
-            })
-    
-    def validate_status_field(self, attrs):
-        """
-        Validate status field if present.
-        
-        Args:
-            attrs (dict): Attribute dictionary to validate
+            attrs: Serializer attributes
             
         Raises:
             ValidationError: If status is invalid
         """
-        if 'status' not in attrs:
-            return
+        status_value = attrs.get('status')
+        if status_value and status_value not in ['to-do', 'in-progress', 'review', 'done']:
+            raise serializers.ValidationError({"status": "Invalid status value"})
+    
+    def _validate_priority(self, attrs):
+        """
+        Validates task priority.
+        
+        Args:
+            attrs: Serializer attributes
             
-        valid_statuses = ['to-do', 'in-progress', 'review', 'done']
-        if attrs['status'] not in valid_statuses:
-            raise serializers.ValidationError({
-                'status': f'Status must be one of: {", ".join(valid_statuses)}'
-            })
+        Raises:
+            ValidationError: If priority is invalid
+        """
+        priority_value = attrs.get('priority')
+        if priority_value and priority_value not in ['low', 'medium', 'high']:
+            raise serializers.ValidationError({"priority": "Invalid priority value"})
     
     def create(self, validated_data):
         """
-        Create a new task instance.
+        Creates a new task.
         
         Args:
-            validated_data (dict): Validated data for task creation
+            validated_data: Validated data
             
         Returns:
             Task: Created task instance
         """
-        reviewers_data = self.initial_data.get('reviewers', [])
-        assignee_id = self.initial_data.get('assignee')
+        assignee_id = validated_data.pop('assignee_id', None)
+        reviewer_id = validated_data.pop('reviewer_id', None)
+        
+        validated_data['created_by'] = self.context['request'].user
         
         task = Task.objects.create(**validated_data)
-        
-        self.process_assignee(task, assignee_id)
-        self.process_reviewers(task, reviewers_data)
+        self._update_task_assignee(task, assignee_id)
+        self._update_task_reviewer(task, reviewer_id)
         
         return task
     
     def update(self, instance, validated_data):
         """
-        Update an existing task instance.
+        Updates a task instance.
         
         Args:
-            instance (Task): Task instance to update
-            validated_data (dict): Validated data for update
+            instance: Task instance
+            validated_data: Validated data
             
         Returns:
             Task: Updated task instance
         """
-        reviewers_data = self.initial_data.get('reviewers', [])
-        assignee_id = self.initial_data.get('assignee')
+        assignee_id = validated_data.pop('assignee_id', None)
+        reviewer_id = validated_data.pop('reviewer_id', None)
         
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         
+        self._update_task_assignee(instance, assignee_id)
+        self._update_task_reviewer(instance, reviewer_id)
+        
         instance.save()
-        
-        self.process_assignee(instance, assignee_id)
-        self.process_reviewers(instance, reviewers_data)
-        
         return instance
     
-    def process_assignee(self, task, assignee_id):
+    def _update_task_assignee(self, task, assignee_id):
         """
-        Process assignee field.
+        Updates task assignee.
         
         Args:
-            task (Task): Task to update
-            assignee_id: ID of assignee user
+            task: Task instance
+            assignee_id: User ID or None
         """
-        if not assignee_id:
-            return
-            
-        try:
-            assignee_id = int(assignee_id)
-            user = User.objects.get(id=assignee_id)
-            task.assignee = user
-            task.save()
-        except (ValueError, TypeError, User.DoesNotExist):
-            pass
+        if assignee_id is not None:
+            if assignee_id:
+                try:
+                    assignee = User.objects.get(id=assignee_id)
+                    task.assignee = assignee
+                except User.DoesNotExist:
+                    pass
+            else:
+                task.assignee = None
     
-    def process_reviewers(self, task, reviewer_ids):
+    def _update_task_reviewer(self, task, reviewer_id):
         """
-        Process reviewers field.
+        Updates task reviewer.
         
         Args:
-            task (Task): Task to update
-            reviewer_ids: List of reviewer user IDs
+            task: Task instance
+            reviewer_id: User ID or None
         """
-        if not reviewer_ids or not isinstance(reviewer_ids, list):
-            return
-            
-        task.reviewers.clear()
+        if reviewer_id is not None:
+            task.reviewers.clear()
+            if reviewer_id:
+                try:
+                    reviewer = User.objects.get(id=reviewer_id)
+                    task.reviewers.add(reviewer)
+                except User.DoesNotExist:
+                    pass
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for task comments.
+    """
+    author = serializers.SerializerMethodField(read_only=True)
+    
+    class Meta:
+        model = Comment
+        fields = ['id', 'created_at', 'author', 'content']
+    
+    def get_author(self, obj):
+        """
+        Gets comment author's full name.
         
-        for reviewer_id in reviewer_ids:
-            try:
-                reviewer_id = int(reviewer_id)
-                user = User.objects.get(id=reviewer_id)
-                task.reviewers.add(user)
-            except (ValueError, TypeError, User.DoesNotExist):
-                continue
+        Args:
+            obj: Comment instance
+            
+        Returns:
+            str: Author's full name
+        """
+        user = obj.created_by
+        return f"{user.first_name} {user.last_name}".strip()
+
+
+class CommentListCreateView(APIView):
+    """
+    View for listing and creating comments.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, task_id):
+        """
+        Lists comments for a task.
+        
+        Args:
+            request: HTTP request
+            task_id: ID of task to get comments for
+            
+        Returns:
+            Response: JSON list of comments
+        """
+        task = self._get_task_if_authorized(task_id, request.user)
+        if isinstance(task, Response):
+            return task
+        
+        comments = Comment.objects.filter(task=task).order_by('created_at')
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, task_id):
+        """
+        Creates a comment on a task.
+        
+        Args:
+            request: HTTP request with comment data
+            task_id: ID of task to comment on
+            
+        Returns:
+            Response: JSON with created comment or errors
+        """
+        task = self._get_task_if_authorized(task_id, request.user)
+        if isinstance(task, Response):
+            return task
+        
+        content = request.data.get('content')
+        if not content:
+            return Response(
+                {'error': 'Content is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        comment = self._create_comment(task, request.user, content)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def _get_task_if_authorized(self, task_id, user):
+        """
+        Retrieves task if user is authorized.
+        
+        Args:
+            task_id: Task ID
+            user: User requesting access
+            
+        Returns:
+            Task or Response: Task if authorized, error Response if not
+        """
+        task = get_object_or_404(Task, id=task_id)
+        board = task.column.board
+        
+        if board.owner != user and not BoardMembership.objects.filter(
+                board=board, user=user
+            ).exists():
+            return Response(
+                {'error': 'No permission to access this task'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        return task
+    
+    def _create_comment(self, task, user, content):
+        """
+        Creates a new comment.
+        
+        Args:
+            task: Task instance
+            user: User creating comment
+            content: Comment text
+            
+        Returns:
+            Comment: Created comment
+        """
+        return Comment.objects.create(
+            task=task,
+            created_by=user,
+            content=content
+        )
+
+
+class CommentDeleteView(APIView):
+    """
+    View for deleting comments.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, task_id, comment_id):
+        """
+        Deletes a comment if user is author.
+        
+        Args:
+            request: HTTP request
+            task_id: Task ID
+            comment_id: Comment ID to delete
+            
+        Returns:
+            Response: Empty response on success, error otherwise
+        """
+        try:
+            comment = get_object_or_404(Comment, id=comment_id, task_id=task_id)
+            
+            if comment.created_by != request.user:
+                return Response(
+                    {'error': 'Only the comment author can delete this comment'}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        except Comment.DoesNotExist:
+            return Response(
+                {'error': 'Comment not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )

@@ -1,193 +1,182 @@
 """
-Authentication views for the API.
-
-Provides views for user registration, login and email verification.
+Views for user authentication including registration, login, and guest access.
 """
+
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError, AuthenticationFailed
-from .serializers import RegisterSerializer, LoginSerializer
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework.decorators import api_view, permission_classes
+from .serializers import RegistrationSerializer
 import logging
+
+logger = logging.getLogger(__name__)
 
 class RegistrationView(APIView):
     """
-    View for user registration.
-    
-    Handles user signup and returns authentication token.
+    View for registering new users.
     """
     permission_classes = [AllowAny]
     
     def post(self, request):
         """
-        Handle user registration request.
+        Creates a new user and returns token with user info.
         
         Args:
-            request (Request): HTTP request with registration data
+            request: HTTP request object with registration data
             
         Returns:
-            Response: User data with token or validation errors
-            
-        Raises:
-            ValidationError: If registration data is invalid
+            Response: JSON with token and user data or errors
         """
-        serializer = RegisterSerializer(data=request.data)
-        
-        if not self._is_valid_registration(serializer):
-            return Response(
-                serializer.errors, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-        return self._create_user_and_respond(serializer)
+        serializer = RegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            return self._create_success_response(user, token)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def _is_valid_registration(self, serializer):
+    def _create_success_response(self, user, token):
         """
-        Validate registration data.
+        Creates success response with user data and token.
         
         Args:
-            serializer (RegisterSerializer): The serializer to validate
+            user: User object
+            token: Auth token
             
         Returns:
-            bool: True if valid, False otherwise
+            Response: Success response with status 201
         """
-        return serializer.is_valid()
-    
-    def _create_user_and_respond(self, serializer):
-        """
-        Create user and generate response.
-        
-        Args:
-            serializer (RegisterSerializer): Validated serializer
-            
-        Returns:
-            Response: Created response with user data
-        """
-        user = serializer.save()
-        token_data = self._create_token_response(user)
-        
-        return Response(token_data, status=status.HTTP_201_CREATED)
-    
-    def _create_token_response(self, user):
-        """
-        Create authentication token and response data.
-        
-        Args:
-            user (User): User object to create token for
-            
-        Returns:
-            dict: Token and user data for response
-        """
-        token, _ = Token.objects.get_or_create(user=user)
-        return {
+        return Response({
             'token': token.key,
+            'fullname': f"{user.first_name} {user.last_name}".strip(),
+            'email': user.email,
             'user_id': user.id
-        }
+        }, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
     """
-    View for user login.
-    
-    Authenticates user credentials and returns token.
+    View for user authentication and token generation.
     """
     permission_classes = [AllowAny]
     
     def post(self, request):
         """
-        Handle user login request.
+        Authenticates a user and returns token with user info.
         
         Args:
-            request (Request): HTTP request with login credentials
+            request: HTTP request with login credentials
             
         Returns:
-            Response: User data with token or error message
-            
-        Raises:
-            ValidationError: If login data is invalid
-            AuthenticationFailed: If credentials are invalid
+            Response: JSON with token and user data or errors
         """
         email = request.data.get('email')
         password = request.data.get('password')
         
-        if not email or not password:
+        if not self._validate_credentials(email, password):
             return Response(
-                {"detail": "Email and password are required"},
+                {'error': 'Please provide both email and password'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        user = self._get_user_by_email(email)
         
-        if not user or not user.check_password(password):
-            raise AuthenticationFailed("Invalid credentials")
-            
-        token_data = self._create_token_response(user)
+        user = self._authenticate_user(email, password)
+        if not user:
+            return Response(
+                {'error': 'Invalid credentials'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        return Response(token_data, status=status.HTTP_200_OK)
-    
-    def _get_user_by_email(self, email):
-        """
-        Get user by email.
-        
-        Args:
-            email (str): Email to search for
-            
-        Returns:
-            User: User object if found, None otherwise
-        """
-        try:
-            return User.objects.get(email=email)
-        except User.DoesNotExist:
-            return None
-    
-    def _create_token_response(self, user):
-        """
-        Create authentication token and response data.
-        
-        Args:
-            user (User): User object to create token for
-            
-        Returns:
-            dict: Token and user data for response
-        """
         token, _ = Token.objects.get_or_create(user=user)
-        return {
-            'token': token.key,
-            'user_id': user.id,
-            'email': user.email
-        }
-
-
-class EmailCheckView(APIView):
-    """
-    View to check if email exists.
+        return self._create_success_response(user, token)
     
-    Provides endpoint to verify email availability.
-    """
-    permission_classes = [AllowAny]
-    
-    def get(self, request):
+    def _validate_credentials(self, email, password):
         """
-        Check if email exists in the system.
+        Validates that both email and password are provided.
         
         Args:
-            request (Request): HTTP request with email parameter
+            email: User email
+            password: User password
             
         Returns:
-            Response: User data or not found message
-            
-        Raises:
-            ValidationError: If email parameter is missing
+            bool: True if both are provided
         """
-        email = request.query_params.get('email')
+        return email is not None and password is not None
+    
+    def _authenticate_user(self, email, password):
+        """
+        Authenticates user with provided credentials.
         
-        if not email:
-            raise ValidationError({'email': 'Email parameter is required'})
+        Args:
+            email: User email
+            password: User password
+            
+        Returns:
+            User: Authenticated user or None
+        """
+        return authenticate(username=email, email=email, password=password)
+    
+    def _create_success_response(self, user, token):
+        """
+        Creates success response with user data and token.
         
-        exists = User.objects.filter(email=email).exists()
+        Args:
+            user: User object
+            token: Auth token
+            
+        Returns:
+            Response: Success response with status 200
+        """
+        return Response({
+            'token': token.key,
+            'fullname': f"{user.first_name} {user.last_name}".strip(),
+            'email': user.email,
+            'user_id': user.id
+        }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def guest_login_view(request):
+    """
+    Authenticate with pre-defined guest credentials.
+    
+    Args:
+        request (Request): HTTP request
         
-        return Response({'exists': exists}, status=status.HTTP_200_OK)
+    Returns:
+        Response: Authentication token and guest user information
+        
+    Raises:
+        AuthenticationFailed: If guest account is unavailable
+    """
+    # Fest definierte Gastanmeldedaten
+    email = "kevin@kovacsi.de"
+    password = "asdasdasd"
+    
+    user = authenticate(username=email, email=email, password=password)
+    
+    if not user:
+        # Überprüfen, ob der Gastbenutzer existiert
+        User = get_user_model()
+        try:
+            user = User.objects.get(email=email)
+            return Response(
+                {'error': 'Guest account exists but password is incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Guest account not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    token, _ = Token.objects.get_or_create(user=user)
+    
+    return Response({
+        'token': token.key,
+        'fullname': f"{user.first_name} {user.last_name}".strip(),
+        'email': user.email,
+        'user_id': user.id
+    }, status=status.HTTP_200_OK)

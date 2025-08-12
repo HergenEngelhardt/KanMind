@@ -1,10 +1,10 @@
 """
-Main URL configuration for KanMind project.
+KanMind API URL Configuration.
+
+The `urlpatterns` list routes URLs to views.
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
 urlpatterns = [
     path('admin/', admin.site.urls),

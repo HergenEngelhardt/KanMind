@@ -1,97 +1,74 @@
-"""
-Serializers for authentication endpoints.
-
-Provides serializers for user registration and login.
-"""
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 
+User = get_user_model()
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegistrationSerializer(serializers.ModelSerializer):
     """
-    Serializer for user registration.
+    Serializer for user registration with password confirmation.
     
-    Handles validation and creation of new user accounts.
+    Args:
+        fullname: User's full name as a single string
+        email: User's email address
+        password: User's password
+        repeated_password: Password confirmation
     """
-    password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True, required=False)
+    fullname = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
-    
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password', 'confirm_password', 
-                  'first_name', 'last_name')
-    
-    def validate(self, data):
-        """
-        Validate registration data.
-        
-        Args:
-            data (dict): Registration data to validate
-            
-        Returns:
-            dict: Validated data
-            
-        Raises:
-            ValidationError: If passwords don't match or fields are invalid
-        """
-        if 'username' not in data and 'email' in data:
-            data['username'] = data['email'].split('@')[0]
-            
-        if 'confirm_password' in data and data['password'] != data['confirm_password']:
-            raise serializers.ValidationError(
-                {"confirm_password": "Passwords don't match"}
-            )
-            
-        return data
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    repeated_password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     
     def validate_email(self, value):
         """
-        Validate email uniqueness.
+        Check that the email is not already in use.
+        """
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Ein Benutzer mit dieser E-Mail existiert bereits.")
+        return value
+        
+    class Meta:
+        model = User
+        fields = ['email', 'fullname', 'password', 'repeated_password']
+        
+    def validate(self, attrs):
+        """
+        Validates that passwords match.
         
         Args:
-            value (str): Email to validate
+            attrs: Serializer attributes
             
         Returns:
-            str: Validated email
+            dict: Validated attributes
             
         Raises:
-            ValidationError: If email already exists
+            ValidationError: If passwords don't match
         """
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already exists")
-            
-        return value
+        if attrs['password'] != attrs['repeated_password']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
     
     def create(self, validated_data):
         """
-        Create a new user.
+        Creates a new user with validated data.
         
         Args:
-            validated_data (dict): Validated registration data
+            validated_data: Validated form data
             
         Returns:
-            User: Created user object
+            User: New user instance
         """
-        if 'confirm_password' in validated_data:
-            validated_data.pop('confirm_password')
-            
-        user = User.objects.create_user(
-            username=validated_data.get('username', ''),
+        validated_data.pop('repeated_password')
+        fullname = validated_data.pop('fullname')
+        
+        name_parts = fullname.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+        
+        return User.objects.create_user(
+            username=validated_data['email'],
             email=validated_data['email'],
             password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', '')
+            first_name=first_name,
+            last_name=last_name
         )
-        
-        return user
-
-
-class LoginSerializer(serializers.Serializer):
-    """
-    Serializer for user login.
-    
-    Validates login credentials.
-    """
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, write_only=True)

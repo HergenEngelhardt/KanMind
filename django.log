@@ -37933,3 +37933,35 @@ Board created successfully
 Column created for board 34
 Prepared task data: {'title': 'Test Task 1754924983541', 'description': 'Test task description', 'column': 90, 'priority': 'MEDIUM', 'status': 'TODO', 'due_date': '2025-08-12'}
 Validation errors: {'priority': [ErrorDetail(string='"MEDIUM" is not a valid choice.', code='invalid_choice')], 'status': [ErrorDetail(string='"TODO" is not a valid choice.', code='invalid_choice')]}
+Board creation request from user: max.mustermann@example.com
+Request data: {'title': 'Neues Projekt'}
+Converted 'title' to 'name': Neues Projekt
+Added max.mustermann@example.com as ADMIN member to board Neues Projekt
+Board created successfully
+Board creation request from user: max.mustermann@example.com
+Request data: {'title': 'Neues Projekt'}
+Converted 'title' to 'name': Neues Projekt
+Added max.mustermann@example.com as ADMIN member to board Neues Projekt
+Board created successfully
+Board creation request from user: max.mustermann@example.com
+Request data: {'title': 'Neues Projekt'}
+Converted 'title' to 'name': Neues Projekt
+Added max.mustermann@example.com as ADMIN member to board Neues Projekt
+Board created successfully
+Board creation request from user: max.mustermann@example.com
+Request data: {'title': 'Neues Projekt'}
+Converted 'title' to 'name': Neues Projekt
+Added max.mustermann@example.com as ADMIN member to board Neues Projekt
+Board created successfully
+Board creation request from user: test1754984652183@mail.de
+Request data: {'title': 'Test Board 1754984652183'}
+Converted 'title' to 'name': Test Board 1754984652183
+Added test1754984652183@mail.de as ADMIN member to board Test Board 1754984652183
+Board created successfully
+Board creation request from user: test1754985126656@mail.de
+Request data: {'title': 'Test Board 1754985126656'}
+Converted 'title' to 'name': Test Board 1754985126656
+Added test1754985126656@mail.de as ADMIN member to board Test Board 1754985126656
+Board created successfully
+Board creation request from user: max.mustermann@example.com
+Board creation request from user: test1754988065184@example.com
