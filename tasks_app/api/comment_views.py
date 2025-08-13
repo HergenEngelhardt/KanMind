@@ -67,6 +67,7 @@ class CommentListCreateView(APIView):
         if serializer.is_valid():
             serializer.save(task=task, created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def _get_task_or_404(self, task_id):
@@ -97,7 +98,7 @@ class CommentListCreateView(APIView):
         """
         if not (board.owner == request.user or board.members.filter(
                 id=request.user.id).exists()):
-            raise PermissionDenied("You are not a member of this board")
+            raise PermissionDenied("You must be a member of this board to access its tasks")
     
     def _get_comments_for_task(self, task):
         """
@@ -142,9 +143,7 @@ class CommentDetailView(APIView):
         comment = self._get_comment_or_404(task, pk)
         
         if comment.created_by != request.user:
-            raise PermissionDenied(
-                "You can only delete your own comments"
-            )
+            raise PermissionDenied("Only the author can delete this comment")
         
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -193,7 +192,7 @@ class CommentDetailView(APIView):
         """
         if not (board.owner == request.user or board.members.filter(
                 id=request.user.id).exists()):
-            raise PermissionDenied("You are not a member of this board")
+            raise PermissionDenied("You must be a member of this board to access its tasks")
 
 
 class BoardCommentListCreateView(APIView):
@@ -248,6 +247,7 @@ class BoardCommentListCreateView(APIView):
         if serializer.is_valid():
             serializer.save(task=task, created_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def _get_board_and_task(self, board_id, task_id):
@@ -301,9 +301,7 @@ class BoardCommentDetailView(APIView):
         comment = get_object_or_404(Comment, id=pk, task=task)
         
         if comment.created_by != request.user:
-            raise PermissionDenied(
-                "You can only delete your own comments"
-            )
+            raise PermissionDenied("Only the author can delete this comment")
         
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

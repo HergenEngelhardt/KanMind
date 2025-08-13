@@ -29,11 +29,7 @@ class TaskSerializer(serializers.ModelSerializer):
     
     Used for list views and creation of tasks.
     """
-    board = serializers.PrimaryKeyRelatedField(
-        queryset=Board.objects.all(), 
-        write_only=True,
-        required=False
-    )
+    board = serializers.SerializerMethodField()
     assignee = UserSerializer(read_only=True)
     reviewer = UserSerializer(read_only=True)
     assignee_id = serializers.PrimaryKeyRelatedField(
@@ -55,11 +51,23 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
-            'id', 'board', 'column', 'title', 'description', 'status', 'priority',
+            'id', 'board', 'title', 'description', 'status', 'priority',
             'assignee', 'reviewer', 'assignee_id', 'reviewer_id',
             'due_date', 'comments_count'
         ]
         read_only_fields = ['id']
+    
+    def get_board(self, obj):
+        """
+        Get the board ID for the task.
+        
+        Args:
+            obj (Task): The Task instance.
+            
+        Returns:
+            int: The board ID.
+        """
+        return obj.column.board.id if obj.column and obj.column.board else None
     
     def get_comments_count(self, obj):
         """
