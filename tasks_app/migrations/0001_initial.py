@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "reviewers",
+                    "reviewer",
                     models.ManyToManyField(
                         blank=True,
                         related_name="reviewing_tasks",

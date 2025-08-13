@@ -8,7 +8,7 @@ KanMind is a Kanban board application built with Django REST Framework backend a
 - Create and manage Kanban boards
 - Add and organize tasks in columns
 - Assign tasks to users
-- Add reviewers to tasks
+- Add reviewer to tasks
 - Comment on tasks
 - Role-based permissions (Admin, Editor, Viewer)
 

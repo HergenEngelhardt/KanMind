@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RemoveField(
             model_name='task',
-            name='reviewers',
+            name='reviewer',
         ),
         migrations.AddField(
             model_name='task',

@@ -7,7 +7,7 @@ class Task(models.Model):
     """
     Model representing a task in the kanban board.
     
-    A task can be assigned to a user, have reviewers, and belongs to a specific column.
+    A task can be assigned to a user, have reviewer, and belongs to a specific column.
     Tasks have priority levels, status tracking, and optional due dates.
     """
     
@@ -32,7 +32,7 @@ class Task(models.Model):
     
     column = models.ForeignKey(Column, on_delete=models.CASCADE, related_name='tasks')
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
-    reviewers = models.ManyToManyField(User, blank=True, related_name='reviewing_tasks')
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,related_name='reviewing_tasks')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tasks')
     
     created_at = models.DateTimeField(auto_now_add=True)

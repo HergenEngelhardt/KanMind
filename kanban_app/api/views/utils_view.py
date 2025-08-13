@@ -63,8 +63,8 @@ def add_reviewer_to_task_data(task, task_data):
         task (Task): Task instance
         task_data (dict): Task data dictionary to modify
     """
-    if task.reviewers.exists():
-        reviewer = task.reviewers.first()
+    if task.reviewer.exists():
+        reviewer = task.reviewer.first()
         task_data['reviewer'] = format_user_data(reviewer)
 
 def format_user_data(user):

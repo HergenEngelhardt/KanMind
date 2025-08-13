@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("tasks_app", "0005_remove_task_reviewers_task_reviewer_and_more"),
+        ("tasks_app", "0005_remove_task_reviewer_task_reviewer_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="task",
-            name="reviewers",
+            name="reviewer",
             field=models.ManyToManyField(
                 blank=True, related_name="reviewing_tasks", to=settings.AUTH_USER_MODEL
             ),

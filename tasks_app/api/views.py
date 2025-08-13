@@ -59,7 +59,7 @@ class ReviewingTasksView(APIView):
         Returns:
             Response: List of tasks where the user is a reviewer.
         """
-        tasks = Task.objects.filter(reviewers=request.user)
+        tasks = Task.objects.filter(reviewer=request.user)
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
 
@@ -127,7 +127,7 @@ class TaskCreateView(APIView):
         if reviewer_id:
             try:
                 reviewer = User.objects.get(id=reviewer_id)
-                task.reviewers.add(reviewer)
+                task.reviewer = reviewer
             except User.DoesNotExist:
                 pass
     
@@ -323,8 +323,8 @@ class TaskDetailView(APIView):
         if reviewer_id is not None:
             try:
                 reviewer = User.objects.get(id=reviewer_id)
-                task.reviewers.clear()
-                task.reviewers.add(reviewer)
+                task.reviewer.clear()
+                task.reviewer.add(reviewer)
             except User.DoesNotExist:
                 pass
     
@@ -488,8 +488,8 @@ class BoardTaskDetailView(APIView):
         if reviewer_id is not None:
             try:
                 reviewer = User.objects.get(id=reviewer_id)
-                task.reviewers.clear()
-                task.reviewers.add(reviewer)
+                task.reviewer.clear()
+                task.reviewer.add(reviewer)
             except User.DoesNotExist:
                 pass
     
