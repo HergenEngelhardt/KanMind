@@ -108,11 +108,10 @@ class TaskCreateView(APIView):
         """
         serializer = TaskSerializer(data=request.data)
         if serializer.is_valid():
-            task = serializer.save(created_by=request.user, column=column)
-            
-            reviewer_id = request.data.get('reviewer_id')
-            self._set_reviewer_if_provided(task, reviewer_id)
-            
+            task = serializer.save(
+                column=column,
+                created_by=request.user
+            )
             return Response(TaskSerializer(task).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -305,13 +304,9 @@ class TaskDetailView(APIView):
         serializer = TaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid():
             updated_task = serializer.save()
-            
-            reviewer_id = request.data.get('reviewer_id')
-            self._update_reviewer_if_provided(updated_task, reviewer_id)
-                
-            return Response(TaskSerializer(updated_task).data)
+            return Response(TaskSerializer(updated_task).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def _update_reviewer_if_provided(self, task, reviewer_id):
         """
         Update the task reviewer if provided in request.
